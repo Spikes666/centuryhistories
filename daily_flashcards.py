@@ -192,7 +192,7 @@ if __name__ == "__main__":
     else:
         todays_block = all_facts[block_start:] + all_facts[:block_end - total_facts]
 
-    return todays_block, day_index, total_facts
+        return todays_block, day_index, total_facts
 
 # ── Format message ────────────────────────────────────────────────────────────
 def format_message(facts_block, day_index, total_facts):
