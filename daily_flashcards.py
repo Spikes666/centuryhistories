@@ -60,7 +60,6 @@ def get_todays_facts(data):
         todays_block = all_facts[block_start:block_end]
     else:
         todays_block = all_facts[block_start:] + all_facts[:block_end - total_facts]
-
     return todays_block, day_index, total_facts
 
 # ── Format message ────────────────────────────────────────────────────────────
