@@ -1,180 +1,399 @@
-#!/usr/bin/env python3
-"""
-Daily History Flashcards - iMessage Delivery Script
-Sends 10 sequential flashcards via iMessage every morning.
-Draws on content from Misquoting Jesus (Bart Ehrman) and The Rest is History.
-Runs on macOS via osascript. Schedule with crontab.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Century Histories</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Lora:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-── Twilio / A2P 10DLC (kept for future SMS use) ─────────────────────────────
-To switch back to SMS:
-  1. pip install twilio python-dotenv
-  2. Set env vars: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER, TO_NUMBER
-  3. Replace send_imessage() with send_sms() in main()
-  4. Register at twilio.com/console for A2P 10DLC or use a toll-free number
-─────────────────────────────────────────────────────────────────────────────
-"""
+    body {
+      background: #0a0a0f;
+      color: #e8e0d0;
+      font-family: 'Lora', Georgia, serif;
+      min-height: 100vh;
+      padding: 0 0 60px;
+    }
 
-import json
-import os
-import sys
-import subprocess
-from datetime import date
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(160deg, #0f0a1a 0%, #1a0f2e 100%);
+      border-bottom: 2px solid #c9184a;
+      padding: 36px 24px 28px;
+      text-align: center;
+    }
+    .header-day { font-size: 11px; color: #666; letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 10px; }
+    .header-title { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(28px, 7vw, 44px); font-style: italic; color: #f5edd8; margin-bottom: 8px; line-height: 1.15; }
+    .header-era { font-size: 14px; color: #c9184a; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .header-date { font-size: 12px; color: #444; font-style: italic; }
 
-# ── Config ───────────────────────────────────────────────────────────────────
-TO_NUMBER     = "+16156046386"   # iMessage phone number or Apple ID email
-FACTS_PER_DAY = 10
+    /* ── Nav ── */
+    .nav { display: flex; justify-content: center; gap: 8px; padding: 20px 20px 0; max-width: 1100px; margin: 0 auto; }
+    .nav-btn { background: none; border: 1px solid #2a2a3a; border-radius: 20px; color: #888; cursor: pointer; font-family: 'Lora', Georgia, serif; font-size: 12px; letter-spacing: 0.1em; padding: 6px 16px; text-transform: uppercase; transition: all 0.2s; }
+    .nav-btn:hover { border-color: #c9184a44; color: #c0b8a8; }
+    .nav-btn.active { border-color: #c9184a; color: #c9184a; }
 
-CONTENT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "flashcards", "content.json")
+    /* ── Century browser pills ── */
+    .century-nav { display: none; max-width: 1100px; margin: 24px auto 0; padding: 0 20px; flex-wrap: wrap; gap: 8px; justify-content: center; }
+    .century-nav.visible { display: flex; }
+    .century-btn { background: #111118; border: 1px solid #1e1e2e; border-radius: 20px; color: #888; cursor: pointer; font-family: 'Lora', Georgia, serif; font-size: 11px; letter-spacing: 0.08em; padding: 5px 14px; transition: all 0.2s; }
+    .century-btn:hover { border-color: #c9184a44; color: #c0b8a8; }
+    .century-btn.active { border-color: #c9184a; color: #c9184a; background: #1a0f1f; }
 
-# ── Load content ──────────────────────────────────────────────────────────────
-def load_content():
-    with open(CONTENT_PATH, "r") as f:
-        return json.load(f)
+    /* ── Main layout: two columns ── */
+    .main-layout {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 20px 0;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 28px;
+      align-items: start;
+    }
+    @media (max-width: 800px) {
+      .main-layout { grid-template-columns: 1fr; }
+      .map-column { order: -1; }
+    }
 
-# ── Determine today's facts ───────────────────────────────────────────────────
-def get_todays_facts(data):
-    """
-    Sequential delivery: exhaust one century before moving to the next.
-    Uses a global day index based on days since a fixed start date.
-    """
-    all_facts = []
-    for century in data["centuries"]:
-        for fact in century["facts"]:
-            all_facts.append({
-                "century_label": century["label"],
-                "century_summary": century["summary"],
-                "fact": fact
-            })
+    /* ── Cards column ── */
+    .cards { display: flex; flex-direction: column; gap: 20px; }
 
-    total_facts = len(all_facts)
+    .card {
+      background: #111118;
+      border: 1px solid #1e1e2e;
+      border-radius: 14px;
+      padding: 28px 24px;
+      opacity: 0;
+      transform: translateY(16px);
+      animation: fadeUp 0.5s ease forwards;
+      transition: border-color 0.2s;
+      cursor: pointer;
+    }
+    .card:hover { border-color: #c9184a44; }
+    .card.map-active { border-color: #c9184a88; }
+    @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
 
-    start_date = date(2025, 1, 1)
-    today = date.today()
-    day_index = (today - start_date).days
+    .card-num { font-size: 10px; color: #c9184a; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 10px; }
+    .card-fact { font-size: 15px; line-height: 1.8; color: #c0b8a8; }
+    .card-region { font-size: 11px; color: #555; letter-spacing: 0.08em; margin-top: 12px; font-style: italic; }
 
-    block_start = (day_index * FACTS_PER_DAY) % total_facts
-    block_end   = block_start + FACTS_PER_DAY
+    /* ── Summary card ── */
+    .summary-card {
+      background: linear-gradient(135deg, #0f0a1a, #1a0f2e);
+      border: 1px solid #c9184a33;
+      border-radius: 14px;
+      padding: 28px 24px;
+      opacity: 0;
+      animation: fadeUp 0.5s ease forwards;
+    }
+    .summary-label { font-size: 10px; color: #c9184a; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 10px; }
+    .summary-title { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(18px, 4vw, 24px); font-style: italic; color: #f0e8d8; margin-bottom: 14px; line-height: 1.3; }
+    .summary-text { font-size: 14px; line-height: 1.8; color: #9090a0; font-style: italic; }
 
-    if block_end <= total_facts:
-        todays_block = all_facts[block_start:block_end]
-    else:
-        todays_block = all_facts[block_start:] + all_facts[:block_end - total_facts]
+    /* ── Map column ── */
+    .map-column { position: sticky; top: 20px; }
+    .map-wrapper {
+      background: #111118;
+      border: 1px solid #1e1e2e;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .map-header {
+      padding: 14px 18px 10px;
+      border-bottom: 1px solid #1e1e2e;
+    }
+    .map-label { font-size: 10px; color: #c9184a; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 4px; }
+    .map-region-name { font-family: 'Playfair Display', Georgia, serif; font-size: 16px; font-style: italic; color: #f0e8d8; }
+    #map {
+      height: 300px;
+      width: 100%;
+      filter: brightness(0.85) saturate(0.7);
+    }
+    .map-hint { padding: 10px 18px; font-size: 11px; color: #444; font-style: italic; }
 
-    return todays_block, day_index, total_facts
+    /* ── Footer ── */
+    .footer { text-align: center; margin-top: 48px; padding: 0 20px; font-size: 11px; color: #333; letter-spacing: 0.08em; line-height: 1.8; }
+    .footer a { color: #c9184a; text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+    .state-msg { text-align: center; padding: 60px 20px; color: #444; font-style: italic; font-size: 14px; }
+  </style>
+</head>
+<body>
 
-# ── Format message ────────────────────────────────────────────────────────────
-def format_message(facts_block, day_index, total_facts):
-    today_str  = date.today().strftime("%B %d, %Y")
-    total_days = (total_facts + FACTS_PER_DAY - 1) // FACTS_PER_DAY
-    cycle_day  = (day_index % total_days) + 1
+  <div class="header">
+    <div class="header-day" id="header-day">Loading…</div>
+    <h1 class="header-title" id="header-title">Century Histories</h1>
+    <div class="header-era" id="header-era"></div>
+    <div class="header-date" id="header-date"></div>
+  </div>
 
-    centuries_in_block = []
-    for item in facts_block:
-        if item["century_label"] not in centuries_in_block:
-            centuries_in_block.append(item["century_label"])
-    century_header = " & ".join(centuries_in_block)
+  <div class="nav">
+    <button class="nav-btn active" id="btn-today" onclick="showToday()">Today</button>
+    <button class="nav-btn" id="btn-browse" onclick="showBrowse()">Browse Centuries</button>
+  </div>
 
-    lines = [
-        f"📜 HISTORY FLASHCARDS — {today_str}",
-        f"📅 Day {cycle_day} of {total_days} | {century_header}",
-        "─" * 32,
-    ]
+  <div class="century-nav" id="century-nav"></div>
 
-    first_fact_index = (day_index * FACTS_PER_DAY) % total_facts
-    if first_fact_index == 0 or facts_block[0]["century_label"] != facts_block[-1]["century_label"]:
-        for century_label in centuries_in_block:
-            for item in facts_block:
-                if item["century_label"] == century_label:
-                    lines.append(f"\n🗺️ {century_label}")
-                    lines.append(item["century_summary"])
-                    lines.append("")
-                    break
+  <div class="main-layout">
+    <div class="cards" id="cards">
+      <div class="state-msg">Loading flashcards…</div>
+    </div>
 
-    for i, item in enumerate(facts_block, 1):
-        lines.append(f"{i}. {item['fact']}")
-        lines.append("")
+    <div class="map-column">
+      <div class="map-wrapper">
+        <div class="map-header">
+          <div class="map-label">Region</div>
+          <div class="map-region-name" id="map-region-name">—</div>
+        </div>
+        <div id="map"></div>
+        <div class="map-hint">Click a card to focus the map</div>
+      </div>
+    </div>
+  </div>
 
-    lines.append("─" * 32)
-    lines.append("📚 Sources: Misquoting Jesus (Ehrman) · The Rest is History")
-    lines.append("🌐 https://spikes666.github.io/centuryhistories/")
+  <div class="footer">
+    Sources: <em>Misquoting Jesus</em> / Bart Ehrman &nbsp;·&nbsp;
+    <em>The Rest is History</em> (Holland &amp; Sandbrook) &nbsp;·&nbsp;
+    <em>Dominion</em> / Tom Holland<br>
+    Page refreshes daily at 8am CT
+  </div>
 
-    return "\n".join(lines)
+<script>
+const FACTS_PER_DAY = 10;
+const START_DATE    = new Date('2025-01-01');
 
-# ── Split long messages ───────────────────────────────────────────────────────
-def split_message(message, max_length=1500):
-    """iMessage handles long messages natively, but splitting keeps things readable."""
-    if len(message) <= max_length:
-        return [message]
+let allData      = null;
+let allFacts     = [];
+let activeCentury = 0;
+let leafletMap   = null;
+let mapMarker    = null;
 
-    chunks, current, length = [], [], 0
-    for line in message.split("\n"):
-        if length + len(line) + 1 > max_length and current:
-            chunks.append("\n".join(current))
-            current, length = [line], len(line)
-        else:
-            current.append(line)
-            length += len(line) + 1
-    if current:
-        chunks.append("\n".join(current))
-    return chunks
+// ── Region map: keywords → {lat, lng, zoom, label} ─────────────────────────
+const REGIONS = [
+  // Mesopotamia / Iraq
+  { keys: ['sumer','sumerian','mesopotamia','cuneiform','babylon','babylonian','hammurabi','nebuchadnezzar','tammuz','akkad','ur'],
+    lat: 32.5, lng: 44.5, zoom: 5, label: 'Mesopotamia (modern Iraq)' },
+  // Egypt
+  { keys: ['egypt','egyptian','giza','pyramid','alexandria','pharaoh','ramesses','osiris','nile','ptolem'],
+    lat: 26.8, lng: 30.8, zoom: 5, label: 'Egypt' },
+  // Persia / Iran
+  { keys: ['persian','persia','cyrus','darius','achaemenid','zoroastrian','sassanid','mani','manichaean','parthian'],
+    lat: 32.4, lng: 53.7, zoom: 5, label: 'Persia (modern Iran)' },
+  // Anatolia / Turkey
+  { keys: ['hittite','anatolia','turkish','byzantine','constantinople','istanbul','ephesus','smyrna','cappadocia'],
+    lat: 39.0, lng: 35.0, zoom: 5, label: 'Anatolia (modern Turkey)' },
+  // Jerusalem / Judea / Israel
+  { keys: ['jerusalem','judea','judah','israel','hebrew','jewish','jew','temple','nazareth','galilee','sinai','dead sea','maccab','hasmonean','zealot','pharisee','sadducee','essene','bar kokhba'],
+    lat: 31.8, lng: 35.2, zoom: 6, label: 'Judea / Israel' },
+  // Roman Empire broadly
+  { keys: ['rome','roman','roman empire','romans','colosseum','tiber','augustus','caesar','nero','trajan','hadrian','marcus aurelius','diocletian','constantine','theodosius','julian','caracalla','septimius','commodus','vespasian','titus','palatine'],
+    lat: 41.9, lng: 12.5, zoom: 5, label: 'Rome, Italy' },
+  // Roman Britain
+  { keys: ["hadrian's wall",'britain','britannia','roman britain'],
+    lat: 55.0, lng: -2.5, zoom: 6, label: 'Roman Britain' },
+  // Gaul / France
+  { keys: ['gaul','frankish','franks','clovis','merovingian'],
+    lat: 46.6, lng: 2.3, zoom: 5, label: 'Gaul (modern France)' },
+  // North Africa
+  { keys: ['north africa','carthage','vandal','augustine','hippo','numidia','libya','tunisia'],
+    lat: 34.0, lng: 9.0, zoom: 5, label: 'North Africa' },
+  // Greece / Athens
+  { keys: ['greek','greece','athens','athen','helleni','corinth','sparta','macedon','alexander','neoplatonism','plotinus','proclus'],
+    lat: 37.9, lng: 23.7, zoom: 6, label: 'Greece' },
+  // Syria / Antioch / Palmyra
+  { keys: ['antioch','syria','syrian','palmyra','zenobia','damascus'],
+    lat: 35.5, lng: 38.0, zoom: 6, label: 'Syria' },
+  // China
+  { keys: ['china','chinese','han dynasty','silk road','confuci','beijing'],
+    lat: 35.9, lng: 104.2, zoom: 4, label: 'China' },
+  // India
+  { keys: ['india','indian','buddhis'],
+    lat: 20.6, lng: 79.0, zoom: 4, label: 'India' },
+  // Ireland / Celtic
+  { keys: ['ireland','irish','patrick','celtic'],
+    lat: 53.4, lng: -8.2, zoom: 6, label: 'Ireland' },
+  // Balkans / Adrianople
+  { keys: ['adrianople','thrace','visigoth','ostrogoth','dacia','dacian','balkans','thessalonica'],
+    lat: 41.7, lng: 26.6, zoom: 6, label: 'Balkans / Thrace' },
+  // Mediterranean broadly
+  { keys: ['mediterranean','roman world','empire'],
+    lat: 37.0, lng: 18.0, zoom: 4, label: 'The Mediterranean World' },
+  // Middle East broadly (fallback for region)
+  { keys: ['middle east','near east','levant','phoenician','canaan'],
+    lat: 31.0, lng: 38.0, zoom: 4, label: 'The Ancient Near East' },
+];
 
-# ── Send via iMessage (macOS only) ────────────────────────────────────────────
-def send_imessage(message):
-    chunks = split_message(message)
-    print(f"Sending {len(chunks)} iMessage(s) to {TO_NUMBER}...")
+function getRegionForFact(factText, centuryLabel) {
+  const lower = factText.toLowerCase() + ' ' + centuryLabel.toLowerCase();
+  for (const r of REGIONS) {
+    if (r.keys.some(k => lower.includes(k))) return r;
+  }
+  // Century-level fallback
+  if (lower.includes('middle east') || lower.includes('bce')) {
+    return { lat: 31.0, lng: 38.0, zoom: 4, label: 'The Ancient Near East' };
+  }
+  return { lat: 37.0, lng: 18.0, zoom: 4, label: 'The Mediterranean World' };
+}
 
-    for i, chunk in enumerate(chunks, 1):
-        # Escape backslashes and double quotes for AppleScript
-        escaped = chunk.replace("\\", "\\\\").replace('"', '\\"')
-        script = f'''
-            tell application "Messages"
-                set targetService to 1st service whose service type = iMessage
-                set targetBuddy to buddy "{TO_NUMBER}" of targetService
-                send "{escaped}" to targetBuddy
-            end tell
-        '''
-        result = subprocess.run(
-            ["osascript", "-e", script],
-            capture_output=True, text=True
-        )
-        if result.returncode != 0:
-            print(f"  Error on part {i}: {result.stderr.strip()}")
-            sys.exit(1)
-        else:
-            print(f"  Part {i}/{len(chunks)} sent via iMessage")
+// ── Init map ─────────────────────────────────────────────────────────────────
+function initMap(region) {
+  if (!leafletMap) {
+    leafletMap = L.map('map', { zoomControl: true, attributionControl: false });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19
+    }).addTo(leafletMap);
+  }
+  leafletMap.setView([region.lat, region.lng], region.zoom);
+  if (mapMarker) mapMarker.remove();
+  mapMarker = L.circleMarker([region.lat, region.lng], {
+    radius: 7, color: '#c9184a', fillColor: '#c9184a', fillOpacity: 0.7, weight: 2
+  }).addTo(leafletMap);
+  document.getElementById('map-region-name').textContent = region.label;
+}
 
-# ── Twilio SMS (kept for future use / A2P 10DLC registration) ─────────────────
-# def send_sms(message):
-#     from twilio.rest import Client
-#     client = Client(os.environ["TWILIO_ACCOUNT_SID"], os.environ["TWILIO_AUTH_TOKEN"])
-#     chunks = split_message(message)
-#     for i, chunk in enumerate(chunks, 1):
-#         msg = client.messages.create(
-#             body=chunk,
-#             from_=os.environ["TWILIO_FROM_NUMBER"],
-#             to=os.environ["TO_NUMBER"]
-#         )
-#         print(f"  Sent part {i}/{len(chunks)}: SID={msg.sid}")
+// ── Fetch content ─────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    const res = await fetch('flashcards/content.json');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    allData = await res.json();
+    for (const century of allData.centuries) {
+      for (const fact of century.facts) {
+        allFacts.push({ century_label: century.label, century_summary: century.summary, fact });
+      }
+    }
+    buildCenturyNav();
+    renderToday();
+  } catch (e) {
+    document.getElementById('cards').innerHTML =
+      `<div class="state-msg">Could not load flashcards.<br><small>${e.message}</small></div>`;
+  }
+}
 
-# ── Main ──────────────────────────────────────────────────────────────────────
-def main():
-    print(f"[{date.today()}] Daily History Flashcards starting...")
+// ── Day index ─────────────────────────────────────────────────────────────────
+function getDayIndex() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  return Math.floor((today - START_DATE) / 86400000);
+}
 
-    try:
-        data = load_content()
-        facts_block, day_index, total_facts = get_todays_facts(data)
-        message = format_message(facts_block, day_index, total_facts)
+// ── Today's block ─────────────────────────────────────────────────────────────
+function getTodaysFacts() {
+  const total = allFacts.length, dayIndex = getDayIndex();
+  const blockStart = (dayIndex * FACTS_PER_DAY) % total;
+  const blockEnd   = blockStart + FACTS_PER_DAY;
+  if (blockEnd <= total) return allFacts.slice(blockStart, blockEnd);
+  return [...allFacts.slice(blockStart), ...allFacts.slice(0, blockEnd - total)];
+}
 
-        print("\n--- PREVIEW ---")
-        print(message[:500] + "..." if len(message) > 500 else message)
-        print(f"--- Total chars: {len(message)} ---\n")
+// ── Focus map on a fact ───────────────────────────────────────────────────────
+function focusMap(factText, centuryLabel, cardEl) {
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('map-active'));
+  if (cardEl) cardEl.classList.add('map-active');
+  const region = getRegionForFact(factText, centuryLabel);
+  initMap(region);
+}
 
-        send_imessage(message)
-        print("Done!")
+// ── Render today ──────────────────────────────────────────────────────────────
+function renderToday() {
+  const dayIndex  = getDayIndex();
+  const totalDays = Math.ceil(allFacts.length / FACTS_PER_DAY);
+  const cycleDay  = (dayIndex % totalDays) + 1;
+  const block     = getTodaysFacts();
 
-    except Exception as e:
-        print(f"Error: {e}")
-        raise
+  const centuries = [...new Set(block.map(f => f.century_label))];
+  const dateStr   = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
 
-if __name__ == "__main__":
-    main()
+  document.getElementById('header-day').textContent   = `Day ${cycleDay} of ${totalDays} · Century Histories`;
+  document.getElementById('header-title').textContent = centuries.join(' & ');
+  document.getElementById('header-era').textContent   = '';
+  document.getElementById('header-date').textContent  = dateStr;
+  document.getElementById('century-nav').classList.remove('visible');
+
+  const cards = document.getElementById('cards');
+  cards.innerHTML = block.map((item, i) => {
+    const region = getRegionForFact(item.fact, item.century_label);
+    return `
+      <div class="card" style="animation-delay:${i * 0.08}s" onclick="focusMap(${JSON.stringify(item.fact)}, ${JSON.stringify(item.century_label)}, this)">
+        <div class="card-num">Fact ${i + 1} of ${block.length}</div>
+        <p class="card-fact">${item.fact}</p>
+        <div class="card-region">📍 ${region.label}</div>
+      </div>`;
+  }).join('');
+
+  // Auto-focus map on first fact
+  setTimeout(() => {
+    const region = getRegionForFact(block[0].fact, block[0].century_label);
+    initMap(region);
+    document.querySelectorAll('.card')[0]?.classList.add('map-active');
+  }, 100);
+}
+
+// ── Century nav ───────────────────────────────────────────────────────────────
+function buildCenturyNav() {
+  document.getElementById('century-nav').innerHTML = allData.centuries.map((c, i) =>
+    `<button class="century-btn${i===0?' active':''}" onclick="selectCentury(${i})">${c.label}</button>`
+  ).join('');
+}
+
+function selectCentury(idx) {
+  activeCentury = idx;
+  document.querySelectorAll('.century-btn').forEach((b, i) => b.classList.toggle('active', i===idx));
+  renderCentury(idx);
+}
+
+function renderCentury(idx) {
+  const century = allData.centuries[idx];
+  document.getElementById('header-day').textContent   = 'Century Histories · Browse';
+  document.getElementById('header-title').textContent = century.label;
+  document.getElementById('header-era').textContent   = `${century.facts.length} facts`;
+  document.getElementById('header-date').textContent  = '';
+
+  const summaryHTML = `
+    <div class="summary-card">
+      <div class="summary-label">Overview</div>
+      <div class="summary-title">${century.label}</div>
+      <p class="summary-text">${century.summary}</p>
+    </div>`;
+
+  const factsHTML = century.facts.map((fact, i) => {
+    const region = getRegionForFact(fact, century.label);
+    return `
+      <div class="card" style="animation-delay:${(i+1)*0.06}s" onclick="focusMap(${JSON.stringify(fact)}, ${JSON.stringify(century.label)}, this)">
+        <div class="card-num">Fact ${i+1} of ${century.facts.length}</div>
+        <p class="card-fact">${fact}</p>
+        <div class="card-region">📍 ${region.label}</div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('cards').innerHTML = summaryHTML + factsHTML;
+
+  // Auto-focus map on century's first fact
+  setTimeout(() => {
+    const region = getRegionForFact(century.facts[0], century.label);
+    initMap(region);
+  }, 100);
+}
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function showToday() {
+  document.getElementById('btn-today').classList.add('active');
+  document.getElementById('btn-browse').classList.remove('active');
+  document.getElementById('century-nav').classList.remove('visible');
+  renderToday();
+}
+
+function showBrowse() {
+  document.getElementById('btn-browse').classList.add('active');
+  document.getElementById('btn-today').classList.remove('active');
+  document.getElementById('century-nav').classList.add('visible');
+  selectCentury(activeCentury);
+}
+
+init();
+</script>
+</body>
+</html>
