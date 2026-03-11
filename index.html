@@ -199,10 +199,16 @@ const START_DATE    = new Date('2025-01-01');
 let allData = null;
 
 async function loadContent() {
-  const res = await fetch('https://raw.githubusercontent.com/Spikes666/centuryhistories/main/flashcards/content.json');
-  allData = await res.json();
-  buildEraBar();
-  renderToday();
+  try {
+    const res = await fetch('https://raw.githubusercontent.com/Spikes666/centuryhistories/main/flashcards/content.json');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    allData = await res.json();
+    buildEraBar();
+    renderToday();
+  } catch(err) {
+    document.getElementById('cards').innerHTML = '<div class="state-msg">Error loading content: ' + err.message + '</div>';
+    document.getElementById('header-title').textContent = 'Load Error';
+  }
 }
 
 const ERA_STYLES    = {"Ancient World (Pre-CE \u2013 500 CE)": {"color": "#c17f3a", "bg": "#2a1f10", "icon": "\ud83c\udfdb\ufe0f"}, "Medieval (500\u20131300)": {"color": "#7a9e5f", "bg": "#111a0f", "icon": "\u2694\ufe0f"}, "Renaissance & Reformation (1300\u20131600)": {"color": "#a06fc0", "bg": "#1a1025", "icon": "\ud83c\udfa8"}, "Age of Exploration & Enlightenment (1600\u20131800)": {"color": "#4a9ec0", "bg": "#0d1e2a", "icon": "\ud83d\udd2d"}, "Revolutionary Era (1776\u20131900)": {"color": "#c04a4a", "bg": "#2a0f0f", "icon": "\u26a1"}, "Modern World (1900\u2013present)": {"color": "#5aa8a0", "bg": "#0d2220", "icon": "\ud83c\udf10"}};
