@@ -195,15 +195,27 @@
 <script>
 const FACTS_PER_DAY = 10;
 const START_DATE    = new Date('2025-01-01');
+const ERA_STYLES    = {
+  "Ancient World (Pre-CE – 500 CE)":               {"color": "#c17f3a", "bg": "#2a1f10", "icon": "🏛️"},
+  "Medieval (500–1300)":                            {"color": "#7a9e5f", "bg": "#111a0f", "icon": "⚔️"},
+  "Renaissance & Reformation (1300–1600)":          {"color": "#a06fc0", "bg": "#1a1025", "icon": "🎨"},
+  "Age of Exploration & Enlightenment (1600–1800)": {"color": "#4a9ec0", "bg": "#0d1e2a", "icon": "🔭"},
+  "Revolutionary Era (1776–1900)":                  {"color": "#c04a4a", "bg": "#2a0f0f", "icon": "⚡"},
+  "Modern World (1900–present)":                    {"color": "#5aa8a0", "bg": "#0d2220", "icon": "🌐"}
+};
+const eraOrder = Object.keys(ERA_STYLES);
 
-let allData = null;
+let allData       = null;
+let allFacts      = [];
+let activeCentury = 0;
 
+// ── Load content ───────────────────────────────────────────
 async function loadContent() {
   try {
     const res = await fetch('https://raw.githubusercontent.com/Spikes666/centuryhistories/main/flashcards/content.json');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     allData = await res.json();
-    // Flatten facts after data loads
+    allFacts = [];
     for (const century of allData.centuries) {
       for (const f of century.facts) {
         allFacts.push({ century_label: century.label, era: century.era, century_summary: century.summary, ...f });
@@ -212,19 +224,12 @@ async function loadContent() {
     buildEraBar();
     renderToday();
   } catch(err) {
-    document.getElementById('cards').innerHTML = '<div class="state-msg">Error loading content: ' + err.message + '</div>';
+    document.getElementById('cards').innerHTML = '<div class="state-msg">Error: ' + err.message + '</div>';
     document.getElementById('header-title').textContent = 'Load Error';
   }
 }
 
-const ERA_STYLES    = {"Ancient World (Pre-CE \u2013 500 CE)": {"color": "#c17f3a", "bg": "#2a1f10", "icon": "\ud83c\udfdb\ufe0f"}, "Medieval (500\u20131300)": {"color": "#7a9e5f", "bg": "#111a0f", "icon": "\u2694\ufe0f"}, "Renaissance & Reformation (1300\u20131600)": {"color": "#a06fc0", "bg": "#1a1025", "icon": "\ud83c\udfa8"}, "Age of Exploration & Enlightenment (1600\u20131800)": {"color": "#4a9ec0", "bg": "#0d1e2a", "icon": "\ud83d\udd2d"}, "Revolutionary Era (1776\u20131900)": {"color": "#c04a4a", "bg": "#2a0f0f", "icon": "\u26a1"}, "Modern World (1900\u2013present)": {"color": "#5aa8a0", "bg": "#0d2220", "icon": "\ud83c\udf10"}};
-
-// ── Flatten facts ──────────────────────────────────────────
-let allFacts = [];
-
-// ── Era groupings ──────────────────────────────────────────
-const eraOrder = Object.keys(ERA_STYLES);
-
+// ── Era helpers ────────────────────────────────────────────
 function getCenturiesByEra() {
   const map = {};
   for (const era of eraOrder) map[era] = [];
@@ -251,7 +256,7 @@ function getTodaysFacts() {
 function cardHTML(f, num, total, delay) {
   const es = ERA_STYLES[f.era] || ERA_STYLES[eraOrder[0]];
   return `
-    <div class="card" style="animation-delay:${delay}s; --era-color:${es.color}">
+    <div class="card" style="animation-delay:${delay}s">
       <div class="card-body">
         <div class="card-meta">
           <span class="card-num">Fact ${num} of ${total}</span>
@@ -274,8 +279,7 @@ function renderToday() {
   const block     = getTodaysFacts();
   const centuries = [...new Set(block.map(f => f.century_label))];
   const dateStr   = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-  const eras      = [...new Set(block.map(f => f.era))];
-  const era       = eras[0];
+  const era       = block[0].era;
   const es        = ERA_STYLES[era] || {};
 
   document.getElementById('header-day').textContent   = `Day ${cycleDay} of ${totalDays}`;
@@ -283,28 +287,25 @@ function renderToday() {
   document.getElementById('header-date').textContent  = dateStr;
 
   const badge = document.getElementById('header-era-badge');
-  badge.style.display = 'inline-flex';
-  badge.style.color   = es.color || '#c8922a';
+  badge.style.display     = 'inline-flex';
+  badge.style.color       = es.color || '#c8922a';
   badge.style.borderColor = (es.color || '#c8922a') + '55';
-  badge.innerHTML = `${es.icon || ''} ${era || ''}`;
+  badge.innerHTML         = `${es.icon || ''} ${era || ''}`;
 
   document.getElementById('era-bar').classList.remove('visible');
   document.getElementById('cards').innerHTML = block.map((f,i) => cardHTML(f, i+1, block.length, i*0.07)).join('');
 }
 
 // ── Browse view ────────────────────────────────────────────
-let activeCentury = 0;
-
 function buildEraBar() {
   const byEra = getCenturiesByEra();
-  const bar   = document.getElementById('era-bar');
-  bar.innerHTML = eraOrder.map(era => {
-    const es = ERA_STYLES[era];
+  document.getElementById('era-bar').innerHTML = eraOrder.map(era => {
+    const es       = ERA_STYLES[era];
     const centuries = byEra[era];
     if (!centuries || !centuries.length) return '';
-    const btns = centuries.map((c, i) => {
-      const globalIdx = allData.centuries.indexOf(c);
-      return `<button class="century-btn" data-idx="${globalIdx}" onclick="selectCentury(${globalIdx})">${c.label.replace(/ CE.*|\(.*\)/g,'').trim()}</button>`;
+    const btns = centuries.map(c => {
+      const idx = allData.centuries.indexOf(c);
+      return `<button class="century-btn" data-idx="${idx}" onclick="selectCentury(${idx})">${c.label.replace(/ CE.*|\(.*\)/g,'').trim()}</button>`;
     }).join('');
     return `
       <div class="era-section">
@@ -323,11 +324,10 @@ function selectCentury(idx) {
     const isActive = parseInt(b.dataset.idx) === idx;
     b.classList.toggle('active', isActive);
     if (isActive) {
-      const era = allData.centuries[idx].era;
-      const es  = ERA_STYLES[era] || {};
-      b.style.background   = (es.color || '#888') + '22';
-      b.style.borderColor  = es.color || '#888';
-      b.style.color        = es.color || '#888';
+      const es = ERA_STYLES[allData.centuries[idx].era] || {};
+      b.style.background  = (es.color || '#888') + '22';
+      b.style.borderColor = es.color || '#888';
+      b.style.color       = es.color || '#888';
     } else {
       b.style.background  = '';
       b.style.borderColor = '';
@@ -346,21 +346,18 @@ function renderCentury(idx) {
   document.getElementById('header-date').textContent  = '';
 
   const badge = document.getElementById('header-era-badge');
-  badge.style.display = 'inline-flex';
-  badge.style.color   = es.color || '#c8922a';
+  badge.style.display     = 'inline-flex';
+  badge.style.color       = es.color || '#c8922a';
   badge.style.borderColor = (es.color || '#c8922a') + '55';
-  badge.innerHTML = `${es.icon || ''} ${century.era}`;
+  badge.innerHTML         = `${es.icon || ''} ${century.era}`;
 
-  const summaryHTML = `
+  document.getElementById('cards').innerHTML = `
     <div class="summary-card" style="border-color:${es.color}33">
       <div class="summary-label" style="color:${es.color}">${es.icon} ${century.era}</div>
       <div class="summary-title">${century.label}</div>
       <p class="summary-text">${century.summary}</p>
-    </div>`;
-
-  document.getElementById('cards').innerHTML =
-    summaryHTML +
-    century.facts.map((f, i) => cardHTML({...f, era: century.era}, i+1, century.facts.length, (i+1)*0.05)).join('');
+    </div>` +
+    century.facts.map((f,i) => cardHTML({...f, era: century.era}, i+1, century.facts.length, (i+1)*0.05)).join('');
 }
 
 // ── Tab switching ──────────────────────────────────────────
@@ -368,6 +365,7 @@ function showToday() {
   document.getElementById('btn-today').classList.add('active');
   document.getElementById('btn-browse').classList.remove('active');
   document.getElementById('era-bar').classList.remove('visible');
+  renderToday();
 }
 
 function showBrowse() {
