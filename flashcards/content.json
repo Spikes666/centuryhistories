@@ -1149,6 +1149,31 @@
           "map_url": "https://staticmap.openstreetmap.de/staticmap.php?center=41.0,29.0&zoom=7&size=280x180&markers=41.0,29.0,red-pushpin",
           "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-74.7,40.0,-73.3,41.400000000000006&layer=mapnik&marker=40.7,-74.0",
           "map_label": "New York City"
+        },
+        {
+          "fact": "Charlemagne was crowned Emperor by Pope Leo III on Christmas Day 800 CE, reviving the concept of a Western Roman Empire after more than three centuries — this act established the precedent that papal authority could legitimize imperial power in Western Europe.",
+          "map_label": "Rome, Italy",
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=6.5,35.9,18.5,47.9&layer=mapnik&marker=41.9,12.5"
+        },
+        {
+          "fact": "The Iconoclastic Controversy dominated Byzantine Christianity throughout the 8th century, with Emperor Leo III banning religious images in 726 CE — this theological dispute over whether icons constituted idolatry created lasting tensions between Eastern and Western Christianity.",
+          "map_label": "The Mediterranean & Ancient World",
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-15,25,55,55&layer=mapnik"
+        },
+        {
+          "fact": "The translation movement under the early Abbasids saw scholars like Hunayn ibn Ishaq systematically translate Greek philosophical and scientific works into Arabic — this preservation effort saved texts that might otherwise have been lost, including works by Plato and Ptolemy.",
+          "map_label": "Arabian Peninsula",
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=33.0,12.0,57.0,36.0&layer=mapnik&marker=24.0,45.0"
+        },
+        {
+          "fact": "The Donation of Pepin (756 CE) established the Papal States when the Frankish king gave conquered Byzantine territories to Pope Stephen II — this created the temporal power of the papacy that would shape European politics for over a millennium.",
+          "map_label": "The Mediterranean & Ancient World",
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-15,25,55,55&layer=mapnik"
+        },
+        {
+          "fact": "Al-Khwarizmi, working in 8th century Baghdad, developed algebraic methods that revolutionized mathematics — his systematic approach to solving equations gave algebra its name (from the Arabic 'al-jabr') and laid foundations for Islamic mathematical supremacy.",
+          "map_label": "Arabian Peninsula",
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=33.0,12.0,57.0,36.0&layer=mapnik&marker=24.0,45.0"
         }
       ]
     },
