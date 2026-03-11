@@ -203,6 +203,12 @@ async function loadContent() {
     const res = await fetch('https://raw.githubusercontent.com/Spikes666/centuryhistories/main/flashcards/content.json');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     allData = await res.json();
+    // Flatten facts after data loads
+    for (const century of allData.centuries) {
+      for (const f of century.facts) {
+        allFacts.push({ century_label: century.label, era: century.era, century_summary: century.summary, ...f });
+      }
+    }
     buildEraBar();
     renderToday();
   } catch(err) {
@@ -215,11 +221,6 @@ const ERA_STYLES    = {"Ancient World (Pre-CE \u2013 500 CE)": {"color": "#c17f3
 
 // ── Flatten facts ──────────────────────────────────────────
 let allFacts = [];
-for (const century of allData.centuries) {
-  for (const f of century.facts) {
-    allFacts.push({ century_label: century.label, era: century.era, century_summary: century.summary, ...f });
-  }
-}
 
 // ── Era groupings ──────────────────────────────────────────
 const eraOrder = Object.keys(ERA_STYLES);
