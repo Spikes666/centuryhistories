@@ -68,10 +68,27 @@
 
     /* ── Era filter bar ── */
     .era-bar {
-      display: none; max-width: 920px; margin: 20px auto 0; padding: 0 20px;
-      flex-direction: column; gap: 12px;
+      display: none;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      width: 100%;
+      padding: 12px 20px;
+      flex-direction: column;
+      gap: 10px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 4px 24px #00000050;
     }
     .era-bar.visible { display: flex; }
+    .era-bar-inner {
+      max-width: 920px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
     .era-section { display: flex; flex-direction: column; gap: 6px; }
     .era-label {
       font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
@@ -299,7 +316,7 @@ function renderToday() {
 // ── Browse view ────────────────────────────────────────────
 function buildEraBar() {
   const byEra = getCenturiesByEra();
-  document.getElementById('era-bar').innerHTML = eraOrder.map(era => {
+  const eraContent = eraOrder.map(era => {
     const es       = ERA_STYLES[era];
     const centuries = byEra[era];
     if (!centuries || !centuries.length) return '';
@@ -316,6 +333,7 @@ function buildEraBar() {
         <div class="era-centuries">${btns}</div>
       </div>`;
   }).join('');
+  document.getElementById('era-bar').innerHTML = '<div class="era-bar-inner">' + eraContent + '</div>';
 }
 
 function selectCentury(idx) {
