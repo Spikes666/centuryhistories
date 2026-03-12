@@ -115,9 +115,9 @@
         },
         {
           "fact": "The Septuagint — a Greek translation of the Hebrew scriptures — was produced in Alexandria, Egypt around 250 BCE. It became the Bible of the early church, and many New Testament authors quote it rather than the original Hebrew.",
-          "map_label": "Alexandria, Egypt",
+          "map_label": "Egypt",
           "map_url": "https://staticmap.openstreetmap.de/staticmap.php?center=31.2,29.9&zoom=7&size=280x180&markers=31.2,29.9,red-pushpin",
-          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=28.4,29.7,31.4,32.7&layer=mapnik&marker=31.2,29.9"
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=18.8,14.8,42.8,38.8&layer=mapnik&marker=26.8,30.8"
         },
         {
           "fact": "By the 1st century BCE, Judaism was not a monolithic religion. Groups included Pharisees (focused on oral law), Sadducees (priestly aristocracy), Essenes (apocalyptic separatists), and Zealots (revolutionary nationalists) — a diversity Ehrman stresses as essential context for understanding Jesus.",
@@ -141,9 +141,9 @@
         },
         {
           "fact": "Bart Ehrman argues that Jesus was an apocalyptic Jewish preacher who believed God was about to intervene in history and establish a kingdom on earth — not the founder of a new religion, but a reformer within Judaism.",
-          "map_label": "Judea / Israel",
+          "map_label": "The Early Christian World",
           "map_url": "https://staticmap.openstreetmap.de/staticmap.php?center=35.0,25.0&zoom=4&size=280x180&markers=35.0,25.0,red-pushpin",
-          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=29.200000000000003,25.8,41.2,37.8&layer=mapnik&marker=31.8,35.2"
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=3.0,13.0,47.0,57.0&layer=mapnik&marker=35.0,25.0"
         },
         {
           "fact": "The four Gospels (Matthew, Mark, Luke, John) were not written by eyewitnesses. Ehrman dates them: Mark (~65–70 CE), Matthew and Luke (~80–85 CE), and John (~90–95 CE) — all decades after Jesus's death.",
@@ -323,7 +323,7 @@
         },
         {
           "fact": "Polycarp of Smyrna (~69–155 CE), a bishop who claimed to have known the Apostle John, was martyred by Roman authorities. His execution is one of the earliest detailed accounts of Christian martyrdom and became a template for later martyr literature.",
-          "map_label": "Smyrna (İzmir), Turkey",
+          "map_label": "Smyrna (Izmir), Turkey",
           "map_url": "https://staticmap.openstreetmap.de/staticmap.php?center=38.4,27.1&zoom=8&size=280x180&markers=38.4,27.1,red-pushpin",
           "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=25.6,36.9,28.6,39.9&layer=mapnik&marker=38.4,27.1"
         },
@@ -481,9 +481,9 @@
         },
         {
           "fact": "Neoplatonism, developed by Plotinus (~205–270 CE), became the dominant philosophical school of the late Roman world. Its concept of a transcendent, ineffable 'One' as the source of all existence deeply influenced Christian theology.",
-          "map_label": "The Roman Empire",
+          "map_label": "Greece",
           "map_url": "https://staticmap.openstreetmap.de/staticmap.php?center=41.9,12.5&zoom=4&size=280x180&markers=41.9,12.5,red-pushpin",
-          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-9.5,19.9,34.5,63.9&layer=mapnik&marker=41.9,12.5"
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=17.7,32.0,29.7,44.0&layer=mapnik&marker=38.0,23.7"
         },
         {
           "fact": "The Sassanid Persian Empire (founded 224 CE) replaced the Parthian Empire as Rome's great eastern rival, initiating centuries of warfare that would drain both empires and eventually leave them vulnerable to the Arab conquests of the 7th century.",
@@ -531,13 +531,13 @@
         },
         {
           "fact": "Constantine convened the Council of Nicaea in 325 CE — the first empire-wide Christian council — to resolve the Arian controversy: whether Jesus was co-eternal with God the Father or a created being subordinate to him.",
-          "map_label": "Nicaea (İznik), Turkey",
+          "map_label": "Nicaea (Iznik), Turkey",
           "map_url": "https://staticmap.openstreetmap.de/staticmap.php?center=35.0,25.0&zoom=4&size=280x180&markers=35.0,25.0,red-pushpin",
           "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=28.2,38.9,31.2,41.9&layer=mapnik&marker=40.4,29.7"
         },
         {
           "fact": "The Council of Nicaea produced the Nicene Creed, declaring the Son 'of the same substance' (homoousios) as the Father — a position that condemned Arianism as heresy. Ehrman notes this was a political as much as theological resolution.",
-          "map_label": "Nicaea (İznik), Turkey",
+          "map_label": "Nicaea (Iznik), Turkey",
           "map_url": "https://staticmap.openstreetmap.de/staticmap.php?center=35.0,25.0&zoom=4&size=280x180&markers=35.0,25.0,red-pushpin",
           "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=28.2,38.9,31.2,41.9&layer=mapnik&marker=40.4,29.7"
         },
@@ -677,7 +677,7 @@
         },
         {
           "fact": "The Council of Chalcedon (451 CE) declared that Christ has two complete natures — fully divine and fully human — united in one person. This formula was rejected by many Eastern churches (Coptic, Armenian, Ethiopian), causing splits that persist today.",
-          "map_label": "Chalcedon (Kadıköy), Turkey",
+          "map_label": "Chalcedon (Kadikoy), Turkey",
           "map_url": "https://staticmap.openstreetmap.de/staticmap.php?center=35.0,25.0&zoom=4&size=280x180&markers=35.0,25.0,red-pushpin",
           "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=27.6,39.4,30.6,42.4&layer=mapnik&marker=40.9,29.1"
         },
@@ -1152,28 +1152,28 @@
         },
         {
           "fact": "Charlemagne was crowned Emperor by Pope Leo III on Christmas Day 800 CE, reviving the concept of a Western Roman Empire after more than three centuries — this act established the precedent that papal authority could legitimize imperial power in Western Europe.",
-          "map_label": "Rome, Italy",
-          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=6.5,35.9,18.5,47.9&layer=mapnik&marker=41.9,12.5"
+          "map_label": "New York City",
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-74.7,40.0,-73.3,41.400000000000006&layer=mapnik&marker=40.7,-74.0"
         },
         {
           "fact": "The Iconoclastic Controversy dominated Byzantine Christianity throughout the 8th century, with Emperor Leo III banning religious images in 726 CE — this theological dispute over whether icons constituted idolatry created lasting tensions between Eastern and Western Christianity.",
           "map_label": "The Mediterranean & Ancient World",
-          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-15,25,55,55&layer=mapnik"
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-15.0,0.0,55.0,70.0&layer=mapnik&marker=35.0,20.0"
         },
         {
           "fact": "The translation movement under the early Abbasids saw scholars like Hunayn ibn Ishaq systematically translate Greek philosophical and scientific works into Arabic — this preservation effort saved texts that might otherwise have been lost, including works by Plato and Ptolemy.",
-          "map_label": "Arabian Peninsula",
-          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=33.0,12.0,57.0,36.0&layer=mapnik&marker=24.0,45.0"
+          "map_label": "Egypt",
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=18.8,14.8,42.8,38.8&layer=mapnik&marker=26.8,30.8"
         },
         {
           "fact": "The Donation of Pepin (756 CE) established the Papal States when the Frankish king gave conquered Byzantine territories to Pope Stephen II — this created the temporal power of the papacy that would shape European politics for over a millennium.",
-          "map_label": "The Mediterranean & Ancient World",
-          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-15,25,55,55&layer=mapnik"
+          "map_label": "Italy",
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=0.5,30.5,24.5,54.5&layer=mapnik&marker=42.5,12.5"
         },
         {
           "fact": "Al-Khwarizmi, working in 8th century Baghdad, developed algebraic methods that revolutionized mathematics — his systematic approach to solving equations gave algebra its name (from the Arabic 'al-jabr') and laid foundations for Islamic mathematical supremacy.",
-          "map_label": "Arabian Peninsula",
-          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=33.0,12.0,57.0,36.0&layer=mapnik&marker=24.0,45.0"
+          "map_label": "Baghdad, Iraq",
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=42.9,31.799999999999997,45.9,34.8&layer=mapnik&marker=33.3,44.4"
         }
       ]
     },
@@ -1345,7 +1345,7 @@
           "fact": "Al-Andalus under Abd al-Rahman III (912–961 CE) reached its golden age — Córdoba became Europe's largest city, with a library of 400,000 volumes, public baths, and street lighting, while most of Europe lived in relative poverty and illiteracy.",
           "map_url": "https://staticmap.openstreetmap.de/staticmap.php?center=37.9,-4.8&zoom=6&size=280x180&markers=37.9,-4.8,red-pushpin",
           "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-6.3,36.4,-3.3,39.4&layer=mapnik&marker=37.9,-4.8",
-          "map_label": "Córdoba, Spain"
+          "map_label": "Cordoba, Spain"
         },
         {
           "fact": "The Byzantine Empire under Basil II 'the Bulgar-Slayer' (976–1025 CE) reached its medieval peak — reconquering Bulgaria, Armenia, and parts of Syria, and cementing Byzantine cultural dominance over Orthodox Eastern Europe.",
@@ -1648,8 +1648,8 @@
         {
           "fact": "Maimonides (Moses ben Maimon, 1138–1204 CE), the greatest medieval Jewish philosopher, fled Almohad persecution from Córdoba to Cairo, where he wrote the 'Guide for the Perplexed' — reconciling Aristotelian philosophy with Jewish theology, influencing Christian scholasticism.",
           "map_url": "https://staticmap.openstreetmap.de/staticmap.php?center=30.0,31.2&zoom=6&size=280x180&markers=30.0,31.2,red-pushpin",
-          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-6.3,36.4,-3.3,39.4&layer=mapnik&marker=37.9,-4.8",
-          "map_label": "Córdoba, Spain"
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-15.0,0.0,55.0,70.0&layer=mapnik&marker=35.0,20.0",
+          "map_label": "The Mediterranean & Ancient World"
         },
         {
           "fact": "The Magna Carta's antecedents developed in the 12th century — Henry I's Coronation Charter (1100 CE) made early promises to limit royal arbitrary power that would eventually lead to Magna Carta in 1215.",
@@ -1672,8 +1672,8 @@
         {
           "fact": "Averroës (Ibn Rushd, 1126–1198 CE), the great Muslim philosopher of Córdoba, wrote the definitive commentaries on Aristotle — transmitted to Europe in Latin translation, they sparked the scholastic movement and deeply influenced Aquinas.",
           "map_url": "https://staticmap.openstreetmap.de/staticmap.php?center=24.7,46.7&zoom=5&size=280x180&markers=24.7,46.7,red-pushpin",
-          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-6.3,36.4,-3.3,39.4&layer=mapnik&marker=37.9,-4.8",
-          "map_label": "Córdoba, Spain"
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-15.0,0.0,55.0,70.0&layer=mapnik&marker=35.0,20.0",
+          "map_label": "The Mediterranean & Ancient World"
         },
         {
           "fact": "The Byzantine Empire under the Komnenian dynasty experienced a cultural and military revival — but the Fourth Crusade looming in 1204 CE would deliver a blow from which it never recovered.",
@@ -2088,8 +2088,8 @@
         {
           "fact": "The Spanish conquest of the Aztec Empire under Hernán Cortés (1519–1521 CE) and of the Inca Empire under Francisco Pizarro (1532–1533 CE) were among history's most consequential events — sophisticated civilizations of millions were destroyed within decades.",
           "map_url": "https://staticmap.openstreetmap.de/staticmap.php?center=4.0,-74.0&zoom=3&size=280x180&markers=4.0,-74.0,red-pushpin",
-          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-15.7,28.4,8.3,52.4&layer=mapnik&marker=40.4,-3.7",
-          "map_label": "Spain"
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-111.1,7.399999999999999,-87.1,31.4&layer=mapnik&marker=19.4,-99.1",
+          "map_label": "Mexico"
         },
         {
           "fact": "The Columbian Exchange introduced European diseases — smallpox, measles, influenza — to American populations with no immunity. Estimates suggest 50–90% of indigenous Americans died within a century of contact, the greatest demographic catastrophe in human history.",
@@ -2252,8 +2252,8 @@
         {
           "fact": "John Locke (1632–1704 CE) argued that government derives legitimacy from the consent of the governed and must protect natural rights of life, liberty, and property — his political philosophy directly inspired the American Declaration of Independence and French Revolution.",
           "map_url": "https://staticmap.openstreetmap.de/staticmap.php?center=38.9,-95.7&zoom=4&size=280x180&markers=38.9,-95.7,red-pushpin",
-          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-3.1,48.5,2.9,54.5&layer=mapnik&marker=51.5,-0.1",
-          "map_label": "England (John Locke)"
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-76.7,38.4,-73.7,41.4&layer=mapnik&marker=39.9,-75.2",
+          "map_label": "Philadelphia, Pennsylvania"
         },
         {
           "fact": "The founding of Jamestown (1607 CE) and Plymouth Colony (1620 CE) established permanent English settlements in North America — the Pilgrim Fathers' voyage on the Mayflower and the Mayflower Compact became founding myths of American identity.",
@@ -2398,8 +2398,8 @@
         {
           "fact": "Captain James Cook's three voyages (1768–1779 CE) completed the mapping of the Pacific Ocean — encountering Australia, New Zealand, Hawaii, and dozens of Pacific islands, making the first sustained European contact with Polynesian civilizations.",
           "map_url": "https://staticmap.openstreetmap.de/staticmap.php?center=10.0,-30.0&zoom=3&size=280x180&markers=10.0,-30.0,red-pushpin",
-          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-65.0,-25.0,5.0,45.0&layer=mapnik&marker=10.0,-30.0",
-          "map_label": "Age of Exploration"
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-15.0,0.0,55.0,70.0&layer=mapnik&marker=35.0,20.0",
+          "map_label": "The Mediterranean & Ancient World"
         },
         {
           "fact": "The Haitian Revolution (1791–1804 CE) was the only successful slave revolt in history — enslaved Africans overthrew French colonial rule in Saint-Domingue to create Haiti, the world's first Black republic, sending shockwaves through slaveholding societies worldwide.",
