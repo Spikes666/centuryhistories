@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>CENTURY HISTORIES :: GAME</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Themes ── */
+    body.fallout { --fg: #20c20e; --dim: #0a4a06; --hi: #39ff14; --bg: #0d0d0d; --cursor: #20c20e; }
+    body.matrix  { --fg: #00ff41; --dim: #003b0f; --hi: #afffbf; --bg: #0d0d0d; --cursor: #00ff41; }
+    body.c64     { --fg: #aaaad4; --dim: #1a4a56; --hi: #ffffff; --bg: #352879; --cursor: #aaaad4; }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'VT323', 'Courier New', monospace;
+      font-size: 20px;
+      line-height: 1.25;
+      min-height: 100vh;
+      overflow-x: hidden;
+      /* CRT scanlines */
+      position: relative;
+    }
+
+    /* Scanline overlay */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        transparent 0px, transparent 3px,
+        rgba(0,0,0,0.12) 3px, rgba(0,0,0,0.12) 4px
+      );
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* CRT glow */
+    #term {
+      text-shadow: 0 0 6px var(--fg), 0 0 2px var(--fg);
+      white-space: pre;
+      font-family: inherit;
+      font-size: inherit;
+      padding: 12px 16px 20px;
+      max-width: 680px;
+      margin: 0 auto;
+      min-height: 100vh;
+      /* Subtle vignette */
+      background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.35) 100%);
+    }
+
+    .dim    { color: var(--dim); text-shadow: none; }
+    .hi     { color: var(--hi); }
+    .blink  { animation: blink 1s step-end infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* On-screen keyboard for mobile Wordle */
+    #osk {
+      display: none;
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--bg); border-top: 1px solid var(--dim);
+      padding: 8px 6px 10px;
+      font-family: 'VT323', 'Courier New', monospace;
+      font-size: 18px;
+      text-shadow: 0 0 4px var(--fg);
+      z-index: 50;
+    }
+    #osk.show { display: block; }
+    .osk-row { display: flex; justify-content: center; gap: 3px; margin-bottom: 3px; }
+    .osk-key {
+      min-width: 28px; height: 36px; border: 1px solid var(--dim); background: transparent;
+      color: var(--fg); font-family: inherit; font-size: 16px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      padding: 0 4px; text-shadow: 0 0 4px var(--fg); -webkit-tap-highlight-color: transparent;
+    }
+    .osk-key.wide { min-width: 48px; font-size: 13px; }
+    .osk-key.correct { color: var(--hi); border-color: var(--hi); }
+    .osk-key.present { color: #b59f3b; border-color: #b59f3b; }
+    .osk-key.absent  { color: var(--dim); border-color: var(--dim); }
+
+    /* Theme toggle button */
+    #theme-toggle {
+      position: fixed; top: 8px; right: 10px;
+      background: transparent; border: 1px solid var(--dim);
+      color: var(--dim); font-family: inherit; font-size: 14px;
+      cursor: pointer; padding: 2px 8px; z-index: 200;
+      text-shadow: none;
+    }
+    #theme-toggle:hover { color: var(--fg); border-color: var(--fg); }
+  </style>
+</head>
+<body class="fallout">
+
+<button id="theme-toggle" onclick="cycleTheme()" title="Toggle theme [T]">[T]HEME</button>
+<div id="term"></div>
+<div id="osk"></div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+//  Constants
+// ─────────────────────────────────────────────────────────────
+const CONTENT_URL = 'https://raw.githubusercontent.com/Spikes666/centuryhistories/main/flashcards/content.json';
+const START_DATE  = new Date('2025-01-01');
+const W = 38; // usable cols inside borders
+const THEMES = ['fallout','matrix','c64'];
+
+const STOPWORDS = new Set([
+  'The','In','By','At','On','An','Of','Or','And','But','From','With',
+  'This','That','These','Those','During','After','Before','Against',
+  'Between','Around','About','Over','Under','Into','Upon','Their',
+  'They','When','What','Who','Which','Where','Such','More','Most',
+  'Some','Many','Both','Each','Even','Than','Then','Also','Only',
+  'Very','Much','Long','Well','High','Holy','Late','Early','New',
+  'First','Last','Great','Later','Soon','Known','Born','Made',
+  'Became','Called','Named','Said','Took','Used','Still'
+]);
+
+// ─────────────────────────────────────────────────────────────
+//  App state
+// ─────────────────────────────────────────────────────────────
+let centuries  = [];
+let games      = null;
+let theme      = localStorage.getItem('retroTheme') || 'fallout';
+
+const S = {
+  screen:      'BOOT',  // BOOT | MENU | CHRONO | WORDLE | JEO | DONE
+  score:       0,
+  streak:      0,
+  modesCompleted: {},
+
+  // CHRONO
+  chronoOrder: [],
+  chronoInput: '',
+  chronoDone:  false,
+
+  // WORDLE
+  wTarget: '', wGuesses: [], wColors: [], wCurrent: '', wDone: false,
+
+  // JEO
+  jChoices: [], jHints: 0, jAnswered: false, jResult: ''
+};
+
+// ─────────────────────────────────────────────────────────────
+//  Persistence
+// ─────────────────────────────────────────────────────────────
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+function yesterdayStr() {
+  const d = new Date(); d.setDate(d.getDate()-1); return d.toISOString().split('T')[0];
+}
+function loadPersist() {
+  const today = todayStr();
+  let p = {};
+  try { p = JSON.parse(localStorage.getItem('ch_retro')||'{}'); } catch(e){}
+  if (p.date !== today) {
+    const streak = p.lastPlayed === yesterdayStr() ? (p.streak||0) : 0;
+    p = { date: today, modesCompleted:{}, todayScore:0, streak };
+  }
+  return p;
+}
+function savePersist() {
+  const p = loadPersist();
+  p.modesCompleted = S.modesCompleted;
+  p.todayScore     = S.score;
+  p.streak         = S.streak;
+  p.lastPlayed     = todayStr();
+  localStorage.setItem('ch_retro', JSON.stringify(p));
+}
+function markDone(id, pts) {
+  if (S.modesCompleted[id] !== undefined) return;
+  S.modesCompleted[id] = pts;
+  S.score += pts;
+  const all = ['chrono','wordle','jeo'].every(m => S.modesCompleted[m] !== undefined);
+  if (all && !S.streakCounted) { S.streak++; S.streakCounted = true; }
+  savePersist();
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Theming
+// ─────────────────────────────────────────────────────────────
+function applyTheme() {
+  document.body.className = theme;
+  localStorage.setItem('retroTheme', theme);
+}
+function cycleTheme() {
+  const i = THEMES.indexOf(theme);
+  theme = THEMES[(i+1) % THEMES.length];
+  applyTheme();
+  render();
+}
+
+// ─────────────────────────────────────────────────────────────
+//  ASCII helpers
+// ─────────────────────────────────────────────────────────────
+function box(lines, w) {
+  // w = inner width (default W)
+  const inner = w || W;
+  const top   = '+' + '-'.repeat(inner+2) + '+\n';
+  const bot   = '+' + '-'.repeat(inner+2) + '+';
+  const rows  = lines.map(l => {
+    const s = String(l);
+    const pad = Math.max(0, inner - visLen(s));
+    return '| ' + s + ' '.repeat(pad) + ' |';
+  }).join('\n');
+  return top + rows + '\n' + bot;
+}
+
+function center(text, w) {
+  const inner = w || W;
+  const s     = String(text);
+  const v     = visLen(s);
+  const pad   = Math.max(0, inner - v);
+  const lpad  = Math.floor(pad/2);
+  const rpad  = pad - lpad;
+  return ' '.repeat(lpad) + s + ' '.repeat(rpad);
+}
+
+function visLen(s) {
+  // Strip ANSI-style spans we're not using, just return char count of plain text
+  return s.replace(/<[^>]*>/g,'').length;
+}
+
+function wrap(text, w) {
+  const maxW = w || W;
+  const words = text.split(' ');
+  const lines = [];
+  let cur = '';
+  for (const word of words) {
+    if (cur.length === 0) { cur = word; }
+    else if (cur.length + 1 + word.length <= maxW) { cur += ' ' + word; }
+    else { lines.push(cur); cur = word; }
+  }
+  if (cur) lines.push(cur);
+  return lines;
+}
+
+function pad(s, n) {
+  const v = visLen(String(s));
+  return String(s) + ' '.repeat(Math.max(0, n - v));
+}
+
+function hr(ch) { return (ch||'-').repeat(W+2); }
+
+// ─────────────────────────────────────────────────────────────
+//  Seeded random
+// ─────────────────────────────────────────────────────────────
+function makeRand(seed) {
+  let s = seed >>> 0;
+  return () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 0x100000000; };
+}
+function getDailySeed() {
+  const d = new Date(); d.setHours(0,0,0,0);
+  return Math.floor((d - START_DATE) / 86400000);
+}
+function shuffleArr(arr, rand) {
+  for (let i = arr.length-1; i > 0; i--) {
+    const j = Math.floor(rand()*(i+1)); [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Year & keyword helpers
+// ─────────────────────────────────────────────────────────────
+function extractYear(text, ci) {
+  const bce = text.match(/(\d[\d,]*)\s*BCE/);
+  if (bce) return -parseInt(bce[1].replace(/,/g,''));
+  const ce  = text.match(/(\d[\d,]*)\s*CE/);
+  if (ce)  return  parseInt(ce[1].replace(/,/g,''));
+  return ci * 100 - 3000;
+}
+function yearLabel(y) { return y < 0 ? Math.abs(y)+' BCE' : y+' CE'; }
+function stripDates(text) {
+  return text.replace(/^(Around\s+)?[\d,]+\s*(BCE|CE|BCE[–-]\d+\s*CE),?\s*/i,'').trim();
+}
+
+function extractKeyword(factText) {
+  const candidates = [];
+  const re = /\b([A-Z][a-z]{3,11})\b/g;
+  let m;
+  while ((m = re.exec(factText)) !== null) {
+    if (!STOPWORDS.has(m[1])) candidates.push(m[1]);
+  }
+  if (!candidates.length) return null;
+  const freq = {};
+  for (const w of candidates) freq[w] = (freq[w]||0)+1;
+  const pool = [...new Set(candidates)].sort((a,b) => {
+    const uA = freq[a]===1, uB = freq[b]===1;
+    if (uA!==uB) return uA?-1:1;
+    return b.length - a.length;
+  });
+  return pool[0];
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Daily game generation (identical seed logic as game.html)
+// ─────────────────────────────────────────────────────────────
+function buildGames() {
+  const rand = makeRand(getDailySeed());
+  const n    = centuries.length;
+  const q    = Math.floor(n/4);
+  const segs = [
+    centuries.slice(0,q), centuries.slice(q,2*q),
+    centuries.slice(2*q,3*q), centuries.slice(3*q)
+  ];
+  const chronoFacts = segs.map(seg => {
+    const c  = seg[Math.floor(rand()*seg.length)];
+    const fi = Math.floor(rand()*c.facts.length);
+    const ci = centuries.indexOf(c);
+    return { ...c.facts[fi], century_label:c.label, era:c.era, century_idx:ci,
+             year: extractYear(c.facts[fi].fact, ci) };
+  });
+  const chronoCorrect = [...chronoFacts].sort((a,b) => a.year - b.year);
+  const chronoDisplay = shuffleArr([...chronoFacts], rand);
+
+  const wPairs = Array.from({length:60}, () => {
+    const ci = Math.floor(rand()*n);
+    return { ci, fi: Math.floor(rand()*centuries[ci].facts.length) };
+  });
+  let wordleFact = null;
+  for (const {ci,fi} of wPairs) {
+    const c = centuries[ci], f = c.facts[fi];
+    const raw = extractKeyword(f.fact);
+    if (raw && raw.length >= 4 && raw.length <= 12) {
+      wordleFact = { ...f, century_label:c.label, era:c.era, raw, word:raw.toUpperCase() }; break;
+    }
+  }
+
+  const jPairs = Array.from({length:60}, () => {
+    const ci = Math.floor(rand()*n);
+    return { ci, fi: Math.floor(rand()*centuries[ci].facts.length) };
+  });
+  let jeoFact = null;
+  for (const {ci,fi} of jPairs) {
+    const c = centuries[ci], f = c.facts[fi];
+    if (wordleFact && f.fact === wordleFact.fact) continue;
+    const raw = extractKeyword(f.fact);
+    if (raw && raw.length >= 3) {
+      jeoFact = { ...f, century_label:c.label, era:c.era, raw, word:raw.toUpperCase() }; break;
+    }
+  }
+
+  const wrongPool = [];
+  for (const c of centuries) {
+    for (const f of c.facts) {
+      if (jeoFact && f.fact === jeoFact.fact) continue;
+      const raw = extractKeyword(f.fact);
+      if (raw && raw.toUpperCase() !== (jeoFact?.word||'') && raw.length >= 3) wrongPool.push(raw.toUpperCase());
+    }
+  }
+  const dedupedWrong = [...new Set(wrongPool)];
+  shuffleArr(dedupedWrong, rand);
+  const wrongAnswers = dedupedWrong.slice(0,3);
+
+  return { chronoDisplay, chronoCorrect, wordleFact, jeoFact, wrongAnswers };
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Render engine
+// ─────────────────────────────────────────────────────────────
+function render() {
+  const term = document.getElementById('term');
+  let out = '';
+
+  const seed = getDailySeed();
+  const themeLabel = theme.toUpperCase();
+
+  // ── Header ──────────────────────────────────────────
+  out += box([
+    center('CENTURY HISTORIES :: GAME'),
+    center(`DAY ${seed}  |  SCORE: ${S.score}  |  [${themeLabel}]`)
+  ]);
+  out += '\n';
+
+  // ── Screen content ───────────────────────────────────
+  if (S.screen === 'BOOT') {
+    out += '\n';
+    out += center('LOADING HISTORY DATABASE...') + '\n';
+    out += '\n';
+    out += center('[' + '='.repeat(20) + ']') + '\n';
+
+  } else if (S.screen === 'MENU') {
+    out += renderMenu();
+
+  } else if (S.screen === 'CHRONO') {
+    out += renderChrono();
+
+  } else if (S.screen === 'WORDLE') {
+    out += renderWordle();
+
+  } else if (S.screen === 'JEO') {
+    out += renderJeo();
+
+  } else if (S.screen === 'DONE') {
+    out += renderDone();
+  }
+
+  // ── Footer ──────────────────────────────────────────
+  out += '\n';
+  out += '+' + hr() + '+\n';
+  out += '| ' + pad('[T] THEME  [H] HUB  [Q] QUIT', W) + ' |\n';
+  out += '+' + hr() + '+\n';
+
+  term.textContent = out;
+  updateOSK();
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Screen renderers
+// ─────────────────────────────────────────────────────────────
+function renderMenu() {
+  let o = '\n';
+  o += box([
+    center('-- DAILY CHALLENGE --'),
+    '',
+    pad(`  [1] CHRONO ORDER`, W) + (S.modesCompleted.chrono!==undefined ? `  +${S.modesCompleted.chrono} pts  DONE` : `  up to 100 pts`),
+    pad(`  [2] MISSING WORD`, W) + (S.modesCompleted.wordle!==undefined ? `  +${S.modesCompleted.wordle} pts  DONE` : `  up to 300 pts`),
+    pad(`  [3] WHAT IS IT?`, W) + (S.modesCompleted.jeo!==undefined    ? `  +${S.modesCompleted.jeo} pts  DONE`    : `  up to 300 pts`),
+    '',
+    center(`STREAK: ${S.streak} DAY(S)`)
+  ]);
+  return o;
+}
+
+function renderChrono() {
+  let o = '\n';
+  o += box([center('-- CHRONO ORDER --'), center('Arrange events: OLDEST to NEWEST')]);
+  o += '\n';
+
+  const facts = S.chronoOrder.map(fi => games.chronoDisplay[fi]);
+  facts.forEach((f, rank) => {
+    const shortFact = stripDates(f.fact);
+    const lines     = wrap(shortFact, W-2);
+    o += `+${'-'.repeat(W+2)}+\n`;
+    o += `| ${pad(`[${rank+1}] ${f.century_label.split(' (')[0].toUpperCase()}`, W)} |\n`;
+    lines.slice(0,4).forEach(l => { o += `|   ${pad(l, W-2)} |\n`; });
+    o += `+${'-'.repeat(W+2)}+\n`;
+  });
+
+  if (S.chronoDone) {
+    o += '\n';
+    const correct = S.chronoOrder.reduce((acc, fi, rank) => {
+      return acc + (games.chronoDisplay[fi].year === games.chronoCorrect[rank].year ? 1 : 0);
+    }, 0);
+    const pts = correct * 25;
+    o += box([
+      center(correct===4 ? '** PERFECT ORDER! **' : `${correct}/4 CORRECT -- +${pts} PTS`),
+      '',
+      center('CORRECT ORDER:'),
+      ...games.chronoCorrect.map((f,i) => `  ${i+1}. ${yearLabel(f.year)} -- ${f.century_label.split(' (')[0]}`),
+      '',
+      center('[H] BACK TO HUB')
+    ]);
+  } else {
+    o += '\n';
+    o += box([
+      center('TYPE ORDER  e.g.  2 4 1 3'),
+      center('then press ENTER to confirm'),
+      '',
+      center(`YOUR INPUT: ${S.chronoInput || '_'}`)
+    ]);
+  }
+  return o;
+}
+
+function renderWordle() {
+  if (!games.wordleFact) return box([center('NO WORD PUZZLE TODAY')]);
+  const target   = S.wTarget;
+  const guesses  = S.wGuesses;
+  const colors   = S.wColors;
+  const current  = S.wCurrent;
+
+  let o = '\n';
+  o += box([
+    center('-- MISSING WORD --'),
+    center(`WORD LENGTH: ${target.length} LETTERS`)
+  ]);
+  o += '\n';
+
+  // Blanked fact
+  const blanked  = games.wordleFact.fact.replace(new RegExp('\\b'+games.wordleFact.raw+'\\b'), '_'.repeat(target.length));
+  const factLines = wrap(blanked, W);
+  o += `+${'-'.repeat(W+2)}+\n`;
+  o += `| ${pad('FACT:', W)} |\n`;
+  factLines.forEach(l => { o += `|   ${pad(l, W-2)} |\n`; });
+  o += `+${'-'.repeat(W+2)}+\n\n`;
+
+  // Guess grid
+  o += `+${'-'.repeat(W+2)}+\n`;
+  for (let row = 0; row < 6; row++) {
+    if (row < guesses.length) {
+      // Submitted guess with color codes
+      const letters = guesses[row];
+      const cs      = colors[row];
+      let cells = '';
+      letters.forEach((l, i) => {
+        const sym = cs[i]==='correct' ? `[${l}]` : cs[i]==='present' ? `(${l})` : ` ${l} `;
+        cells += sym;
+      });
+      // Legend on first submitted row
+      if (row === 0) {
+        o += `| ${pad(center('GUESS HISTORY  [X]=HIT (X)=WRONG SPOT', W), W)} |\n`;
+      }
+      o += `| ${pad(center(cells, W), W)} |\n`;
+    } else if (row === guesses.length && !S.wDone) {
+      // Current input row
+      const filled = current.split('').map(l => `[${l}]`).join('');
+      const empty  = '_  '.repeat(target.length - current.length);
+      o += `| ${pad(center('> ' + filled + empty, W), W)} |\n`;
+    } else {
+      // Empty row
+      const empty  = '   '.repeat(target.length);
+      o += `| ${pad(center(empty, W), W)} |\n`;
+    }
+  }
+  o += `+${'-'.repeat(W+2)}+\n`;
+
+  if (S.wDone) {
+    const won  = colors.length > 0 && colors[colors.length-1].every(c=>c==='correct');
+    const pts  = won ? Math.max(100, 300-(guesses.length-1)*40) : 0;
+    o += '\n';
+    o += box([
+      center(won ? `** CORRECT IN ${guesses.length} TRIES! **` : `WORD WAS: ${target}`),
+      center(`+${pts} PTS`),
+      '',
+      center('[H] BACK TO HUB')
+    ]);
+  } else {
+    o += '\n';
+    o += box([
+      center('TYPE A LETTER TO GUESS'),
+      center('[ENTER] SUBMIT  [BKSP] DELETE'),
+      ...(S.wError ? [center(S.wError)] : [])
+    ]);
+  }
+  return o;
+}
+
+function renderJeo() {
+  if (!games.jeoFact) return box([center('NO QUESTION TODAY')]);
+  let o = '\n';
+  o += box([center('-- WHAT IS IT? --'), center('SELECT THE CORRECT ANSWER')]);
+  o += '\n';
+
+  // Blanked fact
+  const raw     = games.jeoFact.raw;
+  const blanked = games.jeoFact.fact.replace(new RegExp('\\b'+raw+'\\b'), '_'.repeat(raw.length));
+  const lines   = wrap(blanked, W);
+  o += `+${'-'.repeat(W+2)}+\n`;
+  o += `| ${pad('FACT:', W)} |\n`;
+  lines.slice(0,5).forEach(l => { o += `|   ${pad(l, W-2)} |\n`; });
+  o += `+${'-'.repeat(W+2)}+\n\n`;
+
+  // Choices
+  const labels = ['A','B','C','D'];
+  o += `+${'-'.repeat(W+2)}+\n`;
+  S.jChoices.forEach((c, i) => {
+    let mark = '';
+    if (S.jAnswered) {
+      if (c === games.jeoFact.word) mark = ' <-- CORRECT';
+      else if (i === S.jSelected)  mark = ' <-- WRONG';
+    }
+    o += `|  [${labels[i]}] ${pad(c + mark, W-7)} |\n`;
+  });
+  o += `+${'-'.repeat(W+2)}+\n`;
+
+  if (S.jAnswered) {
+    const correct = S.jChoices[S.jSelected] === games.jeoFact.word;
+    const pts     = correct ? Math.max(100, 300-S.jHints*100) : 0;
+    o += '\n';
+    o += box([
+      center(correct ? '** CORRECT! **' : 'INCORRECT'),
+      center(`+${pts} PTS`),
+      center(`ERA: ${games.jeoFact.century_label.split(' (')[0]}`),
+      '',
+      center('[H] BACK TO HUB')
+    ]);
+  } else {
+    o += '\n';
+    o += box([
+      center('PRESS A / B / C / D TO ANSWER'),
+      S.jHints < 1
+        ? center('[X] USE HINT (-100 PTS, REMOVES 1 WRONG)')
+        : center('HINT USED'),
+      ...(S.jHintMsg ? [center(S.jHintMsg)] : [])
+    ]);
+  }
+  return o;
+}
+
+function renderDone() {
+  const all = S.modesCompleted;
+  let o = '\n';
+  o += box([
+    center('** DAILY COMPLETE! **'),
+    '',
+    center('RESULTS:'),
+    `  CHRONO ORDER  : +${all.chrono||0} pts`,
+    `  MISSING WORD  : +${all.wordle||0} pts`,
+    `  WHAT IS IT?   : +${all.jeo||0} pts`,
+    '',
+    center(`TOTAL: ${S.score} PTS`),
+    center(`STREAK: ${S.streak} DAY(S)`),
+    '',
+    center('COME BACK TOMORROW'),
+    center('[H] VIEW HUB')
+  ]);
+  return o;
+}
+
+// ─────────────────────────────────────────────────────────────
+//  On-screen keyboard for mobile Wordle
+// ─────────────────────────────────────────────────────────────
+function updateOSK() {
+  const osk = document.getElementById('osk');
+  if (S.screen !== 'WORDLE' || S.wDone) { osk.classList.remove('show'); return; }
+  osk.classList.add('show');
+
+  const rows    = ['QWERTYUIOP','ASDFGHJKL','⌫ZXCVBNM↵'];
+  const keyState = {};
+  for (let g = 0; g < S.wGuesses.length; g++) {
+    for (let i = 0; i < S.wGuesses[g].length; i++) {
+      const ch = S.wGuesses[g][i], c = S.wColors[g][i], prev = keyState[ch];
+      if (!prev||(prev==='absent'&&c!=='absent')||(prev==='present'&&c==='correct')) keyState[ch]=c;
+    }
+  }
+  osk.innerHTML = rows.map(row => {
+    const keys = row.split('').map(ch => {
+      const special = ch==='⌫'||ch==='↵';
+      const state   = keyState[ch] || '';
+      const label   = ch==='⌫' ? 'DEL' : ch==='↵' ? 'ENT' : ch;
+      return `<button class="osk-key ${special?'wide':''} ${state}" onclick="oskKey('${ch}')">${label}</button>`;
+    }).join('');
+    return `<div class="osk-row">${keys}</div>`;
+  }).join('');
+}
+
+function oskKey(ch) { handleKey(ch); }
+
+// ─────────────────────────────────────────────────────────────
+//  Input handler
+// ─────────────────────────────────────────────────────────────
+function handleKey(key) {
+  const k = key.toUpperCase();
+
+  // Global keys
+  if (k === 'T') { cycleTheme(); return; }
+  if (k === 'H' || k === 'Q') { goMenu(); return; }
+
+  if (S.screen === 'MENU') {
+    if (k === '1' && S.modesCompleted.chrono === undefined) startChrono();
+    if (k === '2' && S.modesCompleted.wordle === undefined) startWordle();
+    if (k === '3' && S.modesCompleted.jeo    === undefined) startJeo();
+    if (['1','2','3'].includes(k) && allDone()) { S.screen='DONE'; render(); }
+
+  } else if (S.screen === 'CHRONO') {
+    if (S.chronoDone) { if (k==='H'||k==='ENTER') goMenu(); return; }
+    if (k === 'ENTER' || k === '\n') { submitChrono(); }
+    else if (k === 'BACKSPACE' || k === '⌫') { S.chronoInput = S.chronoInput.slice(0,-1); render(); }
+    else if (/^[\d ]$/.test(k)) {
+      if (S.chronoInput.length < 8) { S.chronoInput += (k===' '?k:k); render(); }
+    }
+
+  } else if (S.screen === 'WORDLE') {
+    if (S.wDone) { if (k==='H'||k==='ENTER') goMenu(); return; }
+    if (k === 'ENTER' || k === '↵') { submitWordle(); }
+    else if (k === 'BACKSPACE' || k === '⌫') { S.wCurrent = S.wCurrent.slice(0,-1); S.wError=''; render(); }
+    else if (/^[A-Z]$/.test(k) && S.wCurrent.length < S.wTarget.length) {
+      S.wCurrent += k; S.wError=''; render();
+    }
+
+  } else if (S.screen === 'JEO') {
+    if (S.jAnswered) { if (k==='H'||k==='ENTER') goMenu(); return; }
+    if (k==='X' && S.jHints < 1) { useJeoHint(); }
+    const labels = ['A','B','C','D'];
+    const idx = labels.indexOf(k);
+    if (idx >= 0 && idx < S.jChoices.length) answerJeo(idx);
+
+  } else if (S.screen === 'DONE') {
+    if (k==='H'||k==='ENTER') goMenu();
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  let k = e.key;
+  if (k === 'Backspace') k = 'BACKSPACE';
+  else if (k === 'Enter') k = 'ENTER';
+  else if (k.length === 1) k = k.toUpperCase();
+  else return;
+  e.preventDefault();
+  handleKey(k);
+});
+
+// ─────────────────────────────────────────────────────────────
+//  Game logic
+// ─────────────────────────────────────────────────────────────
+function goMenu() {
+  const p = loadPersist();
+  S.modesCompleted = p.modesCompleted;
+  S.score          = p.todayScore;
+  S.streak         = p.streak || 0;
+  S.screen = allDone() ? 'DONE' : 'MENU';
+  render();
+}
+
+function allDone() {
+  return ['chrono','wordle','jeo'].every(m => S.modesCompleted[m] !== undefined);
+}
+
+// ── CHRONO ────────────────────────────────────────
+function startChrono() {
+  S.chronoOrder = games.chronoDisplay.map((_,i)=>i);
+  S.chronoInput = '';
+  S.chronoDone  = false;
+  S.screen      = 'CHRONO';
+  render();
+}
+
+function submitChrono() {
+  const parts = S.chronoInput.trim().split(/\s+/).map(Number).filter(n => n>=1 && n<=4);
+  const unique = [...new Set(parts)];
+  if (unique.length !== 4) {
+    // Show error inline — just re-render with a flag
+    S.chronoError = 'ENTER ALL 4 NUMBERS e.g. 2 4 1 3';
+    render();
+    return;
+  }
+  // Remap 1-based input to 0-based indices
+  S.chronoOrder = unique.map(n => n-1);
+  S.chronoDone  = true;
+
+  const correct = S.chronoOrder.reduce((acc, fi, rank) => {
+    return acc + (games.chronoDisplay[fi].year === games.chronoCorrect[rank].year ? 1 : 0);
+  }, 0);
+  markDone('chrono', correct*25);
+  render();
+}
+
+// ── WORDLE ────────────────────────────────────────
+function startWordle() {
+  if (!games.wordleFact) return;
+  S.wTarget  = games.wordleFact.word;
+  S.wGuesses = []; S.wColors = []; S.wCurrent = ''; S.wDone = false; S.wError = '';
+  S.screen   = 'WORDLE';
+  render();
+}
+
+function submitWordle() {
+  if (S.wCurrent.length !== S.wTarget.length) {
+    S.wError = `NEED ${S.wTarget.length} LETTERS`;
+    render(); return;
+  }
+  const colors = scoreGuess(S.wCurrent, S.wTarget);
+  S.wGuesses.push(S.wCurrent.split(''));
+  S.wColors.push(colors);
+  S.wCurrent = '';
+
+  const won  = colors.every(c=>c==='correct');
+  const over = S.wGuesses.length >= 6;
+  if (won || over) {
+    S.wDone = true;
+    const pts = won ? Math.max(100, 300-(S.wGuesses.length-1)*40) : 0;
+    markDone('wordle', pts);
+  }
+  render();
+}
+
+function scoreGuess(guess, target) {
+  const result = Array(target.length).fill('absent');
+  const used   = Array(target.length).fill(false);
+  for (let i = 0; i < guess.length; i++) {
+    if (guess[i]===target[i]) { result[i]='correct'; used[i]=true; }
+  }
+  for (let i = 0; i < guess.length; i++) {
+    if (result[i]==='correct') continue;
+    for (let j = 0; j < target.length; j++) {
+      if (!used[j] && guess[i]===target[j]) { result[i]='present'; used[j]=true; break; }
+    }
+  }
+  return result;
+}
+
+// ── JEOPARDY ──────────────────────────────────────
+function startJeo() {
+  if (!games.jeoFact) return;
+  S.jChoices  = [games.jeoFact.word, ...games.wrongAnswers];
+  S.jHints    = 0;
+  S.jAnswered = false;
+  S.jSelected = -1;
+  S.jHintMsg  = '';
+  // Shuffle with simple Math.random (non-critical for fairness)
+  for (let i = S.jChoices.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1)); [S.jChoices[i],S.jChoices[j]]=[S.jChoices[j],S.jChoices[i]];
+  }
+  S.screen = 'JEO';
+  render();
+}
+
+function answerJeo(idx) {
+  if (S.jAnswered) return;
+  S.jAnswered = true;
+  S.jSelected = idx;
+  const correct = S.jChoices[idx] === games.jeoFact.word;
+  const pts     = correct ? Math.max(100, 300-S.jHints*100) : 0;
+  markDone('jeo', pts);
+  render();
+}
+
+function useJeoHint() {
+  if (S.jHints >= 1 || S.jAnswered) return;
+  S.jHints++;
+  const correctWord = games.jeoFact.word;
+  const wrongIdx    = S.jChoices.findIndex(c => c !== correctWord);
+  if (wrongIdx >= 0) S.jChoices.splice(wrongIdx,1);
+  S.jHintMsg = 'ONE WRONG ANSWER REMOVED. SCORE CAPPED AT 200.';
+  render();
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Boot
+// ─────────────────────────────────────────────────────────────
+async function boot() {
+  applyTheme();
+  render(); // show BOOT screen
+
+  try {
+    const res = await fetch(CONTENT_URL);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    centuries  = data.centuries;
+    games      = buildGames();
+
+    const p = loadPersist();
+    S.modesCompleted = p.modesCompleted;
+    S.score          = p.todayScore;
+    S.streak         = p.streak || 0;
+
+    S.screen = allDone() ? 'DONE' : 'MENU';
+    render();
+  } catch(err) {
+    document.getElementById('term').textContent =
+      box([
+        center('SYSTEM ERROR'),
+        '',
+        ...wrap('FAILED TO LOAD: ' + err.message, W),
+        '',
+        center('CHECK CONNECTION AND RELOAD')
+      ]);
+  }
+}
+
+boot();
+</script>
+</body>
+</html>
