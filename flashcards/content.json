@@ -2326,6 +2326,31 @@
           "map_url": "https://staticmap.openstreetmap.de/staticmap.php?center=10.0,-30.0&zoom=3&size=280x180&markers=10.0,-30.0,red-pushpin",
           "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-15.0,0.0,55.0,70.0&layer=mapnik&marker=35.0,20.0",
           "map_label": "The Mediterranean & Ancient World"
+        },
+        {
+          "fact": "The English Civil War (1642–1651 CE) resulted in the execution of King Charles I and the establishment of a republic under Oliver Cromwell — this unprecedented regicide shocked Europe and demonstrated that even divine right monarchy could be challenged by parliamentary authority.",
+          "map_label": "The Mediterranean & Ancient World",
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-15,25,55,55&layer=mapnik"
+        },
+        {
+          "fact": "John Locke's 'Two Treatises of Government' (1689 CE) argued that government derives its authority from the consent of the governed — his ideas about natural rights, religious toleration, and the social contract became foundational to liberal democracy and the American Revolution.",
+          "map_label": "England (John Locke)",
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-3.1,48.5,2.9,54.5&layer=mapnik&marker=51.5,-0.1"
+        },
+        {
+          "fact": "The Great Fire of London (1666 CE) destroyed 13,200 houses and 87 churches but led to Christopher Wren's architectural renaissance — his rebuilding of St. Paul's Cathedral and 51 parish churches created the iconic London skyline that blended Protestant theology with baroque grandeur.",
+          "map_label": "The Mediterranean & Ancient World",
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-15,25,55,55&layer=mapnik"
+        },
+        {
+          "fact": "The Scientific Revolution challenged medieval Christian cosmology as Francis Bacon promoted empirical observation and the scientific method — this shift from revelation to reason as the primary source of knowledge fundamentally altered humanity's relationship with both nature and divine authority.",
+          "map_label": "The Mediterranean & Ancient World",
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-15,25,55,55&layer=mapnik"
+        },
+        {
+          "fact": "The Glorious Revolution (1688 CE) overthrew Catholic James II and established Protestant William and Mary as constitutional monarchs — this bloodless coup secured parliamentary supremacy and religious liberty, creating the model of limited monarchy that influenced democratic movements worldwide.",
+          "map_label": "The Mediterranean & Ancient World",
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-15,25,55,55&layer=mapnik"
         }
       ]
     },
