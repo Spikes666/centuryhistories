@@ -893,6 +893,31 @@
           "map_url": "https://staticmap.openstreetmap.de/staticmap.php?center=41.9,12.5&zoom=5&size=280x180&markers=41.9,12.5,red-pushpin",
           "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-9.5,19.9,34.5,63.9&layer=mapnik&marker=41.9,12.5",
           "map_label": "The Roman Empire"
+        },
+        {
+          "fact": "The Nika Riots of 532 CE nearly destroyed Constantinople and Justinian's reign when circus factions turned a chariot race into a city-wide revolt, leaving 30,000 dead in the Hippodrome before Justinian's forces brutally crushed the uprising.",
+          "map_label": "Constantinople (Istanbul), Turkey",
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=25.9,38.0,31.9,44.0&layer=mapnik&marker=41.0,28.9"
+        },
+        {
+          "fact": "Belisarius, Justinian's greatest general, conquered the Vandal kingdom of North Africa in just one year (533–534 CE) and later captured Rome from the Ostrogoths, though his Italian campaigns would drag on for decades with mixed success.",
+          "map_label": "Constantinople (Istanbul), Turkey",
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=25.9,38.0,31.9,44.0&layer=mapnik&marker=41.0,28.9"
+        },
+        {
+          "fact": "The Councils of Constantinople (553 CE) and earlier church councils of this century continued to define Christian doctrine, while competing manuscripts of biblical texts circulated throughout the empire, creating the textual variations that would challenge later scholars.",
+          "map_label": "Constantinople (Istanbul), Turkey",
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=27.4,39.5,30.4,42.5&layer=mapnik&marker=41.0,28.9"
+        },
+        {
+          "fact": "Theodoric the Great died in 526 CE, ending the relatively stable Ostrogothic rule of Italy and creating the power vacuum that Justinian would exploit to launch his devastating Gothic Wars.",
+          "map_label": "Italy",
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=0.5,30.5,24.5,54.5&layer=mapnik&marker=42.5,12.5"
+        },
+        {
+          "fact": "Irish monasticism flourished in the 6th century as monks like St. Columba established monasteries that became centers of learning, preserving classical texts and creating illuminated manuscripts while spreading Christianity across Scotland and northern England.",
+          "map_label": "England / Britain",
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-7.5,46.0,4.5,58.0&layer=mapnik&marker=52.0,-1.5"
         }
       ]
     },
