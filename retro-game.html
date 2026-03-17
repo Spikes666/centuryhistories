@@ -22,7 +22,6 @@
       line-height: 1.25;
       min-height: 100vh;
       overflow-x: hidden;
-      /* CRT scanlines */
       position: relative;
     }
 
@@ -44,11 +43,10 @@
       white-space: pre;
       font-family: inherit;
       font-size: inherit;
-      padding: 12px 16px 20px;
+      padding: 12px 16px 80px;
       max-width: 680px;
       margin: 0 auto;
       min-height: 100vh;
-      /* Subtle vignette */
       background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.35) 100%);
     }
 
@@ -102,10 +100,11 @@
 // ─────────────────────────────────────────────────────────────
 //  Constants
 // ─────────────────────────────────────────────────────────────
-const CONTENT_URL = 'https://raw.githubusercontent.com/Spikes666/centuryhistories/main/flashcards/content.json';
-const START_DATE  = new Date('2025-01-01');
-const W = 38; // usable cols inside borders
-const THEMES = ['fallout','matrix','c64'];
+const CONTENT_URL  = 'https://raw.githubusercontent.com/Spikes666/centuryhistories/main/flashcards/content.json';
+const START_DATE   = new Date('2025-01-01');
+const W            = 38;  // usable cols inside box borders
+const THEMES       = ['fallout','matrix','c64'];
+const STORAGE_KEY  = 'ch_retro_v2';
 
 const STOPWORDS = new Set([
   'The','In','By','At','On','An','Of','Or','And','But','From','With',
@@ -115,66 +114,89 @@ const STOPWORDS = new Set([
   'Some','Many','Both','Each','Even','Than','Then','Also','Only',
   'Very','Much','Long','Well','High','Holy','Late','Early','New',
   'First','Last','Great','Later','Soon','Known','Born','Made',
-  'Became','Called','Named','Said','Took','Used','Still'
+  'Became','Called','Named','Said','Took','Used','Still','Circa'
 ]);
 
 // ─────────────────────────────────────────────────────────────
 //  App state
 // ─────────────────────────────────────────────────────────────
-let centuries  = [];
-let games      = null;
-let theme      = localStorage.getItem('retroTheme') || 'fallout';
+let centuries = [];
+let games     = null;
+let theme     = localStorage.getItem('retroTheme') || 'fallout';
+let G         = {};  // persistent storage
 
+// Screen states: BOOT | DECK | STUDY | MENU | CHRONO | WORDLE | JEO | DONE
 const S = {
-  screen:      'BOOT',  // BOOT | MENU | CHRONO | WORDLE | JEO | DONE
-  score:       0,
-  streak:      0,
-  modesCompleted: {},
+  screen:     'BOOT',
+  studyIdx:   0,
 
   // CHRONO
   chronoOrder: [],
   chronoInput: '',
   chronoDone:  false,
+  chronoError: '',
 
   // WORDLE
-  wTarget: '', wGuesses: [], wColors: [], wCurrent: '', wDone: false,
+  wTarget: '', wGuesses: [], wColors: [], wCurrent: '', wDone: false, wError: '',
 
   // JEO
-  jChoices: [], jHints: 0, jAnswered: false, jResult: ''
+  jChoices: [], jHints: 0, jAnswered: false, jSelected: -1, jHintMsg: ''
 };
 
 // ─────────────────────────────────────────────────────────────
-//  Persistence
+//  Persistent storage
 // ─────────────────────────────────────────────────────────────
-function todayStr() { return new Date().toISOString().split('T')[0]; }
-function yesterdayStr() {
-  const d = new Date(); d.setDate(d.getDate()-1); return d.toISOString().split('T')[0];
+function loadStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return defaultStorage();
+    return { ...defaultStorage(), ...JSON.parse(raw) };
+  } catch(e) { return defaultStorage(); }
 }
-function loadPersist() {
-  const today = todayStr();
-  let p = {};
-  try { p = JSON.parse(localStorage.getItem('ch_retro')||'{}'); } catch(e){}
-  if (p.date !== today) {
-    const streak = p.lastPlayed === yesterdayStr() ? (p.streak||0) : 0;
-    p = { date: today, modesCompleted:{}, todayScore:0, streak };
+function defaultStorage() {
+  return { seenFacts: {}, session: null, streak: 0, lastCompleted: null };
+}
+function saveStorage() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(G));
+}
+
+function countSeenFacts() {
+  let total = 0;
+  for (const [id, n] of Object.entries(G.seenFacts || {})) {
+    const c = centuries.find(c => c.id === id);
+    if (c) total += Math.min(n, c.facts.length);
   }
-  return p;
+  return total;
 }
-function savePersist() {
-  const p = loadPersist();
-  p.modesCompleted = S.modesCompleted;
-  p.todayScore     = S.score;
-  p.streak         = S.streak;
-  p.lastPlayed     = todayStr();
-  localStorage.setItem('ch_retro', JSON.stringify(p));
+
+function markFactsSeen(facts) {
+  const by = {};
+  for (const f of facts) { by[f.century_id] = (by[f.century_id]||0)+1; }
+  for (const [id, n] of Object.entries(by)) {
+    G.seenFacts[id] = (G.seenFacts[id]||0)+n;
+  }
+  saveStorage();
 }
-function markDone(id, pts) {
-  if (S.modesCompleted[id] !== undefined) return;
-  S.modesCompleted[id] = pts;
-  S.score += pts;
-  const all = ['chrono','wordle','jeo'].every(m => S.modesCompleted[m] !== undefined);
-  if (all && !S.streakCounted) { S.streak++; S.streakCounted = true; }
-  savePersist();
+
+function sessionScore() {
+  const s = G.session?.score || {};
+  return Object.values(s).reduce((a,b)=>a+b, 0);
+}
+
+function allModesDone() {
+  const s = G.session?.score || {};
+  return s.chrono !== undefined && s.wordle !== undefined && s.jeopardy !== undefined;
+}
+
+function completeMode(key, pts) {
+  if (!G.session) return;
+  G.session.score[key] = pts;
+  const today = new Date().toISOString().slice(0,10);
+  if (allModesDone() && G.lastCompleted !== today) {
+    G.streak = (G.streak||0)+1;
+    G.lastCompleted = today;
+  }
+  saveStorage();
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -192,17 +214,23 @@ function cycleTheme() {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  ASCII helpers
+//  ASCII helpers — fixed word-wrap and box overflow
 // ─────────────────────────────────────────────────────────────
+function visLen(s) {
+  return s.replace(/<[^>]*>/g,'').length;
+}
+
+// FIX: truncate content that exceeds inner width
 function box(lines, w) {
-  // w = inner width (default W)
   const inner = w || W;
   const top   = '+' + '-'.repeat(inner+2) + '+\n';
   const bot   = '+' + '-'.repeat(inner+2) + '+';
   const rows  = lines.map(l => {
-    const s = String(l);
-    const pad = Math.max(0, inner - visLen(s));
-    return '| ' + s + ' '.repeat(pad) + ' |';
+    const s   = String(l);
+    // Truncate if content is too wide
+    const truncated = visLen(s) > inner ? s.slice(0, inner) : s;
+    const padN = Math.max(0, inner - visLen(truncated));
+    return '| ' + truncated + ' '.repeat(padN) + ' |';
   }).join('\n');
   return top + rows + '\n' + bot;
 }
@@ -211,26 +239,35 @@ function center(text, w) {
   const inner = w || W;
   const s     = String(text);
   const v     = visLen(s);
-  const pad   = Math.max(0, inner - v);
-  const lpad  = Math.floor(pad/2);
-  const rpad  = pad - lpad;
+  const padN  = Math.max(0, inner - v);
+  const lpad  = Math.floor(padN/2);
+  const rpad  = padN - lpad;
   return ' '.repeat(lpad) + s + ' '.repeat(rpad);
 }
 
-function visLen(s) {
-  // Strip ANSI-style spans we're not using, just return char count of plain text
-  return s.replace(/<[^>]*>/g,'').length;
-}
-
+// FIX: hard-wrap words longer than maxW
 function wrap(text, w) {
-  const maxW = w || W;
+  const maxW  = w || W;
   const words = text.split(' ');
   const lines = [];
   let cur = '';
   for (const word of words) {
-    if (cur.length === 0) { cur = word; }
-    else if (cur.length + 1 + word.length <= maxW) { cur += ' ' + word; }
-    else { lines.push(cur); cur = word; }
+    if (word.length > maxW) {
+      // Hard-break overlong words
+      if (cur) { lines.push(cur); cur = ''; }
+      for (let i = 0; i < word.length; i += maxW) {
+        const chunk = word.slice(i, i + maxW);
+        if (i + maxW < word.length) lines.push(chunk);
+        else cur = chunk;
+      }
+    } else if (cur.length === 0) {
+      cur = word;
+    } else if (cur.length + 1 + word.length <= maxW) {
+      cur += ' ' + word;
+    } else {
+      lines.push(cur);
+      cur = word;
+    }
   }
   if (cur) lines.push(cur);
   return lines;
@@ -243,37 +280,44 @@ function pad(s, n) {
 
 function hr(ch) { return (ch||'-').repeat(W+2); }
 
-// ─────────────────────────────────────────────────────────────
-//  Seeded random
-// ─────────────────────────────────────────────────────────────
-function makeRand(seed) {
-  let s = seed >>> 0;
-  return () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 0x100000000; };
-}
-function getDailySeed() {
+function getDayNum() {
   const d = new Date(); d.setHours(0,0,0,0);
   return Math.floor((d - START_DATE) / 86400000);
 }
-function shuffleArr(arr, rand) {
-  for (let i = arr.length-1; i > 0; i--) {
-    const j = Math.floor(rand()*(i+1)); [arr[i],arr[j]] = [arr[j],arr[i]];
-  }
-  return arr;
+
+// FIX: builds a menu row that fits exactly in W chars
+function menuRow(key, name, done, maxPts) {
+  const left  = `  [${key}] ${name}`;
+  const right = done !== undefined ? `DONE +${done}` : `UP TO ${maxPts}`;
+  const space = Math.max(1, W - left.length - right.length);
+  const row   = left + ' '.repeat(space) + right;
+  // Safety clamp
+  return row.length > W ? row.slice(0, W) : row;
 }
 
 // ─────────────────────────────────────────────────────────────
 //  Year & keyword helpers
 // ─────────────────────────────────────────────────────────────
 function extractYear(text, ci) {
-  const bce = text.match(/(\d[\d,]*)\s*BCE/);
+  const bce = text.match(/(\d[\d,]*)\s*BCE/i);
   if (bce) return -parseInt(bce[1].replace(/,/g,''));
-  const ce  = text.match(/(\d[\d,]*)\s*CE/);
+  const ce  = text.match(/(\d[\d,]*)\s*CE/i);
   if (ce)  return  parseInt(ce[1].replace(/,/g,''));
   return ci * 100 - 3000;
 }
 function yearLabel(y) { return y < 0 ? Math.abs(y)+' BCE' : y+' CE'; }
-function stripDates(text) {
-  return text.replace(/^(Around\s+)?[\d,]+\s*(BCE|CE|BCE[–-]\d+\s*CE),?\s*/i,'').trim();
+
+function stripAllDates(text) {
+  return text
+    .replace(/\(\s*[~c.]?\s*\d[\d,]*\s*[-–]?\s*\d*\s*(?:BCE|CE|BC|AD)?\s*\)/gi, '')
+    .replace(/\b(Around|Circa|~)\s*\d[\d,]*\s*(BCE|CE|BC|AD)?,?\s*/gi, '')
+    .replace(/\b\d[\d,]*\s*(?:BCE|CE|BC|AD)\b[,.]?\s*/gi, '')
+    .replace(/\b(1st|2nd|3rd|4th|5th|6th|7th|8th|9th|10th|11th|12th|13th|14th|15th|16th|17th|18th|19th|20th|21st)\s+century\b\s*/gi, 'this era ')
+    .replace(/\(\s*\d{3,4}\s*\)/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/^\s*[,;.]\s*/, '')
+    .replace(/\s+([,;.])/g, '$1')
+    .trim();
 }
 
 function extractKeyword(factText) {
@@ -295,63 +339,95 @@ function extractKeyword(factText) {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  Daily game generation (identical seed logic as game.html)
+//  Fact selection (session-based)
 // ─────────────────────────────────────────────────────────────
-function buildGames() {
-  const rand = makeRand(getDailySeed());
-  const n    = centuries.length;
-  const q    = Math.floor(n/4);
-  const segs = [
-    centuries.slice(0,q), centuries.slice(q,2*q),
-    centuries.slice(2*q,3*q), centuries.slice(3*q)
-  ];
-  const chronoFacts = segs.map(seg => {
-    const c  = seg[Math.floor(rand()*seg.length)];
-    const fi = Math.floor(rand()*c.facts.length);
-    const ci = centuries.indexOf(c);
-    return { ...c.facts[fi], century_label:c.label, era:c.era, century_idx:ci,
-             year: extractYear(c.facts[fi].fact, ci) };
-  });
-  const chronoCorrect = [...chronoFacts].sort((a,b) => a.year - b.year);
-  const chronoDisplay = shuffleArr([...chronoFacts], rand);
+function pickDeckFacts(count) {
+  const seen = G.seenFacts || {};
+  if (count === 23) {
+    return centuries.map((c, ci) => {
+      const idx = (seen[c.id]||0) % c.facts.length;
+      const f   = c.facts[idx];
+      return { ...f, century_label:c.label, era:c.era, century_id:c.id,
+               century_idx:ci, year:extractYear(f.fact, ci) };
+    });
+  } else {
+    const unseenC = centuries.filter(c => (seen[c.id]||0) < c.facts.length);
+    const pool    = unseenC.length > 0 ? unseenC : centuries;
+    const c       = pool[Math.floor(Math.random()*pool.length)];
+    const ci      = centuries.indexOf(c);
+    const start   = (seen[c.id]||0) % c.facts.length;
+    return Array.from({length:count}, (_,i) => {
+      const fi = (start+i) % c.facts.length;
+      const f  = c.facts[fi];
+      return { ...f, century_label:c.label, era:c.era, century_id:c.id,
+               century_idx:ci, year:extractYear(f.fact, ci) };
+    });
+  }
+}
 
-  const wPairs = Array.from({length:60}, () => {
-    const ci = Math.floor(rand()*n);
-    return { ci, fi: Math.floor(rand()*centuries[ci].facts.length) };
-  });
+// ─────────────────────────────────────────────────────────────
+//  Session game builder
+// ─────────────────────────────────────────────────────────────
+function buildSessionGames(facts) {
+  // CHRONO: pick 4 spread across session
+  let chronoPool;
+  if (facts.length <= 4) {
+    chronoPool = [...facts];
+  } else {
+    const step = Math.floor(facts.length/4);
+    const idxs = new Set([0,1,2,3].map(i => Math.min(i*step, facts.length-1)));
+    chronoPool = [...idxs].map(i => facts[i]);
+  }
+  const seenFacts = new Set();
+  chronoPool = chronoPool.filter(f => { if (seenFacts.has(f.fact)) return false; seenFacts.add(f.fact); return true; });
+  while (chronoPool.length < 4 && facts.length > chronoPool.length) {
+    const extra = facts.find(f => !seenFacts.has(f.fact));
+    if (!extra) break;
+    chronoPool.push(extra);
+    seenFacts.add(extra.fact);
+  }
+  const chronoCorrect = [...chronoPool].sort((a,b)=>a.year-b.year);
+  const chronoDisplay = [...chronoPool];
+  for (let i = chronoDisplay.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [chronoDisplay[i],chronoDisplay[j]] = [chronoDisplay[j],chronoDisplay[i]];
+  }
+
+  // WORDLE: first fact with valid keyword
   let wordleFact = null;
-  for (const {ci,fi} of wPairs) {
-    const c = centuries[ci], f = c.facts[fi];
-    const raw = extractKeyword(f.fact);
-    if (raw && raw.length >= 4 && raw.length <= 12) {
-      wordleFact = { ...f, century_label:c.label, era:c.era, raw, word:raw.toUpperCase() }; break;
+  for (const f of facts) {
+    const kw = extractKeyword(f.fact);
+    if (kw && kw.length >= 4 && kw.length <= 12) {
+      wordleFact = { ...f, raw:kw, word:kw.toUpperCase() }; break;
     }
   }
 
-  const jPairs = Array.from({length:60}, () => {
-    const ci = Math.floor(rand()*n);
-    return { ci, fi: Math.floor(rand()*centuries[ci].facts.length) };
-  });
+  // JEOPARDY: another fact
   let jeoFact = null;
-  for (const {ci,fi} of jPairs) {
-    const c = centuries[ci], f = c.facts[fi];
-    if (wordleFact && f.fact === wordleFact.fact) continue;
-    const raw = extractKeyword(f.fact);
-    if (raw && raw.length >= 3) {
-      jeoFact = { ...f, century_label:c.label, era:c.era, raw, word:raw.toUpperCase() }; break;
-    }
-  }
-
   const wrongPool = [];
+  for (const f of facts) {
+    if (wordleFact && f.fact === wordleFact.fact) continue;
+    const kw = extractKeyword(f.fact);
+    if (kw && kw.length >= 3 && !jeoFact) {
+      jeoFact = { ...f, raw:kw, word:kw.toUpperCase() };
+    }
+    if (kw) wrongPool.push(kw.toUpperCase());
+  }
+  // Supplement wrong answers from global pool
   for (const c of centuries) {
     for (const f of c.facts) {
-      if (jeoFact && f.fact === jeoFact.fact) continue;
-      const raw = extractKeyword(f.fact);
-      if (raw && raw.toUpperCase() !== (jeoFact?.word||'') && raw.length >= 3) wrongPool.push(raw.toUpperCase());
+      const kw = extractKeyword(f.fact);
+      if (kw && kw.toUpperCase() !== jeoFact?.word && wrongPool.length < 20) {
+        wrongPool.push(kw.toUpperCase());
+      }
     }
+    if (wrongPool.length >= 20) break;
   }
-  const dedupedWrong = [...new Set(wrongPool)];
-  shuffleArr(dedupedWrong, rand);
+  const dedupedWrong = [...new Set(wrongPool.filter(w => w !== jeoFact?.word))];
+  for (let i = dedupedWrong.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [dedupedWrong[i],dedupedWrong[j]] = [dedupedWrong[j],dedupedWrong[i]];
+  }
   const wrongAnswers = dedupedWrong.slice(0,3);
 
   return { chronoDisplay, chronoCorrect, wordleFact, jeoFact, wrongAnswers };
@@ -361,46 +437,35 @@ function buildGames() {
 //  Render engine
 // ─────────────────────────────────────────────────────────────
 function render() {
-  const term = document.getElementById('term');
+  const term     = document.getElementById('term');
+  const themeLabel = theme.toUpperCase();
+  const score    = sessionScore();
   let out = '';
 
-  const seed = getDailySeed();
-  const themeLabel = theme.toUpperCase();
-
-  // ── Header ──────────────────────────────────────────
   out += box([
     center('CENTURY HISTORIES :: GAME'),
-    center(`DAY ${seed}  |  SCORE: ${S.score}  |  [${themeLabel}]`)
+    center(`DAY ${getDayNum()}  |  SCORE: ${score}  |  [${themeLabel}]`)
   ]);
   out += '\n';
 
-  // ── Screen content ───────────────────────────────────
-  if (S.screen === 'BOOT') {
-    out += '\n';
-    out += center('LOADING HISTORY DATABASE...') + '\n';
-    out += '\n';
-    out += center('[' + '='.repeat(20) + ']') + '\n';
+  if      (S.screen === 'BOOT')   out += renderBoot();
+  else if (S.screen === 'DECK')   out += renderDeck();
+  else if (S.screen === 'STUDY')  out += renderStudy();
+  else if (S.screen === 'MENU')   out += renderMenu();
+  else if (S.screen === 'CHRONO') out += renderChrono();
+  else if (S.screen === 'WORDLE') out += renderWordle();
+  else if (S.screen === 'JEO')    out += renderJeo();
+  else if (S.screen === 'DONE')   out += renderDone();
 
-  } else if (S.screen === 'MENU') {
-    out += renderMenu();
-
-  } else if (S.screen === 'CHRONO') {
-    out += renderChrono();
-
-  } else if (S.screen === 'WORDLE') {
-    out += renderWordle();
-
-  } else if (S.screen === 'JEO') {
-    out += renderJeo();
-
-  } else if (S.screen === 'DONE') {
-    out += renderDone();
-  }
-
-  // ── Footer ──────────────────────────────────────────
   out += '\n';
   out += '+' + hr() + '+\n';
-  out += '| ' + pad('[T] THEME  [H] HUB  [Q] QUIT', W) + ' |\n';
+  if (S.screen === 'DECK' || S.screen === 'BOOT') {
+    out += '| ' + pad('[T] THEME  [Q] QUIT TO INDEX', W) + ' |\n';
+  } else if (S.screen === 'STUDY') {
+    out += '| ' + pad('[N] NEXT  [P] PREV  [S] SKIP', W) + ' |\n';
+  } else {
+    out += '| ' + pad('[T] THEME  [H] HUB  [D] NEW SESSION', W) + ' |\n';
+  }
   out += '+' + hr() + '+\n';
 
   term.textContent = out;
@@ -410,16 +475,81 @@ function render() {
 // ─────────────────────────────────────────────────────────────
 //  Screen renderers
 // ─────────────────────────────────────────────────────────────
-function renderMenu() {
+function renderBoot() {
+  let o = '\n';
+  o += center('LOADING HISTORY DATABASE...') + '\n\n';
+  o += center('[' + '='.repeat(20) + ']') + '\n';
+  return o;
+}
+
+function renderDeck() {
+  const seen   = countSeenFacts();
+  const streak = G.streak || 0;
   let o = '\n';
   o += box([
-    center('-- DAILY CHALLENGE --'),
+    center('-- SELECT SESSION --'),
     '',
-    pad(`  [1] CHRONO ORDER`, W) + (S.modesCompleted.chrono!==undefined ? `  +${S.modesCompleted.chrono} pts  DONE` : `  up to 100 pts`),
-    pad(`  [2] MISSING WORD`, W) + (S.modesCompleted.wordle!==undefined ? `  +${S.modesCompleted.wordle} pts  DONE` : `  up to 300 pts`),
-    pad(`  [3] WHAT IS IT?`, W) + (S.modesCompleted.jeo!==undefined    ? `  +${S.modesCompleted.jeo} pts  DONE`    : `  up to 300 pts`),
+    center(`SEEN: ${seen} FACTS  |  STREAK: ${streak} DAYS`),
     '',
-    center(`STREAK: ${S.streak} DAY(S)`)
+    `  [1] QUICK      5 facts, 1 century`,
+    `  [2] STANDARD  10 facts, 1 century`,
+    `  [3] GRAND TOUR 23 facts, all eras`,
+    '',
+    center('PRESS 1 / 2 / 3 TO BEGIN')
+  ]);
+  return o;
+}
+
+function renderStudy() {
+  if (!G.session) return renderDeck();
+  const facts = G.session.facts;
+  const idx   = S.studyIdx;
+  const f     = facts[idx];
+  const total = facts.length;
+  let o = '\n';
+  o += box([center(`STUDYING: ${idx+1} OF ${total}`)]);
+  o += '\n';
+
+  // Century / era info
+  const centuryLine = (f.century_label || '').toUpperCase();
+  const eraLine     = (f.era || '').toUpperCase();
+
+  // Fact text wrapped
+  const factLines = wrap(f.fact || '', W-4);
+
+  o += `+${'-'.repeat(W+2)}+\n`;
+  // Truncate long century labels to fit
+  const centLabel = centuryLine.slice(0, W-2);
+  o += `| ${pad(centLabel, W)} |\n`;
+  if (eraLine) o += `| ${pad(eraLine.slice(0, W-2), W)} |\n`;
+  o += `| ${' '.repeat(W)} |\n`;
+  factLines.forEach(l => {
+    o += `|   ${pad(l, W-4)}   |\n`;
+  });
+  o += `| ${' '.repeat(W)} |\n`;
+  o += `+${'-'.repeat(W+2)}+\n`;
+  o += '\n';
+
+  const isLast = idx === total - 1;
+  o += box([
+    center(isLast ? '[N/ENTER] DONE STUDYING' : '[N] NEXT FACT'),
+    center('[P] PREVIOUS  [S] SKIP TO GAMES')
+  ]);
+  return o;
+}
+
+function renderMenu() {
+  const score = G.session?.score || {};
+  let o = '\n';
+  o += box([
+    center('-- GAME HUB --'),
+    center((G.session?.centuryLabel || '').toUpperCase()),
+    '',
+    menuRow('1', 'CHRONO ORDER', score.chrono,   100),
+    menuRow('2', 'MISSING WORD', score.wordle,   300),
+    menuRow('3', 'WHAT IS IT?',  score.jeopardy, 300),
+    '',
+    center(`STREAK: ${G.streak||0} DAY(S)`)
   ]);
   return o;
 }
@@ -431,11 +561,13 @@ function renderChrono() {
 
   const facts = S.chronoOrder.map(fi => games.chronoDisplay[fi]);
   facts.forEach((f, rank) => {
-    const shortFact = stripDates(f.fact);
-    const lines     = wrap(shortFact, W-2);
+    const stripped = stripAllDates(f.fact);
+    const lines    = wrap(stripped, W-4);
     o += `+${'-'.repeat(W+2)}+\n`;
-    o += `| ${pad(`[${rank+1}] ${f.century_label.split(' (')[0].toUpperCase()}`, W)} |\n`;
-    lines.slice(0,4).forEach(l => { o += `|   ${pad(l, W-2)} |\n`; });
+    // Century label clamped to W
+    const lbl = `[${rank+1}] ${(f.century_label||'').split(' (')[0].toUpperCase()}`;
+    o += `| ${pad(lbl.slice(0,W), W)} |\n`;
+    lines.slice(0,4).forEach(l => { o += `|   ${pad(l, W-4)}   |\n`; });
     o += `+${'-'.repeat(W+2)}+\n`;
   });
 
@@ -449,12 +581,19 @@ function renderChrono() {
       center(correct===4 ? '** PERFECT ORDER! **' : `${correct}/4 CORRECT -- +${pts} PTS`),
       '',
       center('CORRECT ORDER:'),
-      ...games.chronoCorrect.map((f,i) => `  ${i+1}. ${yearLabel(f.year)} -- ${f.century_label.split(' (')[0]}`),
+      ...games.chronoCorrect.map((f,i) => {
+        const label = `  ${i+1}. ${yearLabel(f.year)} -- ${(f.century_label||'').split(' (')[0]}`;
+        return label.slice(0, W);
+      }),
       '',
       center('[H] BACK TO HUB')
     ]);
   } else {
     o += '\n';
+    if (S.chronoError) {
+      o += box([center(S.chronoError)]);
+      o += '\n';
+    }
     o += box([
       center('TYPE ORDER  e.g.  2 4 1 3'),
       center('then press ENTER to confirm'),
@@ -466,11 +605,11 @@ function renderChrono() {
 }
 
 function renderWordle() {
-  if (!games.wordleFact) return box([center('NO WORD PUZZLE TODAY')]);
-  const target   = S.wTarget;
-  const guesses  = S.wGuesses;
-  const colors   = S.wColors;
-  const current  = S.wCurrent;
+  if (!games?.wordleFact) return box([center('NO WORD PUZZLE FOR THIS SESSION')]);
+  const target  = S.wTarget;
+  const guesses = S.wGuesses;
+  const colors  = S.wColors;
+  const current = S.wCurrent;
 
   let o = '\n';
   o += box([
@@ -479,19 +618,20 @@ function renderWordle() {
   ]);
   o += '\n';
 
-  // Blanked fact
-  const blanked  = games.wordleFact.fact.replace(new RegExp('\\b'+games.wordleFact.raw+'\\b'), '_'.repeat(target.length));
-  const factLines = wrap(blanked, W);
+  // FIX: wrap at W-4 to match the |   pad(l, W-4)   | row format
+  const blanked   = (games.wordleFact.fact||'').replace(
+    new RegExp('\\b'+games.wordleFact.raw+'\\b', 'i'), '_'.repeat(target.length)
+  );
+  const factLines = wrap(blanked, W-4);
   o += `+${'-'.repeat(W+2)}+\n`;
   o += `| ${pad('FACT:', W)} |\n`;
-  factLines.forEach(l => { o += `|   ${pad(l, W-2)} |\n`; });
+  factLines.forEach(l => { o += `|   ${pad(l, W-4)}   |\n`; });
   o += `+${'-'.repeat(W+2)}+\n\n`;
 
   // Guess grid
   o += `+${'-'.repeat(W+2)}+\n`;
   for (let row = 0; row < 6; row++) {
     if (row < guesses.length) {
-      // Submitted guess with color codes
       const letters = guesses[row];
       const cs      = colors[row];
       let cells = '';
@@ -499,27 +639,24 @@ function renderWordle() {
         const sym = cs[i]==='correct' ? `[${l}]` : cs[i]==='present' ? `(${l})` : ` ${l} `;
         cells += sym;
       });
-      // Legend on first submitted row
       if (row === 0) {
-        o += `| ${pad(center('GUESS HISTORY  [X]=HIT (X)=WRONG SPOT', W), W)} |\n`;
+        o += `| ${pad(center('[X]=HIT  (X)=WRONG SPOT   =MISS',W),W)} |\n`;
       }
       o += `| ${pad(center(cells, W), W)} |\n`;
     } else if (row === guesses.length && !S.wDone) {
-      // Current input row
       const filled = current.split('').map(l => `[${l}]`).join('');
       const empty  = '_  '.repeat(target.length - current.length);
       o += `| ${pad(center('> ' + filled + empty, W), W)} |\n`;
     } else {
-      // Empty row
-      const empty  = '   '.repeat(target.length);
+      const empty = '   '.repeat(target.length);
       o += `| ${pad(center(empty, W), W)} |\n`;
     }
   }
   o += `+${'-'.repeat(W+2)}+\n`;
 
   if (S.wDone) {
-    const won  = colors.length > 0 && colors[colors.length-1].every(c=>c==='correct');
-    const pts  = won ? Math.max(100, 300-(guesses.length-1)*40) : 0;
+    const won = colors.length > 0 && colors[colors.length-1].every(c=>c==='correct');
+    const pts = won ? Math.max(100, 300-(guesses.length-1)*40) : 0;
     o += '\n';
     o += box([
       center(won ? `** CORRECT IN ${guesses.length} TRIES! **` : `WORD WAS: ${target}`),
@@ -530,7 +667,7 @@ function renderWordle() {
   } else {
     o += '\n';
     o += box([
-      center('TYPE A LETTER TO GUESS'),
+      center('TYPE LETTERS TO GUESS'),
       center('[ENTER] SUBMIT  [BKSP] DELETE'),
       ...(S.wError ? [center(S.wError)] : [])
     ]);
@@ -539,18 +676,20 @@ function renderWordle() {
 }
 
 function renderJeo() {
-  if (!games.jeoFact) return box([center('NO QUESTION TODAY')]);
+  if (!games?.jeoFact) return box([center('NO QUESTION FOR THIS SESSION')]);
+  const pts = Math.max(100, 300-S.jHints*100);
   let o = '\n';
-  o += box([center('-- WHAT IS IT? --'), center('SELECT THE CORRECT ANSWER')]);
+  o += box([center('-- WHAT IS IT? --'), center(`WORTH: ${pts} PTS  |  HINTS USED: ${S.jHints}`)]);
   o += '\n';
 
-  // Blanked fact
   const raw     = games.jeoFact.raw;
-  const blanked = games.jeoFact.fact.replace(new RegExp('\\b'+raw+'\\b'), '_'.repeat(raw.length));
-  const lines   = wrap(blanked, W);
+  const blanked = (games.jeoFact.fact||'').replace(
+    new RegExp('\\b'+raw+'\\b', 'i'), '_'.repeat(raw.length)
+  );
+  const lines   = wrap(blanked, W-4);
   o += `+${'-'.repeat(W+2)}+\n`;
-  o += `| ${pad('FACT:', W)} |\n`;
-  lines.slice(0,5).forEach(l => { o += `|   ${pad(l, W-2)} |\n`; });
+  o += `| ${pad('CLUE:', W)} |\n`;
+  lines.slice(0,5).forEach(l => { o += `|   ${pad(l, W-4)}   |\n`; });
   o += `+${'-'.repeat(W+2)}+\n\n`;
 
   // Choices
@@ -559,21 +698,21 @@ function renderJeo() {
   S.jChoices.forEach((c, i) => {
     let mark = '';
     if (S.jAnswered) {
-      if (c === games.jeoFact.word) mark = ' <-- CORRECT';
-      else if (i === S.jSelected)  mark = ' <-- WRONG';
+      if (c === games.jeoFact.word) mark = ' <CORRECT';
+      else if (i === S.jSelected)  mark = ' <WRONG';
     }
-    o += `|  [${labels[i]}] ${pad(c + mark, W-7)} |\n`;
+    const row = `  [${labels[i]}] ${c}${mark}`;
+    o += `| ${pad(row.slice(0,W), W)} |\n`;
   });
   o += `+${'-'.repeat(W+2)}+\n`;
 
   if (S.jAnswered) {
     const correct = S.jChoices[S.jSelected] === games.jeoFact.word;
-    const pts     = correct ? Math.max(100, 300-S.jHints*100) : 0;
+    const earned  = correct ? pts : 0;
     o += '\n';
     o += box([
       center(correct ? '** CORRECT! **' : 'INCORRECT'),
-      center(`+${pts} PTS`),
-      center(`ERA: ${games.jeoFact.century_label.split(' (')[0]}`),
+      center(`+${earned} PTS`),
       '',
       center('[H] BACK TO HUB')
     ]);
@@ -582,8 +721,8 @@ function renderJeo() {
     o += box([
       center('PRESS A / B / C / D TO ANSWER'),
       S.jHints < 1
-        ? center('[X] USE HINT (-100 PTS, REMOVES 1 WRONG)')
-        : center('HINT USED'),
+        ? center('[X] HINT: REMOVE 1 WRONG (-100)')
+        : center('NO MORE HINTS'),
       ...(S.jHintMsg ? [center(S.jHintMsg)] : [])
     ]);
   }
@@ -591,21 +730,24 @@ function renderJeo() {
 }
 
 function renderDone() {
-  const all = S.modesCompleted;
+  const s = G.session?.score || {};
+  const chrono   = s.chrono   !== undefined ? s.chrono   : '-';
+  const wordle   = s.wordle   !== undefined ? s.wordle   : '-';
+  const jeopardy = s.jeopardy !== undefined ? s.jeopardy : '-';
+  const total    = sessionScore();
   let o = '\n';
   o += box([
-    center('** DAILY COMPLETE! **'),
+    center('** SESSION COMPLETE! **'),
     '',
     center('RESULTS:'),
-    `  CHRONO ORDER  : +${all.chrono||0} pts`,
-    `  MISSING WORD  : +${all.wordle||0} pts`,
-    `  WHAT IS IT?   : +${all.jeo||0} pts`,
+    `  CHRONO ORDER  : +${chrono} pts`,
+    `  MISSING WORD  : +${wordle} pts`,
+    `  WHAT IS IT?   : +${jeopardy} pts`,
     '',
-    center(`TOTAL: ${S.score} PTS`),
-    center(`STREAK: ${S.streak} DAY(S)`),
+    center(`TOTAL: ${total} PTS`),
+    center(`STREAK: ${G.streak||0} DAY(S)`),
     '',
-    center('COME BACK TOMORROW'),
-    center('[H] VIEW HUB')
+    center('[D] NEW SESSION  [H] HUB')
   ]);
   return o;
 }
@@ -618,7 +760,7 @@ function updateOSK() {
   if (S.screen !== 'WORDLE' || S.wDone) { osk.classList.remove('show'); return; }
   osk.classList.add('show');
 
-  const rows    = ['QWERTYUIOP','ASDFGHJKL','⌫ZXCVBNM↵'];
+  const rows = ['QWERTYUIOP','ASDFGHJKL','⌫ZXCVBNM↵'];
   const keyState = {};
   for (let g = 0; g < S.wGuesses.length; g++) {
     for (let i = 0; i < S.wGuesses[g].length; i++) {
@@ -645,41 +787,71 @@ function oskKey(ch) { handleKey(ch); }
 function handleKey(key) {
   const k = key.toUpperCase();
 
-  // Global keys
+  // Global
   if (k === 'T') { cycleTheme(); return; }
+
+  if (S.screen === 'DECK') {
+    if (k === '1') startSession(5);
+    if (k === '2') startSession(10);
+    if (k === '3') startSession(23);
+    return;
+  }
+
+  if (k === 'D') { newSession(); return; }
   if (k === 'H' || k === 'Q') { goMenu(); return; }
 
-  if (S.screen === 'MENU') {
-    if (k === '1' && S.modesCompleted.chrono === undefined) startChrono();
-    if (k === '2' && S.modesCompleted.wordle === undefined) startWordle();
-    if (k === '3' && S.modesCompleted.jeo    === undefined) startJeo();
-    if (['1','2','3'].includes(k) && allDone()) { S.screen='DONE'; render(); }
-
-  } else if (S.screen === 'CHRONO') {
-    if (S.chronoDone) { if (k==='H'||k==='ENTER') goMenu(); return; }
-    if (k === 'ENTER' || k === '\n') { submitChrono(); }
-    else if (k === 'BACKSPACE' || k === '⌫') { S.chronoInput = S.chronoInput.slice(0,-1); render(); }
-    else if (/^[\d ]$/.test(k)) {
-      if (S.chronoInput.length < 8) { S.chronoInput += (k===' '?k:k); render(); }
+  if (S.screen === 'STUDY') {
+    const total = G.session?.facts?.length || 0;
+    if (k === 'N' || k === 'ENTER') {
+      if (S.studyIdx < total - 1) { S.studyIdx++; render(); }
+      else doneStudying();
+    } else if (k === 'P') {
+      if (S.studyIdx > 0) { S.studyIdx--; render(); }
+    } else if (k === 'S') {
+      doneStudying();
     }
+    return;
+  }
 
-  } else if (S.screen === 'WORDLE') {
-    if (S.wDone) { if (k==='H'||k==='ENTER') goMenu(); return; }
+  if (S.screen === 'MENU') {
+    const sc = G.session?.score || {};
+    if (k === '1' && sc.chrono   === undefined) startChrono();
+    if (k === '2' && sc.wordle   === undefined) startWordle();
+    if (k === '3' && sc.jeopardy === undefined) startJeo();
+    if (allModesDone()) { S.screen='DONE'; render(); }
+    return;
+  }
+
+  if (S.screen === 'CHRONO') {
+    if (S.chronoDone) { if (k==='ENTER') goMenu(); return; }
+    if (k === 'ENTER' || k === '\n') { submitChrono(); }
+    else if (k === 'BACKSPACE' || k === '⌫') { S.chronoInput = S.chronoInput.slice(0,-1); S.chronoError=''; render(); }
+    else if (/^[\d ]$/.test(k)) {
+      if (S.chronoInput.length < 8) { S.chronoInput += k; render(); }
+    }
+    return;
+  }
+
+  if (S.screen === 'WORDLE') {
+    if (S.wDone) { if (k==='ENTER') goMenu(); return; }
     if (k === 'ENTER' || k === '↵') { submitWordle(); }
     else if (k === 'BACKSPACE' || k === '⌫') { S.wCurrent = S.wCurrent.slice(0,-1); S.wError=''; render(); }
     else if (/^[A-Z]$/.test(k) && S.wCurrent.length < S.wTarget.length) {
       S.wCurrent += k; S.wError=''; render();
     }
+    return;
+  }
 
-  } else if (S.screen === 'JEO') {
-    if (S.jAnswered) { if (k==='H'||k==='ENTER') goMenu(); return; }
-    if (k==='X' && S.jHints < 1) { useJeoHint(); }
-    const labels = ['A','B','C','D'];
-    const idx = labels.indexOf(k);
+  if (S.screen === 'JEO') {
+    if (S.jAnswered) { if (k==='ENTER') goMenu(); return; }
+    if (k==='X' && S.jHints < 1) { useJeoHint(); return; }
+    const idx = ['A','B','C','D'].indexOf(k);
     if (idx >= 0 && idx < S.jChoices.length) answerJeo(idx);
+    return;
+  }
 
-  } else if (S.screen === 'DONE') {
-    if (k==='H'||k==='ENTER') goMenu();
+  if (S.screen === 'DONE') {
+    if (k==='ENTER') goMenu();
   }
 }
 
@@ -695,53 +867,69 @@ document.addEventListener('keydown', e => {
 });
 
 // ─────────────────────────────────────────────────────────────
-//  Game logic
+//  Session flow
 // ─────────────────────────────────────────────────────────────
-function goMenu() {
-  const p = loadPersist();
-  S.modesCompleted = p.modesCompleted;
-  S.score          = p.todayScore;
-  S.streak         = p.streak || 0;
-  S.screen = allDone() ? 'DONE' : 'MENU';
+function startSession(count) {
+  const facts        = pickDeckFacts(count);
+  const centuryLabel = count === 23 ? 'All 23 Centuries' : (facts[0]?.century_label || '');
+  G.session = { facts, score: {}, deckSize: count, centuryLabel, studyDone: false };
+  saveStorage();
+  S.studyIdx = 0;
+  S.screen   = 'STUDY';
   render();
 }
 
-function allDone() {
-  return ['chrono','wordle','jeo'].every(m => S.modesCompleted[m] !== undefined);
+function doneStudying() {
+  markFactsSeen(G.session.facts);
+  G.session.studyDone = true;
+  saveStorage();
+  games = buildSessionGames(G.session.facts);
+  goMenu();
 }
 
-// ── CHRONO ────────────────────────────────────────
+function goMenu() {
+  S.screen = allModesDone() ? 'DONE' : 'MENU';
+  render();
+}
+
+function newSession() {
+  G.session = null;
+  games     = null;
+  saveStorage();
+  S.screen = 'DECK';
+  render();
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Game logic
+// ─────────────────────────────────────────────────────────────
 function startChrono() {
+  if (!games) return;
   S.chronoOrder = games.chronoDisplay.map((_,i)=>i);
   S.chronoInput = '';
   S.chronoDone  = false;
+  S.chronoError = '';
   S.screen      = 'CHRONO';
   render();
 }
 
 function submitChrono() {
-  const parts = S.chronoInput.trim().split(/\s+/).map(Number).filter(n => n>=1 && n<=4);
+  const parts = S.chronoInput.trim().split(/\s+/).map(Number).filter(n=>n>=1&&n<=4);
   const unique = [...new Set(parts)];
   if (unique.length !== 4) {
-    // Show error inline — just re-render with a flag
-    S.chronoError = 'ENTER ALL 4 NUMBERS e.g. 2 4 1 3';
-    render();
-    return;
+    S.chronoError = `NEED ALL 4 NUMBERS e.g. 2 4 1 3`;
+    render(); return;
   }
-  // Remap 1-based input to 0-based indices
-  S.chronoOrder = unique.map(n => n-1);
+  S.chronoOrder = unique.map(n=>n-1);
   S.chronoDone  = true;
-
-  const correct = S.chronoOrder.reduce((acc, fi, rank) => {
-    return acc + (games.chronoDisplay[fi].year === games.chronoCorrect[rank].year ? 1 : 0);
-  }, 0);
-  markDone('chrono', correct*25);
+  const correct = S.chronoOrder.reduce((acc, fi, rank) =>
+    acc + (games.chronoDisplay[fi].year === games.chronoCorrect[rank].year ? 1 : 0), 0);
+  completeMode('chrono', correct*25);
   render();
 }
 
-// ── WORDLE ────────────────────────────────────────
 function startWordle() {
-  if (!games.wordleFact) return;
+  if (!games?.wordleFact) return;
   S.wTarget  = games.wordleFact.word;
   S.wGuesses = []; S.wColors = []; S.wCurrent = ''; S.wDone = false; S.wError = '';
   S.screen   = 'WORDLE';
@@ -750,20 +938,18 @@ function startWordle() {
 
 function submitWordle() {
   if (S.wCurrent.length !== S.wTarget.length) {
-    S.wError = `NEED ${S.wTarget.length} LETTERS`;
-    render(); return;
+    S.wError = `NEED ${S.wTarget.length} LETTERS`; render(); return;
   }
   const colors = scoreGuess(S.wCurrent, S.wTarget);
   S.wGuesses.push(S.wCurrent.split(''));
   S.wColors.push(colors);
   S.wCurrent = '';
-
   const won  = colors.every(c=>c==='correct');
   const over = S.wGuesses.length >= 6;
   if (won || over) {
     S.wDone = true;
     const pts = won ? Math.max(100, 300-(S.wGuesses.length-1)*40) : 0;
-    markDone('wordle', pts);
+    completeMode('wordle', pts);
   }
   render();
 }
@@ -783,17 +969,16 @@ function scoreGuess(guess, target) {
   return result;
 }
 
-// ── JEOPARDY ──────────────────────────────────────
 function startJeo() {
-  if (!games.jeoFact) return;
+  if (!games?.jeoFact) return;
   S.jChoices  = [games.jeoFact.word, ...games.wrongAnswers];
   S.jHints    = 0;
   S.jAnswered = false;
   S.jSelected = -1;
   S.jHintMsg  = '';
-  // Shuffle with simple Math.random (non-critical for fairness)
   for (let i = S.jChoices.length-1; i > 0; i--) {
-    const j = Math.floor(Math.random()*(i+1)); [S.jChoices[i],S.jChoices[j]]=[S.jChoices[j],S.jChoices[i]];
+    const j = Math.floor(Math.random()*(i+1));
+    [S.jChoices[i],S.jChoices[j]] = [S.jChoices[j],S.jChoices[i]];
   }
   S.screen = 'JEO';
   render();
@@ -805,7 +990,7 @@ function answerJeo(idx) {
   S.jSelected = idx;
   const correct = S.jChoices[idx] === games.jeoFact.word;
   const pts     = correct ? Math.max(100, 300-S.jHints*100) : 0;
-  markDone('jeo', pts);
+  completeMode('jeopardy', pts);
   render();
 }
 
@@ -813,9 +998,9 @@ function useJeoHint() {
   if (S.jHints >= 1 || S.jAnswered) return;
   S.jHints++;
   const correctWord = games.jeoFact.word;
-  const wrongIdx    = S.jChoices.findIndex(c => c !== correctWord);
+  const wrongIdx    = S.jChoices.findIndex(c=>c!==correctWord);
   if (wrongIdx >= 0) S.jChoices.splice(wrongIdx,1);
-  S.jHintMsg = 'ONE WRONG ANSWER REMOVED. SCORE CAPPED AT 200.';
+  S.jHintMsg = 'ONE WRONG REMOVED. CAP: 200 PTS.';
   render();
 }
 
@@ -824,22 +1009,34 @@ function useJeoHint() {
 // ─────────────────────────────────────────────────────────────
 async function boot() {
   applyTheme();
-  render(); // show BOOT screen
+  S.screen = 'BOOT';
+  render();
 
   try {
-    const res = await fetch(CONTENT_URL);
+    const res  = await fetch(CONTENT_URL);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    centuries  = data.centuries;
-    games      = buildGames();
 
-    const p = loadPersist();
-    S.modesCompleted = p.modesCompleted;
-    S.score          = p.todayScore;
-    S.streak         = p.streak || 0;
+    // Normalize content structure
+    if (Array.isArray(data)) {
+      centuries = data;
+    } else if (data.centuries) {
+      centuries = data.centuries;
+    } else {
+      centuries = Object.entries(data).map(([id,obj])=>({id,...obj}));
+    }
+    centuries = centuries.filter(c => c.facts && c.facts.length > 0);
 
-    S.screen = allDone() ? 'DONE' : 'MENU';
-    render();
+    G = loadStorage();
+
+    // Resume active session or go to deck select
+    if (G.session && G.session.studyDone && G.session.facts?.length) {
+      games = buildSessionGames(G.session.facts);
+      goMenu();
+    } else {
+      S.screen = 'DECK';
+      render();
+    }
   } catch(err) {
     document.getElementById('term').textContent =
       box([
