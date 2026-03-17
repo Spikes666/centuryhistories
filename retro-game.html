@@ -309,9 +309,11 @@ function yearLabel(y) { return y < 0 ? Math.abs(y)+' BCE' : y+' CE'; }
 
 function stripAllDates(text) {
   return text
-    .replace(/\b(Around|Circa)\s+\d[\d,]*\s*(BCE|CE|BC|AD)?,?\s*/gi, '')
+    .replace(/\(\s*[~c.]?\s*\d[\d,]*\s*[-–]?\s*\d*\s*(?:BCE|CE|BC|AD)?\s*\)/gi, '')
+    .replace(/\b(Around|Circa|~)\s*\d[\d,]*\s*(BCE|CE|BC|AD)?,?\s*/gi, '')
     .replace(/\b\d[\d,]*\s*(?:BCE|CE|BC|AD)\b[,.]?\s*/gi, '')
     .replace(/\b(1st|2nd|3rd|4th|5th|6th|7th|8th|9th|10th|11th|12th|13th|14th|15th|16th|17th|18th|19th|20th|21st)\s+century\b\s*/gi, 'this era ')
+    .replace(/\(\s*\d{3,4}\s*\)/g, '')
     .replace(/\s{2,}/g, ' ')
     .replace(/^\s*[,;.]\s*/, '')
     .replace(/\s+([,;.])/g, '$1')

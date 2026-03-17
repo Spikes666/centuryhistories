@@ -996,9 +996,16 @@ function extractYear(factText, centuryIdx) {
 
 function stripAllDates(text) {
   return text
-    .replace(/\b(Around|Circa)\s+\d[\d,]*\s*(BCE|CE|BC|AD)?,?\s*/gi, '')
+    // Parenthetical date ranges: (~1122–1204 CE), (1147–), (c. 312 BCE)
+    .replace(/\(\s*[~c.]?\s*\d[\d,]*\s*[-–]?\s*\d*\s*(?:BCE|CE|BC|AD)?\s*\)/gi, '')
+    // "Around/Circa YYYY BCE/CE,"
+    .replace(/\b(Around|Circa|~)\s*\d[\d,]*\s*(BCE|CE|BC|AD)?,?\s*/gi, '')
+    // Standalone "YYYY BCE" or "YYYY CE"
     .replace(/\b\d[\d,]*\s*(?:BCE|CE|BC|AD)\b[,.]?\s*/gi, '')
+    // Ordinal century references
     .replace(/\b(1st|2nd|3rd|4th|5th|6th|7th|8th|9th|10th|11th|12th|13th|14th|15th|16th|17th|18th|19th|20th|21st)\s+century\b\s*/gi, 'this era ')
+    // Bare 4-digit years in parens: (1453), (1066)
+    .replace(/\(\s*\d{3,4}\s*\)/g, '')
     .replace(/\s{2,}/g, ' ')
     .replace(/^\s*[,;.]\s*/, '')
     .replace(/\s+([,;.])/g, '$1')
