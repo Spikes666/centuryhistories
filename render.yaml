@@ -1,0 +1,16 @@
+services:
+  - type: cron
+    name: history-flashcards
+    runtime: python
+    schedule: "0 13 * * *"   # 8:00 AM CST = 13:00 UTC
+    buildCommand: pip install -r requirements.txt
+    startCommand: python daily_flashcards.py
+    envVars:
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_FROM_NUMBER
+        sync: false
+      - key: TO_NUMBER
+        sync: false

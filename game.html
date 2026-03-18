@@ -1,0 +1,1811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>Century Histories · Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Lora:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #1c1510;
+      --bg2:     #241c14;
+      --bg3:     #2e2418;
+      --border:  #3d3020;
+      --border2: #4a3a28;
+      --text:    #e8dcc8;
+      --text2:   #b8a888;
+      --text3:   #786050;
+      --accent:  #c9184a;
+      --gold:    #c8922a;
+      --correct: #538d4e;
+      --present: #b59f3b;
+      --absent:  #3a3a3c;
+      --word-len: 6;
+      --tile: clamp(30px, calc((100vw - 80px) / var(--word-len)), 54px);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Lora', Georgia, serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Screen system ── */
+    .screen { display: none; min-height: 100vh; flex-direction: column; }
+    .screen.active { display: flex; }
+
+    /* ── Header ── */
+    .hdr {
+      background: linear-gradient(160deg, #221810 0%, #2e2010 60%, #1c1408 100%);
+      border-bottom: 2px solid var(--gold);
+      padding: 18px 20px 14px;
+      text-align: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .hdr-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.1rem, 4vw, 1.5rem);
+      color: var(--gold);
+      letter-spacing: 0.08em;
+    }
+    .hdr-sub {
+      font-size: 0.75rem;
+      color: var(--text3);
+      margin-top: 4px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .hdr-back {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .hdr-back:hover { border-color: var(--gold); color: var(--gold); }
+    .hdr-home {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+    }
+    .hdr-home:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ── Deck Select ── */
+    .deck-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 20px;
+      gap: 24px;
+    }
+    .deck-intro {
+      text-align: center;
+      color: var(--text2);
+      font-size: 1rem;
+      line-height: 1.6;
+      max-width: 400px;
+    }
+    .deck-meta {
+      display: flex;
+      gap: 28px;
+      color: var(--text3);
+      font-size: 0.8rem;
+      text-align: center;
+    }
+    .deck-meta span strong { display: block; color: var(--gold); font-size: 1.4rem; }
+    .deck-opts {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+      max-width: 400px;
+    }
+    .deck-btn {
+      background: var(--bg2);
+      border: 2px solid var(--border2);
+      border-radius: 12px;
+      padding: 20px 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: border-color 0.2s, background 0.2s;
+      text-align: left;
+    }
+    .deck-btn:hover { border-color: var(--gold); background: var(--bg3); }
+    .deck-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem;
+      color: var(--gold);
+      min-width: 52px;
+      text-align: center;
+    }
+    .deck-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .deck-desc { font-size: 0.8rem; color: var(--text3); line-height: 1.4; }
+
+    /* ── Study Screen ── */
+    .study-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .study-progress {
+      font-size: 0.85rem;
+      color: var(--text3);
+      text-align: center;
+      flex: 1;
+    }
+    .study-progress strong { color: var(--gold); }
+    .study-hdr-btn {
+      background: none;
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+    .study-hdr-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .study-card-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 16px;
+    }
+    .study-card {
+      background: var(--bg2);
+      border: 2px solid var(--border2);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 480px;
+      overflow: hidden;
+    }
+    .study-card-body { padding: 20px; }
+    .study-card-era {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text3);
+      margin-bottom: 4px;
+    }
+    .study-card-century {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--gold);
+      margin-bottom: 14px;
+    }
+    .study-card-fact {
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--text);
+    }
+    .study-card-map {
+      width: 100%;
+      height: 200px;
+      border: none;
+      border-top: 1px solid var(--border);
+      display: block;
+    }
+    .study-card-loc {
+      padding: 10px 20px;
+      font-size: 0.8rem;
+      color: var(--text2);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .study-card-loc::before { content: "📍"; }
+    .study-nav {
+      display: flex;
+      gap: 12px;
+      padding: 16px;
+      flex-shrink: 0;
+    }
+    .study-nav-btn {
+      flex: 1;
+      background: var(--bg2);
+      border: 2px solid var(--border2);
+      color: var(--text);
+      padding: 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-family: 'Lora', serif;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .study-nav-btn:hover { border-color: var(--gold); }
+    .study-nav-btn.primary {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #1c1510;
+      font-weight: bold;
+    }
+    .study-nav-btn.primary:hover { background: #d9a240; }
+    .study-nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+    /* ── Study Done ── */
+    .study-done-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      gap: 20px;
+      text-align: center;
+    }
+    .study-done-icon { font-size: 3.5rem; }
+    .study-done-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      color: var(--gold);
+    }
+    .study-done-sub { font-size: 1rem; color: var(--text2); line-height: 1.6; max-width: 360px; }
+    .study-done-btn {
+      background: var(--gold);
+      border: none;
+      color: #1c1510;
+      padding: 16px 40px;
+      border-radius: 12px;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .study-done-btn:hover { background: #d9a240; }
+
+    /* ── Game Hub ── */
+    .hub-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+      gap: 16px;
+    }
+    .hub-session-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text3);
+    }
+    .hub-session-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+    .hub-score {
+      display: flex;
+      gap: 20px;
+      font-size: 0.85rem;
+      color: var(--text2);
+    }
+    .hub-score span strong { color: var(--gold); }
+    .hub-modes {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 460px;
+    }
+    .mode-card {
+      background: var(--bg2);
+      border: 2px solid var(--border2);
+      border-radius: 14px;
+      padding: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .mode-card:hover { border-color: var(--gold); background: var(--bg3); }
+    .mode-card.done { border-color: var(--correct); opacity: 0.7; cursor: default; }
+    .mode-card.done:hover { background: var(--bg2); border-color: var(--correct); }
+    .mode-icon { font-size: 2rem; }
+    .mode-info { flex: 1; }
+    .mode-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .mode-desc { font-size: 0.78rem; color: var(--text3); }
+    .mode-pts {
+      font-size: 0.85rem;
+      color: var(--text2);
+      text-align: right;
+    }
+    .mode-pts.earned { color: var(--correct); font-weight: bold; }
+    .hub-new-session {
+      background: none;
+      border: 1px solid var(--border2);
+      color: var(--text3);
+      padding: 10px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      margin-top: 8px;
+    }
+    .hub-new-session:hover { border-color: var(--text2); color: var(--text2); }
+
+    /* ── Score bar (top of game screens) ── */
+    .score-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--text2);
+      flex-shrink: 0;
+    }
+    .score-bar strong { color: var(--gold); }
+
+    /* ── CHRONO ORDER ── */
+    .chrono-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 20px 16px;
+      overflow-y: auto;
+    }
+    .chrono-instruction {
+      font-size: 0.85rem;
+      color: var(--text2);
+      text-align: center;
+    }
+    .chrono-list { display: flex; flex-direction: column; gap: 10px; }
+    .chrono-card {
+      background: var(--bg2);
+      border: 2px solid var(--border2);
+      border-radius: 10px;
+      padding: 14px 16px;
+      cursor: grab;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      transition: border-color 0.2s, transform 0.15s;
+      user-select: none;
+    }
+    .chrono-card:active { cursor: grabbing; }
+    .chrono-card.dragging { opacity: 0.5; transform: scale(0.97); }
+    .chrono-card.drag-over { border-color: var(--gold); }
+    .chrono-card.correct-pos { border-color: var(--correct); }
+    .chrono-card.wrong-pos { border-color: var(--accent); }
+    .chrono-handle { color: var(--text3); font-size: 1.2rem; padding-top: 2px; }
+    .chrono-text { font-size: 0.9rem; line-height: 1.6; flex: 1; }
+    .chrono-arrows {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .chrono-arrow {
+      background: none;
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      width: 34px;
+      height: 30px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      touch-action: manipulation;
+    }
+    .chrono-arrow:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
+    .chrono-arrow:disabled { opacity: 0.2; cursor: default; }
+    .chrono-reveal { font-size: 0.75rem; color: var(--text3); margin-top: 6px; font-style: italic; }
+    .chrono-submit-wrap { padding: 0 16px 20px; }
+    .chrono-submit {
+      width: 100%;
+      background: var(--gold);
+      border: none;
+      color: #1c1510;
+      padding: 16px;
+      border-radius: 10px;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      cursor: pointer;
+    }
+    .chrono-submit:hover { background: #d9a240; }
+    .chrono-submit:disabled { opacity: 0.4; cursor: default; }
+
+    /* ── WORDLE ── */
+    .wordle-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      gap: 14px;
+      overflow-y: auto;
+    }
+    .wordle-clue {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      text-align: center;
+      width: 100%;
+      max-width: 480px;
+    }
+    .wordle-clue em { color: var(--gold); font-style: normal; }
+    .wordle-grid {
+      display: grid;
+      grid-template-columns: repeat(var(--word-len), var(--tile));
+      gap: 5px;
+    }
+    .tile {
+      width: var(--tile);
+      height: var(--tile);
+      border: 2px solid var(--border2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1rem, 3.5vw, 1.4rem);
+      font-weight: bold;
+      text-transform: uppercase;
+      border-radius: 4px;
+      transition: background 0.3s, border-color 0.3s, color 0.3s;
+    }
+    .tile.filled { border-color: var(--text3); }
+    .tile.correct { background: var(--correct); border-color: var(--correct); color: white; }
+    .tile.present { background: var(--present); border-color: var(--present); color: white; }
+    .tile.absent  { background: var(--absent);  border-color: var(--absent);  color: var(--text2); }
+    .wordle-keyboard {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+      max-width: 480px;
+    }
+    .kb-row { display: flex; justify-content: center; gap: 5px; }
+    .kb-key {
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      border-radius: 5px;
+      padding: 12px 8px;
+      min-width: 32px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-family: 'Lora', serif;
+      transition: background 0.2s;
+      touch-action: manipulation;
+    }
+    .kb-key.wide { min-width: 52px; font-size: 0.65rem; }
+    .kb-key.correct { background: var(--correct); border-color: var(--correct); color: white; }
+    .kb-key.present { background: var(--present); border-color: var(--present); color: white; }
+    .kb-key.absent  { background: var(--absent);  border-color: var(--absent);  color: var(--text3); }
+    .kb-key:hover { border-color: var(--gold); }
+    .wordle-msg {
+      font-size: 0.9rem;
+      color: var(--text2);
+      text-align: center;
+      min-height: 1.4em;
+    }
+
+    /* ── JEOPARDY ── */
+    .jeo-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px;
+      gap: 16px;
+      max-width: 520px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .jeo-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--text3);
+    }
+    .jeo-clue {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      padding: 18px 20px;
+      font-size: 0.95rem;
+      line-height: 1.7;
+      text-align: center;
+      width: 100%;
+    }
+    .jeo-clue em { color: var(--gold); font-style: normal; }
+    .jeo-choices { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+    .choice-btn {
+      background: var(--bg2);
+      border: 2px solid var(--border2);
+      color: var(--text);
+      padding: 14px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-family: 'Lora', serif;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: border-color 0.2s;
+    }
+    .choice-btn:hover:not(:disabled) { border-color: var(--gold); }
+    .choice-btn:disabled { cursor: default; }
+    .choice-btn .choice-letter {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--border2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+    .choice-btn.correct-ans { border-color: var(--correct); background: rgba(83,141,78,0.15); }
+    .choice-btn.wrong-ans   { border-color: var(--accent);  background: rgba(201,24,74,0.1); }
+    .jeo-hint-btn {
+      background: none;
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      padding: 8px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    .jeo-hint-btn:hover { border-color: var(--gold); }
+    .jeo-msg { font-size: 0.9rem; color: var(--text2); text-align: center; min-height: 1.4em; }
+
+    /* ── Mode Result ── */
+    .mode-result {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding: 24px 20px;
+      border-top: 1px solid var(--border);
+    }
+    .mode-result.show { display: flex; }
+    .mode-result-icon { font-size: 2.5rem; }
+    .mode-result-score {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      color: var(--gold);
+    }
+    .mode-result-msg { font-size: 0.9rem; color: var(--text2); text-align: center; }
+    .mode-result-btn {
+      background: var(--gold);
+      border: none;
+      color: #1c1510;
+      padding: 14px 36px;
+      border-radius: 10px;
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .mode-result-btn:hover { background: #d9a240; }
+
+    /* ── Final Done Screen ── */
+    .done-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      gap: 18px;
+      text-align: center;
+    }
+    .done-icon { font-size: 3.5rem; }
+    .done-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      color: var(--gold);
+    }
+    .done-scores {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+      max-width: 320px;
+    }
+    .done-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: var(--bg2);
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+    .done-row .pts { color: var(--gold); font-weight: bold; }
+    .done-total {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--bg3);
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+    }
+    .done-total .pts { color: var(--gold); }
+    .done-streak { font-size: 0.9rem; color: var(--text2); }
+    .done-streak strong { color: var(--gold); }
+    .done-btn {
+      background: var(--gold);
+      border: none;
+      color: #1c1510;
+      padding: 14px 36px;
+      border-radius: 10px;
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .done-btn:hover { background: #d9a240; }
+    .done-btn.secondary {
+      background: none;
+      border: 1px solid var(--border2);
+      color: var(--text2);
+    }
+    .done-btn.secondary:hover { border-color: var(--gold); color: var(--gold); }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     SCREEN: Deck Select
+════════════════════════════════════════════════ -->
+<div id="screen-deck" class="screen active">
+  <div class="hdr">
+    <div class="hdr-title">Century Histories</div>
+    <div class="hdr-sub">Choose Your Session</div>
+    <a class="hdr-home" href="index.html">🏛 Home</a>
+  </div>
+  <div class="deck-body">
+    <div class="deck-intro">
+      Study a set of historical facts, then test yourself with three game modes.
+    </div>
+    <div class="deck-meta">
+      <span><strong id="deck-seen-count">0</strong>facts studied</span>
+      <span><strong id="deck-streak">0</strong>day streak</span>
+    </div>
+    <div class="deck-opts">
+      <button class="deck-btn" onclick="startSession(5)">
+        <div class="deck-num">5</div>
+        <div>
+          <div class="deck-name">Quick Session</div>
+          <div class="deck-desc">5 facts from one century · ~5 minutes</div>
+        </div>
+      </button>
+      <button class="deck-btn" onclick="startSession(10)">
+        <div class="deck-num">10</div>
+        <div>
+          <div class="deck-name">Standard Session</div>
+          <div class="deck-desc">10 facts from one century · ~10 minutes</div>
+        </div>
+      </button>
+      <button class="deck-btn" onclick="startSession(23)">
+        <div class="deck-num">23</div>
+        <div>
+          <div class="deck-name">Grand Tour</div>
+          <div class="deck-desc">One fact from each of the 23 centuries · ~20 minutes</div>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     SCREEN: Study
+════════════════════════════════════════════════ -->
+<div id="screen-study" class="screen">
+  <div class="hdr">
+    <div class="hdr-title">Study</div>
+    <div class="study-hdr">
+      <button class="study-hdr-btn" onclick="studyNav(-1)" id="study-prev-btn">← Prev</button>
+      <div class="study-progress">
+        Fact <strong id="study-idx">1</strong> of <strong id="study-total">5</strong>
+      </div>
+      <button class="study-hdr-btn" onclick="skipToGame()">Skip to Game →</button>
+    </div>
+  </div>
+  <div class="study-card-wrap">
+    <div class="study-card" id="study-card">
+      <div class="study-card-body">
+        <div class="study-card-era" id="sc-era"></div>
+        <div class="study-card-century" id="sc-century"></div>
+        <div class="study-card-fact" id="sc-fact"></div>
+      </div>
+      <iframe class="study-card-map" id="sc-map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <div class="study-card-loc" id="sc-loc"></div>
+    </div>
+  </div>
+  <div class="study-nav">
+    <button class="study-nav-btn" onclick="studyNav(-1)" id="study-prev-nav">← Back</button>
+    <button class="study-nav-btn primary" onclick="studyNav(1)" id="study-next-nav">Next →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     SCREEN: Study Done
+════════════════════════════════════════════════ -->
+<div id="screen-study-done" class="screen">
+  <div class="hdr">
+    <div class="hdr-title">Ready to Play?</div>
+  </div>
+  <div class="study-done-body">
+    <div class="study-done-icon">🎓</div>
+    <div class="study-done-title">Session Complete!</div>
+    <div class="study-done-sub" id="study-done-sub">
+      You've studied 5 facts.<br>Now test your memory with three game modes.
+    </div>
+    <button class="study-done-btn" onclick="startGames()">Start Games →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     SCREEN: Hub
+════════════════════════════════════════════════ -->
+<div id="screen-hub" class="screen">
+  <div class="hdr">
+    <div class="hdr-title">Game Hub</div>
+    <div class="hdr-sub" id="hub-sub">Choose a mode</div>
+    <a class="hdr-home" href="index.html">🏛 Home</a>
+  </div>
+  <div class="hub-body">
+    <div>
+      <div class="hub-session-label">Current Session</div>
+      <div class="hub-session-name" id="hub-session-name">—</div>
+    </div>
+    <div class="hub-score">
+      <span>Score: <strong id="hub-score">0</strong></span>
+      <span>Streak: <strong id="hub-streak">0</strong> 🔥</span>
+    </div>
+    <div class="hub-modes">
+      <div class="mode-card" id="mode-chrono-card" onclick="startChrono()">
+        <div class="mode-icon">📅</div>
+        <div class="mode-info">
+          <div class="mode-name">Chrono Order</div>
+          <div class="mode-desc">Arrange 4 events from oldest to newest</div>
+        </div>
+        <div class="mode-pts" id="mode-chrono-pts">up to 100</div>
+      </div>
+      <div class="mode-card" id="mode-wordle-card" onclick="startWordle()">
+        <div class="mode-icon">🔤</div>
+        <div class="mode-info">
+          <div class="mode-name">Missing Word</div>
+          <div class="mode-desc">Guess the hidden keyword from the fact</div>
+        </div>
+        <div class="mode-pts" id="mode-wordle-pts">up to 300</div>
+      </div>
+      <div class="mode-card" id="mode-jeo-card" onclick="startJeo()">
+        <div class="mode-icon">❓</div>
+        <div class="mode-info">
+          <div class="mode-name">What Is It?</div>
+          <div class="mode-desc">Identify the missing person, place, or event</div>
+        </div>
+        <div class="mode-pts" id="mode-jeo-pts">up to 300</div>
+      </div>
+    </div>
+    <button class="hub-new-session" onclick="newSession()">↩ New Session</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     SCREEN: Chrono Order
+════════════════════════════════════════════════ -->
+<div id="screen-chrono" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="goHub()">← Hub</button>
+    <div class="hdr-title">Chrono Order</div>
+  </div>
+  <div class="score-bar">
+    <span>Session Score: <strong id="chrono-session-score">0</strong></span>
+    <span>Drag oldest → newest</span>
+  </div>
+  <div class="chrono-body">
+    <div class="chrono-instruction">Arrange these events from <strong>oldest</strong> (top) to <strong>most recent</strong> (bottom)</div>
+    <div class="chrono-list" id="chrono-list"></div>
+  </div>
+  <div class="chrono-submit-wrap">
+    <button class="chrono-submit" id="chrono-submit-btn" onclick="checkChrono()">Check Order</button>
+  </div>
+  <div class="mode-result" id="chrono-result">
+    <div class="mode-result-icon" id="chrono-res-icon">🏆</div>
+    <div class="mode-result-score" id="chrono-res-score"></div>
+    <div class="mode-result-msg" id="chrono-res-msg"></div>
+    <button class="mode-result-btn" onclick="goHub()">Back to Hub</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     SCREEN: Wordle
+════════════════════════════════════════════════ -->
+<div id="screen-wordle" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="goHub()">← Hub</button>
+    <div class="hdr-title">Missing Word</div>
+  </div>
+  <div class="score-bar">
+    <span>Session Score: <strong id="wordle-session-score">0</strong></span>
+    <span id="wordle-attempts-left">6 attempts</span>
+  </div>
+  <div class="wordle-body">
+    <div class="wordle-clue" id="wordle-clue"></div>
+    <div class="wordle-grid" id="wordle-grid"></div>
+    <div class="wordle-msg" id="wordle-msg"></div>
+    <div class="wordle-keyboard" id="wordle-keyboard"></div>
+  </div>
+  <div class="mode-result" id="wordle-result">
+    <div class="mode-result-icon" id="wordle-res-icon">🏆</div>
+    <div class="mode-result-score" id="wordle-res-score"></div>
+    <div class="mode-result-msg" id="wordle-res-msg"></div>
+    <button class="mode-result-btn" onclick="goHub()">Back to Hub</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     SCREEN: Jeopardy
+════════════════════════════════════════════════ -->
+<div id="screen-jeo" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="goHub()">← Hub</button>
+    <div class="hdr-title">What Is It?</div>
+  </div>
+  <div class="score-bar">
+    <span>Session Score: <strong id="jeo-session-score">0</strong></span>
+    <span id="jeo-value-left">Worth 300 pts</span>
+  </div>
+  <div style="flex:1;overflow-y:auto">
+    <div class="jeo-body">
+      <div class="jeo-label">The clue is…</div>
+      <div class="jeo-clue" id="jeo-clue"></div>
+      <div class="jeo-choices" id="jeo-choices"></div>
+      <button class="jeo-hint-btn" id="jeo-hint-btn" onclick="useHint()">Use Hint (−100 pts)</button>
+      <div class="jeo-msg" id="jeo-msg"></div>
+    </div>
+  </div>
+  <div class="mode-result" id="jeo-result">
+    <div class="mode-result-icon" id="jeo-res-icon">🏆</div>
+    <div class="mode-result-score" id="jeo-res-score"></div>
+    <div class="mode-result-msg" id="jeo-res-msg"></div>
+    <button class="mode-result-btn" onclick="goHub()">Back to Hub</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     SCREEN: All Done
+════════════════════════════════════════════════ -->
+<div id="screen-done" class="screen">
+  <div class="hdr">
+    <div class="hdr-title">Session Complete!</div>
+    <a class="hdr-home" href="index.html">🏛 Home</a>
+  </div>
+  <div class="done-body">
+    <div class="done-icon">🏆</div>
+    <div class="done-title">All Modes Done!</div>
+    <div class="done-scores" id="done-scores"></div>
+    <div class="done-streak" id="done-streak"></div>
+    <button class="done-btn" onclick="newSession()">Play Again</button>
+    <a class="done-btn secondary" href="index.html">Browse History</a>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  Constants
+// ═══════════════════════════════════════════════════════════
+const CONTENT_URL = 'https://raw.githubusercontent.com/Spikes666/centuryhistories/main/flashcards/content.json';
+const STORAGE_KEY = 'ch_game_v2';
+const MAX_WORDLE_ATTEMPTS = 6;
+
+// ═══════════════════════════════════════════════════════════
+//  App state
+// ═══════════════════════════════════════════════════════════
+let centuries = [];         // raw century objects from JSON
+let G = {};                 // persistent game state (from localStorage)
+
+// Active session game data (rebuilt from G.session.facts when needed)
+let sessionGames = null;
+
+// Wordle state
+let W = { word: '', guess: '', attempts: [], keyStates: {}, done: false };
+
+// Jeopardy state
+let J = { hintsUsed: 0, done: false, currentValue: 300 };
+
+// Chrono state
+let C = { order: [], done: false };
+
+// ═══════════════════════════════════════════════════════════
+//  localStorage helpers
+// ═══════════════════════════════════════════════════════════
+function loadStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return defaultStorage();
+    return { ...defaultStorage(), ...JSON.parse(raw) };
+  } catch(e) { return defaultStorage(); }
+}
+
+function defaultStorage() {
+  return {
+    seenFacts: {},
+    session: null,
+    streak: 0,
+    lastCompleted: null
+  };
+}
+
+function saveStorage() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(G));
+}
+
+function countSeenFacts() {
+  let total = 0;
+  for (const [id, n] of Object.entries(G.seenFacts || {})) {
+    const c = centuries.find(c => c.id === id);
+    if (c) total += Math.min(n, c.facts.length);
+  }
+  return total;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Utility
+// ═══════════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) { el.classList.add('active'); window.scrollTo(0,0); }
+}
+
+function extractYear(factText, centuryIdx) {
+  const m = factText.match(/(\d[\d,]*)\s*(BCE|BC|CE|AD)/i);
+  if (m) {
+    const n = parseInt(m[1].replace(/,/g,''));
+    return m[2].toUpperCase() === 'BCE' || m[2].toUpperCase() === 'BC' ? -n : n;
+  }
+  return (centuryIdx * 100) - 3000;
+}
+
+function stripAllDates(text) {
+  return text
+    // Parenthetical date ranges: (~1122–1204 CE), (1147–), (c. 312 BCE)
+    .replace(/\(\s*[~c.]?\s*\d[\d,]*\s*[-–]?\s*\d*\s*(?:BCE|CE|BC|AD)?\s*\)/gi, '')
+    // "Around/Circa YYYY BCE/CE,"
+    .replace(/\b(Around|Circa|~)\s*\d[\d,]*\s*(BCE|CE|BC|AD)?,?\s*/gi, '')
+    // Standalone "YYYY BCE" or "YYYY CE"
+    .replace(/\b\d[\d,]*\s*(?:BCE|CE|BC|AD)\b[,.]?\s*/gi, '')
+    // Ordinal century references
+    .replace(/\b(1st|2nd|3rd|4th|5th|6th|7th|8th|9th|10th|11th|12th|13th|14th|15th|16th|17th|18th|19th|20th|21st)\s+century\b\s*/gi, 'this era ')
+    // Bare 4-digit years in parens: (1453), (1066)
+    .replace(/\(\s*\d{3,4}\s*\)/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/^\s*[,;.]\s*/, '')
+    .replace(/\s+([,;.])/g, '$1')
+    .trim();
+}
+
+function extractKeyword(factText) {
+  const stopwords = new Set(['The','In','By','At','On','This','That','These','During',
+    'After','Before','When','From','With','Around','Circa','Later','Early','Late',
+    'First','Second','Third','Great','New','One','Two','Three','Four']);
+  const words = factText.match(/\b[A-Z][a-z]{3,11}\b/g) || [];
+  const filtered = words.filter(w => !stopwords.has(w));
+  if (!filtered.length) return null;
+  // prefer longer, unique words
+  const counts = {};
+  filtered.forEach(w => { counts[w] = (counts[w]||0)+1; });
+  const unique = filtered.filter(w => counts[w] === 1);
+  const pool = unique.length ? unique : filtered;
+  return pool.sort((a,b) => b.length - a.length)[0];
+}
+
+function blankedFact(factText, keyword) {
+  const blanks = '_'.repeat(keyword.length);
+  return factText.replace(new RegExp('\\b' + keyword + '\\b', 'i'), blanks);
+}
+
+function buildWrongAnswers(correctFact, sessionFacts, count = 3) {
+  const correctKw = extractKeyword(correctFact.fact);
+  const pool = [];
+  // first try session facts from other facts
+  for (const f of sessionFacts) {
+    if (f.fact === correctFact.fact) continue;
+    const kw = extractKeyword(f.fact);
+    if (kw && kw.toUpperCase() !== correctKw?.toUpperCase()) pool.push(kw);
+  }
+  // fallback: use keywords from all centuries
+  if (pool.length < count) {
+    for (const c of centuries) {
+      for (const f of c.facts) {
+        const kw = extractKeyword(f.fact);
+        if (kw && kw.toUpperCase() !== correctKw?.toUpperCase() && !pool.includes(kw)) {
+          pool.push(kw);
+          if (pool.length >= count * 4) break;
+        }
+      }
+      if (pool.length >= count * 4) break;
+    }
+  }
+  // shuffle & take count
+  for (let i = pool.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, count);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Fact selection
+// ═══════════════════════════════════════════════════════════
+function pickDeckFacts(count) {
+  const seen = G.seenFacts || {};
+
+  if (count === 23) {
+    return centuries.map((c, ci) => {
+      const idx = (seen[c.id] || 0) % c.facts.length;
+      const f   = c.facts[idx];
+      return { ...f, century_label: c.label, era: c.era, century_id: c.id,
+               century_idx: ci, year: extractYear(f.fact, ci) };
+    });
+  } else {
+    const unseenCenturies = centuries.filter(c => (seen[c.id]||0) < c.facts.length);
+    const pool = unseenCenturies.length > 0 ? unseenCenturies : centuries;
+    const c  = pool[Math.floor(Math.random() * pool.length)];
+    const ci = centuries.indexOf(c);
+    const start = (seen[c.id] || 0) % c.facts.length;
+    const facts = Array.from({ length: count }, (_, i) => {
+      const fi = (start + i) % c.facts.length;
+      const f  = c.facts[fi];
+      return { ...f, century_label: c.label, era: c.era, century_id: c.id,
+               century_idx: ci, year: extractYear(f.fact, ci) };
+    });
+    return facts;
+  }
+}
+
+function markFactsSeen(facts) {
+  const byCentury = {};
+  for (const f of facts) {
+    if (!byCentury[f.century_id]) byCentury[f.century_id] = 0;
+    byCentury[f.century_id]++;
+  }
+  for (const [id, n] of Object.entries(byCentury)) {
+    G.seenFacts[id] = (G.seenFacts[id] || 0) + n;
+  }
+  saveStorage();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Session game builder
+// ═══════════════════════════════════════════════════════════
+function buildSessionGames(facts) {
+  // CHRONO: pick 4, spread across the session, sort by year
+  let chronoPool;
+  if (facts.length <= 4) {
+    chronoPool = [...facts];
+  } else {
+    const step = Math.floor(facts.length / 4);
+    const idxs = new Set([0,1,2,3].map(i => Math.min(i*step, facts.length-1)));
+    chronoPool = [...idxs].map(i => facts[i]);
+  }
+  // dedupe by fact text
+  const seen = new Set();
+  chronoPool = chronoPool.filter(f => { if (seen.has(f.fact)) return false; seen.add(f.fact); return true; });
+  while (chronoPool.length < 4 && facts.length > chronoPool.length) {
+    const extra = facts.find(f => !seen.has(f.fact));
+    if (!extra) break;
+    chronoPool.push(extra);
+    seen.add(extra.fact);
+  }
+  const chronoCorrect = [...chronoPool].sort((a,b) => a.year - b.year);
+  // shuffle display order
+  const chronoDisplay = [...chronoPool];
+  for (let i = chronoDisplay.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [chronoDisplay[i], chronoDisplay[j]] = [chronoDisplay[j], chronoDisplay[i]];
+  }
+
+  // WORDLE: first fact with a valid keyword (4-12 chars)
+  let wordleFact = null;
+  for (const f of facts) {
+    const kw = extractKeyword(f.fact);
+    if (kw && kw.length >= 4 && kw.length <= 12) {
+      wordleFact = { ...f, keyword: kw.toUpperCase() };
+      break;
+    }
+  }
+
+  // JEOPARDY: another fact with a valid keyword, different from wordle
+  let jeoFact = null;
+  for (const f of facts) {
+    if (wordleFact && f.fact === wordleFact.fact) continue;
+    const kw = extractKeyword(f.fact);
+    if (kw && kw.length >= 3) {
+      const wrong = buildWrongAnswers(f, facts);
+      jeoFact = { ...f, keyword: kw, wrong };
+      break;
+    }
+  }
+
+  return { chronoDisplay, chronoCorrect, wordleFact, jeoFact };
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Study flow
+// ═══════════════════════════════════════════════════════════
+let studyIdx = 0;
+
+function startSession(count) {
+  const facts = pickDeckFacts(count);
+  const centuryLabel = count === 23 ? 'All 23 Centuries' : (facts[0]?.century_label || '');
+  G.session = {
+    facts,
+    score: {},
+    deckSize: count,
+    centuryLabel,
+    studyDone: false
+  };
+  saveStorage();
+  studyIdx = 0;
+  showScreen('screen-study');
+  renderStudyCard(0);
+}
+
+function renderStudyCard(idx) {
+  const facts = G.session.facts;
+  const f = facts[idx];
+  if (!f) return;
+
+  document.getElementById('study-idx').textContent   = idx + 1;
+  document.getElementById('study-total').textContent = facts.length;
+  document.getElementById('sc-era').textContent      = f.era || '';
+  document.getElementById('sc-century').textContent  = f.century_label || '';
+  document.getElementById('sc-fact').textContent     = f.fact || '';
+
+  // Map iframe
+  const mapEl  = document.getElementById('sc-map');
+  const locEl  = document.getElementById('sc-loc');
+  const mapIframe = f.map_iframe || '';
+  const mapLabel  = f.map_label  || '';
+  if (mapIframe) {
+    mapEl.src = mapIframe;
+    mapEl.style.display = 'block';
+    locEl.textContent   = mapLabel;
+    locEl.style.display = 'flex';
+  } else {
+    mapEl.src           = '';
+    mapEl.style.display = 'none';
+    locEl.style.display = 'none';
+  }
+
+  // Button states
+  const prevBtn = document.getElementById('study-prev-nav');
+  const nextBtn = document.getElementById('study-next-nav');
+  if (prevBtn) prevBtn.disabled = idx === 0;
+  if (nextBtn) {
+    if (idx === facts.length - 1) {
+      nextBtn.textContent = 'Start Game →';
+      nextBtn.onclick = showStudyDone;
+    } else {
+      nextBtn.textContent = 'Next →';
+      nextBtn.onclick = () => studyNav(1);
+    }
+  }
+}
+
+function studyNav(dir) {
+  const facts = G.session.facts;
+  studyIdx = Math.max(0, Math.min(facts.length - 1, studyIdx + dir));
+  renderStudyCard(studyIdx);
+}
+
+function skipToGame() {
+  showStudyDone();
+}
+
+function showStudyDone() {
+  const { facts, centuryLabel } = G.session;
+  const sub = document.getElementById('study-done-sub');
+  sub.innerHTML = `You've studied <strong>${facts.length}</strong> facts from <strong>${centuryLabel}</strong>.<br>Now test your memory with three game modes.`;
+  showScreen('screen-study-done');
+}
+
+function startGames() {
+  markFactsSeen(G.session.facts);
+  G.session.studyDone = true;
+  saveStorage();
+  sessionGames = buildSessionGames(G.session.facts);
+  goHub();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Hub
+// ═══════════════════════════════════════════════════════════
+function goHub() {
+  const sess = G.session;
+  if (!sess || !sess.studyDone) {
+    renderDeckScreen();
+    showScreen('screen-deck');
+    return;
+  }
+  if (!sessionGames) sessionGames = buildSessionGames(sess.facts);
+
+  const score = sess.score || {};
+  const total = Object.values(score).reduce((a,b) => a+b, 0);
+  document.getElementById('hub-session-name').textContent = sess.centuryLabel || '—';
+  document.getElementById('hub-score').textContent = total;
+  document.getElementById('hub-streak').textContent = G.streak || 0;
+  document.getElementById('hub-sub').textContent = 'Choose a mode';
+
+  // Update mode cards
+  function setMode(id, pts, key) {
+    const card = document.getElementById(`mode-${id}-card`);
+    const ptsEl = document.getElementById(`mode-${id}-pts`);
+    if (score[key] !== undefined) {
+      card.classList.add('done');
+      card.onclick = null;
+      ptsEl.textContent = `✓ +${score[key]} pts`;
+      ptsEl.className = 'mode-pts earned';
+    } else {
+      card.classList.remove('done');
+      ptsEl.textContent = `up to ${pts}`;
+      ptsEl.className = 'mode-pts';
+      if (id === 'chrono')  card.onclick = startChrono;
+      if (id === 'wordle')  card.onclick = startWordle;
+      if (id === 'jeo')     card.onclick = startJeo;
+    }
+  }
+  setMode('chrono', 100,  'chrono');
+  setMode('wordle', 300,  'wordle');
+  setMode('jeo',    300,  'jeopardy');
+
+  showScreen('screen-hub');
+}
+
+function renderDeckScreen() {
+  document.getElementById('deck-seen-count').textContent = countSeenFacts();
+  document.getElementById('deck-streak').textContent = G.streak || 0;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Score helpers
+// ═══════════════════════════════════════════════════════════
+function sessionTotal() {
+  return Object.values(G.session.score || {}).reduce((a,b) => a+b, 0);
+}
+
+function completeMode(key, pts) {
+  G.session.score[key] = pts;
+  saveStorage();
+  // check if all 3 done
+  const s = G.session.score;
+  if (s.chrono !== undefined && s.wordle !== undefined && s.jeopardy !== undefined) {
+    const today = new Date().toISOString().slice(0,10);
+    if (G.lastCompleted !== today) {
+      G.streak = (G.streak || 0) + 1;
+      G.lastCompleted = today;
+    }
+    saveStorage();
+    setTimeout(showDoneScreen, 1200);
+  }
+}
+
+function showDoneScreen() {
+  const score = G.session.score;
+  const chrono   = score.chrono   || 0;
+  const wordle   = score.wordle   || 0;
+  const jeopardy = score.jeopardy || 0;
+  const total    = chrono + wordle + jeopardy;
+
+  const scoresEl = document.getElementById('done-scores');
+  scoresEl.innerHTML = `
+    <div class="done-row"><span>📅 Chrono Order</span><span class="pts">+${chrono}</span></div>
+    <div class="done-row"><span>🔤 Missing Word</span><span class="pts">+${wordle}</span></div>
+    <div class="done-row"><span>❓ What Is It?</span><span class="pts">+${jeopardy}</span></div>
+    <div class="done-total"><span>Total</span><span class="pts">${total} pts</span></div>
+  `;
+  document.getElementById('done-streak').innerHTML = `Streak: <strong>${G.streak} day${G.streak===1?'':'s'}</strong> 🔥`;
+  showScreen('screen-done');
+}
+
+function newSession() {
+  G.session = null;
+  sessionGames = null;
+  saveStorage();
+  renderDeckScreen();
+  showScreen('screen-deck');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  CHRONO ORDER
+// ═══════════════════════════════════════════════════════════
+function startChrono() {
+  if (!sessionGames) return;
+  C = { order: [...sessionGames.chronoDisplay], done: false };
+  document.getElementById('chrono-session-score').textContent = sessionTotal();
+  document.getElementById('chrono-result').classList.remove('show');
+  document.getElementById('chrono-submit-btn').disabled = false;
+  renderChronoList();
+  showScreen('screen-chrono');
+}
+
+function moveCard(i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= C.order.length) return;
+  [C.order[i], C.order[j]] = [C.order[j], C.order[i]];
+  renderChronoList();
+}
+
+function renderChronoList() {
+  const list = document.getElementById('chrono-list');
+  list.innerHTML = '';
+  C.order.forEach((fact, i) => {
+    const card = document.createElement('div');
+    card.className = 'chrono-card';
+    card.draggable = true;
+    card.dataset.idx = i;
+    card.innerHTML = `
+      <div class="chrono-arrows">
+        <button class="chrono-arrow" onclick="moveCard(${i}, -1)" ${i === 0 ? 'disabled' : ''} aria-label="Move up">▲</button>
+        <button class="chrono-arrow" onclick="moveCard(${i}, 1)" ${i === C.order.length - 1 ? 'disabled' : ''} aria-label="Move down">▼</button>
+      </div>
+      <div class="chrono-text">${stripAllDates(fact.fact)}</div>
+    `;
+    // Drag events
+    card.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', i);
+      card.classList.add('dragging');
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+    card.addEventListener('dragover', e => { e.preventDefault(); card.classList.add('drag-over'); });
+    card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+    card.addEventListener('drop', e => {
+      e.preventDefault();
+      card.classList.remove('drag-over');
+      const fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
+      const toIdx   = i;
+      if (fromIdx !== toIdx) {
+        const tmp = C.order[fromIdx];
+        C.order[fromIdx] = C.order[toIdx];
+        C.order[toIdx]   = tmp;
+        renderChronoList();
+      }
+    });
+    // Touch events for mobile
+    let touchStartY = 0;
+    let dragCard = null;
+    card.addEventListener('touchstart', e => {
+      touchStartY = e.touches[0].clientY;
+      dragCard = i;
+    }, {passive:true});
+    card.addEventListener('touchmove', e => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const el = document.elementFromPoint(touch.clientX, touch.clientY);
+      const target = el?.closest('.chrono-card');
+      document.querySelectorAll('.chrono-card').forEach(c => c.classList.remove('drag-over'));
+      if (target) target.classList.add('drag-over');
+    }, {passive:false});
+    card.addEventListener('touchend', e => {
+      const touch = e.changedTouches[0];
+      const el = document.elementFromPoint(touch.clientX, touch.clientY);
+      const target = el?.closest('.chrono-card');
+      document.querySelectorAll('.chrono-card').forEach(c => c.classList.remove('drag-over'));
+      if (target && dragCard !== null) {
+        const toIdx = parseInt(target.dataset.idx);
+        if (dragCard !== toIdx) {
+          const tmp = C.order[dragCard];
+          C.order[dragCard] = C.order[toIdx];
+          C.order[toIdx]    = tmp;
+          renderChronoList();
+        }
+      }
+      dragCard = null;
+    });
+    list.appendChild(card);
+  });
+}
+
+function checkChrono() {
+  const correct = sessionGames.chronoCorrect;
+  let pts = 0;
+  C.order.forEach((f, i) => {
+    if (f.fact === correct[i].fact) pts += 25;
+  });
+
+  // Reveal correct positions
+  const cards = document.querySelectorAll('.chrono-card');
+  C.order.forEach((f, i) => {
+    const isRight = f.fact === correct[i].fact;
+    cards[i].classList.add(isRight ? 'correct-pos' : 'wrong-pos');
+    const revealEl = document.createElement('div');
+    revealEl.className = 'chrono-reveal';
+    revealEl.textContent = `${correct[i].year < 0 ? Math.abs(correct[i].year)+' BCE' : correct[i].year+' CE'} · ${correct[i].century_label}`;
+    cards[i].appendChild(revealEl);
+  });
+  document.getElementById('chrono-submit-btn').disabled = true;
+
+  const resIcon  = document.getElementById('chrono-res-icon');
+  const resScore = document.getElementById('chrono-res-score');
+  const resMsg   = document.getElementById('chrono-res-msg');
+  resIcon.textContent  = pts === 100 ? '🏆' : pts >= 50 ? '⭐' : '📜';
+  resScore.textContent = `+${pts} points`;
+  resMsg.textContent   = pts === 100 ? 'Perfect order! Outstanding!' :
+                         pts >= 50   ? 'Mostly correct — great job!' :
+                         'Keep studying — you\'ll get it!';
+  document.getElementById('chrono-result').classList.add('show');
+  completeMode('chrono', pts);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MISSING WORD (Wordle)
+// ═══════════════════════════════════════════════════════════
+function startWordle() {
+  if (!sessionGames?.wordleFact) { alert('No suitable fact for this mode in your session.'); return; }
+  const { keyword, fact } = sessionGames.wordleFact;
+  W = {
+    word: keyword.toUpperCase(),
+    guess: '',
+    attempts: [],
+    keyStates: {},
+    done: false
+  };
+  document.getElementById('wordle-session-score').textContent = sessionTotal();
+  document.getElementById('wordle-msg').textContent = '';
+  document.getElementById('wordle-result').classList.remove('show');
+  document.style?.setProperty('--word-len', W.word.length);
+  document.documentElement.style.setProperty('--word-len', W.word.length);
+
+  // Clue
+  const clueEl = document.getElementById('wordle-clue');
+  const blanks  = '_'.repeat(W.word.length);
+  clueEl.innerHTML = `<em>${blanks}</em><br><br>${blankedFact(fact, sessionGames.wordleFact.keyword)}`;
+
+  renderWordleGrid();
+  renderWordleKeyboard();
+  updateWordleAttemptsLeft();
+  showScreen('screen-wordle');
+}
+
+function renderWordleGrid() {
+  const grid = document.getElementById('wordle-grid');
+  grid.innerHTML = '';
+  const maxRows = MAX_WORDLE_ATTEMPTS;
+  const wordLen = W.word.length;
+
+  for (let r = 0; r < maxRows; r++) {
+    const attempt = W.attempts[r];
+    for (let c = 0; c < wordLen; c++) {
+      const tile = document.createElement('div');
+      tile.className = 'tile';
+      if (attempt) {
+        tile.textContent = attempt.letters[c].letter;
+        tile.classList.add(attempt.letters[c].state);
+        tile.classList.add('filled');
+      } else if (r === W.attempts.length) {
+        // current row
+        tile.textContent = W.guess[c] || '';
+        if (W.guess[c]) tile.classList.add('filled');
+      }
+      grid.appendChild(tile);
+    }
+  }
+}
+
+function scoreWordleGuess(guess, target) {
+  const result = [];
+  const used   = Array(target.length).fill(false);
+  // Pass 1: correct positions
+  for (let i = 0; i < guess.length; i++) {
+    if (guess[i] === target[i]) {
+      result[i] = { letter: guess[i], state: 'correct' };
+      used[i] = true;
+    } else {
+      result[i] = { letter: guess[i], state: 'absent' };
+    }
+  }
+  // Pass 2: present
+  for (let i = 0; i < guess.length; i++) {
+    if (result[i].state === 'correct') continue;
+    for (let j = 0; j < target.length; j++) {
+      if (!used[j] && guess[i] === target[j]) {
+        result[i].state = 'present';
+        used[j] = true;
+        break;
+      }
+    }
+  }
+  return result;
+}
+
+function wordleKey(letter) {
+  if (W.done) return;
+  if (letter === 'ENTER') {
+    submitWordleGuess();
+  } else if (letter === 'BACK') {
+    W.guess = W.guess.slice(0, -1);
+    renderWordleGrid();
+  } else if (W.guess.length < W.word.length && /^[A-Z]$/.test(letter)) {
+    W.guess += letter;
+    renderWordleGrid();
+  }
+}
+
+function submitWordleGuess() {
+  if (W.guess.length !== W.word.length) {
+    document.getElementById('wordle-msg').textContent = `Need ${W.word.length} letters`;
+    return;
+  }
+  const letters = scoreWordleGuess(W.guess, W.word);
+  W.attempts.push({ guess: W.guess, letters });
+
+  // Update key states
+  letters.forEach(({ letter, state }) => {
+    const cur = W.keyStates[letter];
+    if (cur === 'correct') return;
+    if (cur === 'present' && state !== 'correct') return;
+    W.keyStates[letter] = state;
+  });
+
+  const won = letters.every(l => l.state === 'correct');
+  W.guess = '';
+  renderWordleGrid();
+  renderWordleKeyboard();
+
+  if (won) {
+    W.done = true;
+    const pts = Math.max(100, 300 - (W.attempts.length - 1) * 40);
+    document.getElementById('wordle-msg').textContent = '🎉 Correct!';
+    showWordleResult(pts, true);
+  } else if (W.attempts.length >= MAX_WORDLE_ATTEMPTS) {
+    W.done = true;
+    document.getElementById('wordle-msg').textContent = `The word was: ${W.word}`;
+    showWordleResult(0, false);
+  } else {
+    document.getElementById('wordle-msg').textContent = '';
+    updateWordleAttemptsLeft();
+  }
+}
+
+function updateWordleAttemptsLeft() {
+  const left = MAX_WORDLE_ATTEMPTS - W.attempts.length;
+  document.getElementById('wordle-attempts-left').textContent = `${left} attempt${left===1?'':'s'} left`;
+}
+
+function showWordleResult(pts, won) {
+  const resIcon  = document.getElementById('wordle-res-icon');
+  const resScore = document.getElementById('wordle-res-score');
+  const resMsg   = document.getElementById('wordle-res-msg');
+  resIcon.textContent  = won ? '🏆' : '📖';
+  resScore.textContent = `+${pts} points`;
+  resMsg.textContent   = won
+    ? `Solved in ${W.attempts.length} attempt${W.attempts.length===1?'':'s'}!`
+    : `The answer was: ${W.word}`;
+  document.getElementById('wordle-result').classList.add('show');
+  completeMode('wordle', pts);
+}
+
+function renderWordleKeyboard() {
+  const rows = [['Q','W','E','R','T','Y','U','I','O','P'],
+                ['A','S','D','F','G','H','J','K','L'],
+                ['ENTER','Z','X','C','V','B','N','M','BACK']];
+  const kb = document.getElementById('wordle-keyboard');
+  kb.innerHTML = '';
+  rows.forEach(row => {
+    const rowEl = document.createElement('div');
+    rowEl.className = 'kb-row';
+    row.forEach(k => {
+      const btn = document.createElement('button');
+      btn.className = 'kb-key' + (k.length > 1 ? ' wide' : '');
+      btn.textContent = k === 'BACK' ? '⌫' : k;
+      const st = W.keyStates[k];
+      if (st) btn.classList.add(st);
+      btn.addEventListener('click', () => wordleKey(k));
+      rowEl.appendChild(btn);
+    });
+    kb.appendChild(rowEl);
+  });
+}
+
+// Physical keyboard
+document.addEventListener('keydown', e => {
+  const screen = document.querySelector('.screen.active');
+  if (!screen || screen.id !== 'screen-wordle') return;
+  if (e.key === 'Enter')     { wordleKey('ENTER'); }
+  else if (e.key === 'Backspace') { wordleKey('BACK'); }
+  else if (/^[a-zA-Z]$/.test(e.key)) { wordleKey(e.key.toUpperCase()); }
+});
+
+// ═══════════════════════════════════════════════════════════
+//  JEOPARDY (What Is It?)
+// ═══════════════════════════════════════════════════════════
+function startJeo() {
+  if (!sessionGames?.jeoFact) { alert('No suitable fact for this mode in your session.'); return; }
+  J = { hintsUsed: 0, done: false, currentValue: 300 };
+  document.getElementById('jeo-session-score').textContent = sessionTotal();
+  document.getElementById('jeo-value-left').textContent = 'Worth 300 pts';
+  document.getElementById('jeo-msg').textContent = '';
+  document.getElementById('jeo-result').classList.remove('show');
+  document.getElementById('jeo-hint-btn').style.display = '';
+  document.getElementById('jeo-hint-btn').disabled = false;
+
+  const { fact, keyword, wrong } = sessionGames.jeoFact;
+  // Build answer set: correct + wrong, shuffled
+  const answers = [keyword, ...wrong].sort(() => Math.random() - 0.5);
+  const correctIdx = answers.indexOf(keyword);
+
+  const clueEl = document.getElementById('jeo-clue');
+  clueEl.innerHTML = blankedFact(fact, keyword).replace(keyword, '<em>________</em>');
+
+  const choicesEl = document.getElementById('jeo-choices');
+  choicesEl.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  answers.forEach((ans, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `<span class="choice-letter">${letters[i]}</span>${ans}`;
+    btn.addEventListener('click', () => answerJeo(ans, keyword, btn, choicesEl));
+    choicesEl.appendChild(btn);
+  });
+
+  showScreen('screen-jeo');
+}
+
+function answerJeo(chosen, correct, clickedBtn, choicesEl) {
+  if (J.done) return;
+  J.done = true;
+  const won = chosen.toLowerCase() === correct.toLowerCase();
+
+  // Reveal all choices
+  choicesEl.querySelectorAll('.choice-btn').forEach(btn => {
+    btn.disabled = true;
+    const btnText = btn.textContent.replace(/^[ABCD]/, '').trim();
+    if (btnText.toLowerCase() === correct.toLowerCase()) {
+      btn.classList.add('correct-ans');
+    } else if (btn === clickedBtn && !won) {
+      btn.classList.add('wrong-ans');
+    }
+  });
+
+  document.getElementById('jeo-hint-btn').style.display = 'none';
+  const pts = won ? J.currentValue : 0;
+  document.getElementById('jeo-msg').textContent = won
+    ? `Correct! +${pts} pts`
+    : `The answer was: ${correct}`;
+
+  const resIcon  = document.getElementById('jeo-res-icon');
+  const resScore = document.getElementById('jeo-res-score');
+  const resMsg   = document.getElementById('jeo-res-msg');
+  resIcon.textContent  = won ? '🏆' : '📖';
+  resScore.textContent = `+${pts} points`;
+  resMsg.textContent   = won
+    ? (J.hintsUsed === 0 ? 'No hints needed — impressive!' : `Used ${J.hintsUsed} hint${J.hintsUsed===1?'':'s'}`)
+    : `The answer was: ${correct}`;
+  setTimeout(() => {
+    document.getElementById('jeo-result').classList.add('show');
+    completeMode('jeopardy', pts);
+  }, 700);
+}
+
+function useHint() {
+  if (J.hintsUsed >= 2 || J.done) return;
+  J.hintsUsed++;
+  J.currentValue = J.hintsUsed === 1 ? 200 : 100;
+
+  const { fact, keyword, wrong } = sessionGames.jeoFact;
+  // Eliminate a wrong answer button
+  const buttons = Array.from(document.getElementById('jeo-choices').querySelectorAll('.choice-btn'));
+  const wrongBtns = buttons.filter(btn => {
+    const t = btn.textContent.replace(/^[ABCD]/, '').trim();
+    return t.toLowerCase() !== keyword.toLowerCase() && !btn.disabled;
+  });
+  if (wrongBtns.length) {
+    const toElim = wrongBtns[Math.floor(Math.random() * wrongBtns.length)];
+    toElim.disabled = true;
+    toElim.style.opacity = '0.3';
+  }
+
+  document.getElementById('jeo-value-left').textContent = `Worth ${J.currentValue} pts`;
+  if (J.hintsUsed >= 2) {
+    document.getElementById('jeo-hint-btn').disabled = true;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+async function init() {
+  G = loadStorage();
+
+  try {
+    const resp = await fetch(CONTENT_URL);
+    const data = await resp.json();
+
+    // Normalize content.json structure
+    if (Array.isArray(data)) {
+      centuries = data;
+    } else if (data.centuries) {
+      centuries = data.centuries;
+    } else {
+      // Try to extract centuries from object keys
+      centuries = Object.entries(data).map(([id, obj]) => ({ id, ...obj }));
+    }
+
+    // Ensure each century has id, label, facts
+    centuries = centuries.filter(c => c.facts && c.facts.length > 0);
+
+  } catch(e) {
+    document.body.innerHTML = `<div style="padding:40px;text-align:center;color:#c8922a">
+      <h2>Could not load content</h2><p style="color:#786050;margin-top:12px">${e.message}</p>
+      <p style="margin-top:20px"><a href="index.html" style="color:#c8922a">← Back to Flashcards</a></p>
+    </div>`;
+    return;
+  }
+
+  // Check for an active session to resume
+  const sess = G.session;
+  if (sess && sess.studyDone && sess.facts?.length) {
+    sessionGames = buildSessionGames(sess.facts);
+    goHub();
+  } else {
+    renderDeckScreen();
+    showScreen('screen-deck');
+  }
+}
+
+init();
+</script>
+</body>
+</html>
