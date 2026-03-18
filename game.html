@@ -1217,10 +1217,10 @@ function renderStudyCard(idx) {
   // Map iframe
   const mapEl  = document.getElementById('sc-map');
   const locEl  = document.getElementById('sc-loc');
-  const mapLabel = f.map_label || '';
-  if (mapLabel) {
-    const q = encodeURIComponent(mapLabel);
-    mapEl.src = `https://www.openstreetmap.org/export/embed.html?bbox=-180,-85,180,85&layer=mapnik&marker=0,0&query=${q}`;
+  const mapIframe = f.map_iframe || '';
+  const mapLabel  = f.map_label  || '';
+  if (mapIframe) {
+    mapEl.src = mapIframe;
     mapEl.style.display = 'block';
     locEl.textContent   = mapLabel;
     locEl.style.display = 'flex';
