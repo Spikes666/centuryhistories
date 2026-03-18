@@ -88,6 +88,19 @@
       text-shadow: none;
     }
     #theme-toggle:hover { color: var(--fg); border-color: var(--fg); }
+
+    /* On-screen ENTER button — always visible, anchored above OSK */
+    #enter-btn {
+      position: fixed; bottom: 10px; right: 10px;
+      background: transparent; border: 1px solid var(--fg);
+      color: var(--fg); font-family: inherit; font-size: 16px;
+      cursor: pointer; padding: 6px 14px; z-index: 200;
+      text-shadow: 0 0 4px var(--fg);
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    #enter-btn:hover { background: var(--dim); }
+    #enter-btn.osk-open { bottom: 130px; }
   </style>
 </head>
 <body class="fallout">
@@ -95,6 +108,7 @@
 <button id="theme-toggle" onclick="cycleTheme()" title="Toggle theme [T]">[T]HEME</button>
 <div id="term"></div>
 <div id="osk"></div>
+<button id="enter-btn" onclick="handleKey('ENTER')" title="Confirm / Enter">[ENTER]</button>
 
 <script>
 // ─────────────────────────────────────────────────────────────
@@ -757,8 +771,14 @@ function renderDone() {
 // ─────────────────────────────────────────────────────────────
 function updateOSK() {
   const osk = document.getElementById('osk');
-  if (S.screen !== 'WORDLE' || S.wDone) { osk.classList.remove('show'); return; }
+  const enterBtn = document.getElementById('enter-btn');
+  if (S.screen !== 'WORDLE' || S.wDone) {
+    osk.classList.remove('show');
+    if (enterBtn) enterBtn.classList.remove('osk-open');
+    return;
+  }
   osk.classList.add('show');
+  if (enterBtn) enterBtn.classList.add('osk-open');
 
   const rows = ['QWERTYUIOP','ASDFGHJKL','⌫ZXCVBNM↵'];
   const keyState = {};

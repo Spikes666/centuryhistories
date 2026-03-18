@@ -413,6 +413,29 @@
     .chrono-card.wrong-pos { border-color: var(--accent); }
     .chrono-handle { color: var(--text3); font-size: 1.2rem; padding-top: 2px; }
     .chrono-text { font-size: 0.9rem; line-height: 1.6; flex: 1; }
+    .chrono-arrows {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .chrono-arrow {
+      background: none;
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      width: 34px;
+      height: 30px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      touch-action: manipulation;
+    }
+    .chrono-arrow:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
+    .chrono-arrow:disabled { opacity: 0.2; cursor: default; }
     .chrono-reveal { font-size: 0.75rem; color: var(--text3); margin-top: 6px; font-style: italic; }
     .chrono-submit-wrap { padding: 0 16px 20px; }
     .chrono-submit {
@@ -495,6 +518,7 @@
       text-transform: uppercase;
       font-family: 'Lora', serif;
       transition: background 0.2s;
+      touch-action: manipulation;
     }
     .kb-key.wide { min-width: 52px; font-size: 0.65rem; }
     .kb-key.correct { background: var(--correct); border-color: var(--correct); color: white; }
@@ -1357,6 +1381,13 @@ function startChrono() {
   showScreen('screen-chrono');
 }
 
+function moveCard(i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= C.order.length) return;
+  [C.order[i], C.order[j]] = [C.order[j], C.order[i]];
+  renderChronoList();
+}
+
 function renderChronoList() {
   const list = document.getElementById('chrono-list');
   list.innerHTML = '';
@@ -1366,7 +1397,10 @@ function renderChronoList() {
     card.draggable = true;
     card.dataset.idx = i;
     card.innerHTML = `
-      <div class="chrono-handle">⠿</div>
+      <div class="chrono-arrows">
+        <button class="chrono-arrow" onclick="moveCard(${i}, -1)" ${i === 0 ? 'disabled' : ''} aria-label="Move up">▲</button>
+        <button class="chrono-arrow" onclick="moveCard(${i}, 1)" ${i === C.order.length - 1 ? 'disabled' : ''} aria-label="Move down">▼</button>
+      </div>
       <div class="chrono-text">${stripAllDates(fact.fact)}</div>
     `;
     // Drag events
