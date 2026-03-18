@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Century Histories</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Lora:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #1c1510;
+      --bg2:       #241c14;
+      --bg3:       #2e2418;
+      --border:    #3d3020;
+      --border2:   #4a3a28;
+      --text:      #e8dcc8;
+      --text2:     #b8a888;
+      --text3:     #786050;
+      --accent:    #c9184a;
+      --gold:      #c8922a;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Lora', Georgia, serif;
+      min-height: 100vh;
+      padding: 0 0 80px;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(160deg, #221810 0%, #2e2010 60%, #1c1408 100%);
+      border-bottom: 2px solid var(--gold);
+      padding: 36px 24px 28px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, #c8922a18 0%, transparent 70%);
+      
+    }
+    .header-day   { font-size: 11px; color: var(--text3); letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 10px; }
+    .header-title { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(28px, 7vw, 46px); font-style: italic; color: #f0e4cc; margin-bottom: 10px; line-height: 1.15; }
+    .header-era-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: var(--bg3); border: 1px solid var(--border2);
+      border-radius: 20px; padding: 5px 14px; margin-bottom: 8px;
+      font-size: 12px; color: var(--gold); letter-spacing: 0.06em;
+    }
+    .header-date { font-size: 12px; color: var(--text3); font-style: italic; }
+
+    /* ── Nav tabs ── */
+    .nav { display: flex; justify-content: center; gap: 8px; padding: 20px 20px 0; max-width: 920px; margin: 0 auto; }
+    .nav-btn {
+      background: none; border: 1px solid var(--border); border-radius: 20px;
+      color: var(--text3); cursor: pointer; font-family: 'Lora', Georgia, serif;
+      font-size: 12px; letter-spacing: 0.1em; padding: 7px 18px;
+      text-transform: uppercase; transition: all 0.2s;
+      text-decoration: none; display: inline-block;
+    }
+    .nav-btn:hover  { border-color: var(--border2); color: var(--text2); }
+    .nav-btn.active { border-color: var(--gold); color: var(--gold); background: #c8922a12; }
+
+    /* ── Era filter bar ── */
+    .era-bar {
+      display: none; max-width: 920px; margin: 20px auto 0; padding: 0 20px;
+      flex-direction: column; gap: 12px;
+    }
+    .era-bar.visible { display: flex; }
+    .era-section { display: flex; flex-direction: column; gap: 6px; }
+    .era-label {
+      font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--text3); padding-left: 2px; display: flex; align-items: center; gap: 6px;
+    }
+    .era-label-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .era-centuries { display: flex; flex-wrap: wrap; gap: 6px; }
+    .century-btn {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 16px;
+      color: var(--text3); cursor: pointer; font-family: 'Lora', Georgia, serif;
+      font-size: 11px; letter-spacing: 0.06em; padding: 5px 13px; transition: all 0.2s;
+    }
+    .century-btn:hover  { border-color: var(--border2); color: var(--text2); }
+    .century-btn.active { color: #fff; }
+
+    /* ── Era divider in browse ── */
+    .era-divider {
+      display: flex; align-items: center; gap: 14px;
+      padding: 28px 0 8px; opacity: 0; animation: fadeUp 0.4s ease forwards;
+    }
+    .era-divider-line { flex: 1; height: 1px; background: var(--border); }
+    .era-divider-label {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+      white-space: nowrap; padding: 4px 12px; border-radius: 12px;
+      border: 1px solid; background: var(--bg2);
+    }
+
+    /* ── Cards container ── */
+    .cards { max-width: 920px; margin: 0 auto; padding: 28px 20px 0; display: flex; flex-direction: column; gap: 18px; }
+
+    /* ── Individual card ── */
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(14px);
+      animation: fadeUp 0.45s ease forwards;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      display: grid;
+      grid-template-columns: 1fr 200px;
+    }
+    .card:hover { border-color: var(--border2); box-shadow: 0 4px 24px #00000030; }
+    @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+    .card-body { padding: 22px 22px; display: flex; flex-direction: column; gap: 10px; }
+    .card-meta { display: flex; align-items: center; gap: 8px; }
+    .card-num  { font-size: 10px; color: var(--text3); letter-spacing: 0.2em; text-transform: uppercase; }
+    .card-era-pip { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .card-fact { font-size: 14px; line-height: 1.85; color: var(--text2); flex: 1; }
+
+    /* ── Map panel ── */
+    .card-map {
+      position: relative; border-left: 1px solid var(--border);
+      background: #161008; display: flex; flex-direction: column;
+    }
+    .card-map iframe {
+      width: 100%; height: 160px; display: block; border: none;
+      filter: brightness(0.82) saturate(0.6) sepia(0.25);
+      flex: 1; 
+    }
+    .card-map-label {
+      padding: 7px 10px; font-size: 10px; color: var(--text3);
+      letter-spacing: 0.07em; font-style: italic;
+      border-top: 1px solid var(--border); text-align: center; line-height: 1.4;
+    }
+
+    /* ── Summary card ── */
+    .summary-card {
+      background: linear-gradient(135deg, var(--bg2), var(--bg3));
+      border: 1px solid var(--border2);
+      border-radius: 14px; padding: 28px 26px;
+      opacity: 0; animation: fadeUp 0.4s ease forwards;
+    }
+    .summary-label { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 10px; }
+    .summary-title { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(18px, 4vw, 24px); font-style: italic; color: #f0e4cc; margin-bottom: 14px; line-height: 1.3; }
+    .summary-text  { font-size: 14px; line-height: 1.85; color: var(--text3); font-style: italic; }
+
+    /* ── Footer ── */
+    .footer { text-align: center; margin-top: 52px; padding: 0 20px; font-size: 11px; color: var(--text3); letter-spacing: 0.08em; line-height: 2; }
+
+    .state-msg { text-align: center; padding: 60px 20px; color: var(--text3); font-style: italic; font-size: 14px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .card { grid-template-columns: 1fr; }
+      .card-map { border-left: none; border-top: 1px solid var(--border); }
+      .card-map iframe { height: 130px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-day" id="header-day">Loading…</div>
+  <h1 class="header-title" id="header-title">Century Histories</h1>
+  <div id="header-era-badge" class="header-era-badge" style="display:none"></div>
+  <div class="header-date" id="header-date"></div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn active" id="btn-today"  onclick="showToday()">Today</button>
+  <button class="nav-btn"        id="btn-browse" onclick="showBrowse()">Browse Eras</button>
+  <a class="nav-btn" href="game.html">🎮 Play</a>
+  <a class="nav-btn" href="retro-game.html">💾 Retro</a>
+</div>
+
+<div class="era-bar" id="era-bar"></div>
+
+<div class="cards" id="cards">
+  <div class="state-msg">Loading flashcards…</div>
+</div>
+
+<div class="footer">
+  Sources: <em>Misquoting Jesus</em> / Bart Ehrman &nbsp;·&nbsp;
+  <em>The Rest is History</em> (Holland &amp; Sandbrook) &nbsp;·&nbsp;
+  <em>Dominion</em> / Tom Holland<br>
+  Refreshes daily · 460 facts across 23 centuries
+</div>
+
+<script>
+const FACTS_PER_DAY = 10;
+const START_DATE    = new Date('2025-01-01');
+const ERA_STYLES    = {
+  "Ancient World (Pre-CE – 500 CE)":               {"color": "#c17f3a", "bg": "#2a1f10", "icon": "🏛️"},
+  "Medieval (500–1300)":                            {"color": "#7a9e5f", "bg": "#111a0f", "icon": "⚔️"},
+  "Renaissance & Reformation (1300–1600)":          {"color": "#a06fc0", "bg": "#1a1025", "icon": "🎨"},
+  "Age of Exploration & Enlightenment (1600–1800)": {"color": "#4a9ec0", "bg": "#0d1e2a", "icon": "🔭"},
+  "Industrial Age (1800–1900)":                  {"color": "#c04a4a", "bg": "#2a0f0f", "icon": "⚡"},
+  "Modern World (1900–present)":                    {"color": "#5aa8a0", "bg": "#0d2220", "icon": "🌐"}
+};
+const eraOrder = Object.keys(ERA_STYLES);
+
+let allData       = null;
+let allFacts      = [];
+let activeCentury = 0;
+
+// ── Load content ───────────────────────────────────────────
+async function loadContent() {
+  try {
+    const res = await fetch('https://raw.githubusercontent.com/Spikes666/centuryhistories/main/flashcards/content.json');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    allData = await res.json();
+    allFacts = [];
+    for (const century of allData.centuries) {
+      for (const f of century.facts) {
+        allFacts.push({ century_label: century.label, era: century.era, century_summary: century.summary, ...f });
+      }
+    }
+    buildEraBar();
+    renderToday();
+  } catch(err) {
+    document.getElementById('cards').innerHTML = '<div class="state-msg">Error: ' + err.message + '</div>';
+    document.getElementById('header-title').textContent = 'Load Error';
+  }
+}
+
+// ── Era helpers ────────────────────────────────────────────
+function getCenturiesByEra() {
+  const map = {};
+  for (const era of eraOrder) map[era] = [];
+  for (const c of allData.centuries) {
+    if (map[c.era]) map[c.era].push(c);
+  }
+  return map;
+}
+
+// ── Day logic ──────────────────────────────────────────────
+function getDayIndex() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  return Math.floor((today - START_DATE) / 86400000);
+}
+
+function getTodaysFacts() {
+  const total = allFacts.length, d = getDayIndex();
+  const s = (d * FACTS_PER_DAY) % total;
+  const e = s + FACTS_PER_DAY;
+  return e <= total ? allFacts.slice(s, e) : [...allFacts.slice(s), ...allFacts.slice(0, e - total)];
+}
+
+// ── Card HTML ──────────────────────────────────────────────
+function cardHTML(f, num, total, delay) {
+  const es = ERA_STYLES[f.era] || ERA_STYLES[eraOrder[0]];
+  return `
+    <div class="card" style="animation-delay:${delay}s">
+      <div class="card-body">
+        <div class="card-meta">
+          <span class="card-num">Fact ${num} of ${total}</span>
+          <span class="card-era-pip" style="background:${es.color}" title="${f.era}"></span>
+        </div>
+        <p class="card-fact">${f.fact}</p>
+      </div>
+      <div class="card-map">
+        <iframe src="${f.map_iframe}" loading="lazy" scrolling="no" frameborder="0" title="${f.map_label}"></iframe>
+        <div class="card-map-label">📍 ${f.map_label}</div>
+      </div>
+    </div>`;
+}
+
+// ── Today view ─────────────────────────────────────────────
+function renderToday() {
+  const d         = getDayIndex();
+  const totalDays = Math.ceil(allFacts.length / FACTS_PER_DAY);
+  const cycleDay  = (d % totalDays) + 1;
+  const block     = getTodaysFacts();
+  const centuries = [...new Set(block.map(f => f.century_label))];
+  const dateStr   = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  const era       = block[0].era;
+  const es        = ERA_STYLES[era] || {};
+
+  document.getElementById('header-day').textContent   = `Day ${cycleDay} of ${totalDays}`;
+  document.getElementById('header-title').textContent = centuries.join(' & ');
+  document.getElementById('header-date').textContent  = dateStr;
+
+  const badge = document.getElementById('header-era-badge');
+  badge.style.display     = 'inline-flex';
+  badge.style.color       = es.color || '#c8922a';
+  badge.style.borderColor = (es.color || '#c8922a') + '55';
+  badge.innerHTML         = `${es.icon || ''} ${era || ''}`;
+
+  document.getElementById('era-bar').classList.remove('visible');
+  document.getElementById('cards').innerHTML = block.map((f,i) => cardHTML(f, i+1, block.length, i*0.07)).join('');
+}
+
+// ── Browse view ────────────────────────────────────────────
+function buildEraBar() {
+  const byEra = getCenturiesByEra();
+  document.getElementById('era-bar').innerHTML = eraOrder.map(era => {
+    const es       = ERA_STYLES[era];
+    const centuries = byEra[era];
+    if (!centuries || !centuries.length) return '';
+    const btns = centuries.map(c => {
+      const idx = allData.centuries.indexOf(c);
+      return `<button class="century-btn" data-idx="${idx}" onclick="selectCentury(${idx})">${c.label.replace(/ CE.*|\(.*\)/g,'').trim()}</button>`;
+    }).join('');
+    return `
+      <div class="era-section">
+        <div class="era-label">
+          <span class="era-label-dot" style="background:${es.color}"></span>
+          ${es.icon} ${era}
+        </div>
+        <div class="era-centuries">${btns}</div>
+      </div>`;
+  }).join('');
+}
+
+function selectCentury(idx) {
+  activeCentury = idx;
+  document.querySelectorAll('.century-btn').forEach(b => {
+    const isActive = parseInt(b.dataset.idx) === idx;
+    b.classList.toggle('active', isActive);
+    if (isActive) {
+      const es = ERA_STYLES[allData.centuries[idx].era] || {};
+      b.style.background  = (es.color || '#888') + '22';
+      b.style.borderColor = es.color || '#888';
+      b.style.color       = es.color || '#888';
+    } else {
+      b.style.background  = '';
+      b.style.borderColor = '';
+      b.style.color       = '';
+    }
+  });
+  renderCentury(idx);
+}
+
+function renderCentury(idx) {
+  const century = allData.centuries[idx];
+  const es      = ERA_STYLES[century.era] || {};
+
+  document.getElementById('header-day').textContent   = 'Browse · Century Histories';
+  document.getElementById('header-title').textContent = century.label;
+  document.getElementById('header-date').textContent  = '';
+
+  const badge = document.getElementById('header-era-badge');
+  badge.style.display     = 'inline-flex';
+  badge.style.color       = es.color || '#c8922a';
+  badge.style.borderColor = (es.color || '#c8922a') + '55';
+  badge.innerHTML         = `${es.icon || ''} ${century.era}`;
+
+  document.getElementById('cards').innerHTML = `
+    <div class="summary-card" style="border-color:${es.color}33">
+      <div class="summary-label" style="color:${es.color}">${es.icon} ${century.era}</div>
+      <div class="summary-title">${century.label}</div>
+      <p class="summary-text">${century.summary}</p>
+    </div>` +
+    century.facts.map((f,i) => cardHTML({...f, era: century.era}, i+1, century.facts.length, (i+1)*0.05)).join('');
+}
+
+// ── Tab switching ──────────────────────────────────────────
+function showToday() {
+  document.getElementById('btn-today').classList.add('active');
+  document.getElementById('btn-browse').classList.remove('active');
+  document.getElementById('era-bar').classList.remove('visible');
+  renderToday();
+}
+
+function showBrowse() {
+  document.getElementById('btn-browse').classList.add('active');
+  document.getElementById('btn-today').classList.remove('active');
+  document.getElementById('era-bar').classList.add('visible');
+  selectCentury(activeCentury);
+}
+
+// ── Init ───────────────────────────────────────────────────
+loadContent();
+</script>
+</body>
+</html>
