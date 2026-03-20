@@ -1071,5 +1071,156 @@ async function boot() {
 
 boot();
 </script>
+
+<!-- ═══════════════════════════════════════════════════════
+     C64 HISTORIAN SPRITE
+     Authentic 24×21 pixel design — 4× scaled, CRT glow
+     Designed within real C64 constraints:
+       - 24×21 pixels per sprite
+       - 16-color palette
+       - 3-frame walk cycle at 3 fps
+═══════════════════════════════════════════════════════ -->
+<canvas id="c64-sprite" width="96" height="84"
+  style="position:fixed;bottom:12px;right:14px;z-index:50;
+         image-rendering:pixelated;
+         filter:drop-shadow(0 0 6px var(--fg)) drop-shadow(0 0 2px var(--fg));
+         opacity:0.88;pointer-events:none;"></canvas>
+
+<script>
+(function() {
+  // Authentic C64 16-color palette
+  const PAL = [
+    null,        // 0 = transparent
+    '#ffffff',   // 1 white
+    '#883300',   // 2 red  (shoes)
+    '#aaffee',   // 3 cyan
+    '#cc44cc',   // 4 purple
+    '#00cc55',   // 5 green
+    '#0000aa',   // 6 blue
+    '#eeee77',   // 7 yellow
+    '#dd8855',   // 8 orange  (skin)
+    '#664400',   // 9 brown   (robe)
+    '#ff7777',   // A light red
+    '#333333',   // B dark grey  (hair/shadow)
+    '#777777',   // C medium grey
+    '#aaff66',   // D light green
+    '#0088ff',   // E light blue
+    '#bbbbbb',   // F light grey  (scroll/paper)
+  ];
+
+  // 3 animation frames — each row is 24 hex chars (C64 color indices)
+  // 0 = transparent, 9 = brown robe, 8 = orange skin,
+  // B = dark hair, F = light grey scroll, 2 = red shoes
+
+  // Frame 0: standing neutral
+  const F0 = [
+    '000000000999000000000000',
+    '00000000BB8BB00000000000',
+    '00000000B888B00000000000',
+    '00000000BB8BB00000000000',
+    '000000000BBB000000000000',
+    '000000099999990000000000',
+    '000000999999999000000000',
+    '00000099FFF9999000000000',
+    '00000099FFF9999000000000',
+    '00000099FF99999000000000',
+    '000000999999999000000000',
+    '000000999999999000000000',
+    '000000099999990000000000',
+    '000000099999990000000000',
+    '000000099999990000000000',
+    '000000009909900000000000',
+    '000000009909900000000000',
+    '000000009909900000000000',
+    '000000099909990000000000',
+    '000000229000922000000000',
+    '000002220000022200000000',
+  ];
+
+  // Frame 1: left foot forward, right foot trailing
+  const F1 = [
+    '000000000999000000000000',
+    '00000000BB8BB00000000000',
+    '00000000B888B00000000000',
+    '00000000BB8BB00000000000',
+    '000000000BBB000000000000',
+    '000000099999990000000000',
+    '000000999999999000000000',
+    '00000099FFF9999000000000',
+    '00000099FFF9999000000000',
+    '00000099FF99999000000000',
+    '000000999999999000000000',
+    '000000999999999000000000',
+    '000000099999990000000000',
+    '000000099999990000000000',
+    '000000099999990000000000',
+    '000000009900990000000000',
+    '000000099000990000000000',
+    '000000990000099000000000',
+    '000000990000099000000000',
+    '000002290000292000000000',
+    '000022200000022200000000',
+  ];
+
+  // Frame 2: right foot forward, left foot trailing
+  const F2 = [
+    '000000000999000000000000',
+    '00000000BB8BB00000000000',
+    '00000000B888B00000000000',
+    '00000000BB8BB00000000000',
+    '000000000BBB000000000000',
+    '000000099999990000000000',
+    '000000999999999000000000',
+    '00000099FFF9999000000000',
+    '00000099FFF9999000000000',
+    '00000099FF99999000000000',
+    '000000999999999000000000',
+    '000000999999999000000000',
+    '000000099999990000000000',
+    '000000099999990000000000',
+    '000000099999990000000000',
+    '000000009900990000000000',
+    '000000009900990000000000',
+    '000000009900990000000000',
+    '000000099900999000000000',
+    '000002229000922000000000',
+    '000002220000022200000000',
+  ];
+
+  const FRAMES = [F0, F1, F0, F2];
+  const SCALE  = 4;
+  let frameIdx = 0;
+
+  const canvas = document.getElementById('c64-sprite');
+  const ctx    = canvas.getContext('2d');
+
+  function drawFrame(frameData) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    frameData.forEach((row, y) => {
+      for (let x = 0; x < row.length; x++) {
+        const c = parseInt(row[x], 16);
+        if (c === 0) continue;
+        ctx.fillStyle = PAL[c] || '#ffffff';
+        ctx.fillRect(x * SCALE, y * SCALE, SCALE, SCALE);
+      }
+    });
+  }
+
+  // Sync sprite color to current retro theme
+  function syncColor() {
+    const fg = getComputedStyle(document.body).getPropertyValue('--fg').trim();
+    if (fg) canvas.style.filter =
+      `drop-shadow(0 0 6px ${fg}) drop-shadow(0 0 2px ${fg})`;
+  }
+
+  drawFrame(FRAMES[0]);
+
+  setInterval(() => {
+    frameIdx = (frameIdx + 1) % FRAMES.length;
+    drawFrame(FRAMES[frameIdx]);
+    syncColor();
+  }, 280);
+})();
+</script>
 </body>
 </html>
