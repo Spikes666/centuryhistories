@@ -3044,5 +3044,97 @@
         }
       ]
     }
+  ],
+  "threads": [
+    {
+      "id": "medicine_science",
+      "name": "Medicine & Science",
+      "icon": "⚕️",
+      "description": "How humans understood the body and nature across time",
+      "waypoints": [
+        { "century_id": "pre_ce_middle_east", "fact_index": 4, "connective": "Ancient knowledge of metals laid the foundation for understanding matter itself." },
+        { "century_id": "3rd_century_ce", "fact_index": 4, "connective": "Crisis drove physicians to observe disease patterns and develop new healing practices." },
+        { "century_id": "10th_century", "fact_index": 18, "connective": "Islamic scholars preserved and advanced medical knowledge during Europe's intellectual darkness." },
+        { "century_id": "11th_century", "fact_index": 10, "connective": "Medieval medical texts unified earlier knowledge into systematic frameworks that would guide practice for centuries." },
+        { "century_id": "16th_century", "fact_index": 15, "connective": "The scientific revolution transformed how humans understood the universe through observation and mathematics." },
+        { "century_id": "18th_century", "fact_index": 17, "connective": "Enlightenment empiricism produced the first weapon against disease at the population level." },
+        { "century_id": "20th_century_early", "fact_index": 17, "connective": "Modern medicine entered the age of antibiotics, transforming infectious disease from a death sentence into a treatable condition." }
+      ]
+    },
+    {
+      "id": "trade_commerce",
+      "name": "Trade & Commerce",
+      "icon": "🏪",
+      "description": "How humans exchanged goods and built economic systems across distances and centuries",
+      "waypoints": [
+        { "century_id": "pre_ce_middle_east", "fact_index": 0, "connective": "The first written language was invented not for poetry, but for commerce — recording grain and livestock." },
+        { "century_id": "6th_century", "fact_index": 16, "connective": "Trade secrets became strategic assets, driving espionage and technological theft across empires." },
+        { "century_id": "9th_century", "fact_index": 3, "connective": "Viking traders founded new cities along river routes, creating the first commercial networks linking north and south." },
+        { "century_id": "13th_century", "fact_index": 14, "connective": "Political stability under the Mongols created unprecedented security for merchants crossing vast distances." },
+        { "century_id": "15th_century", "fact_index": 2, "connective": "Global commerce transformed from regional networks into a truly worldwide system, reshaping economics, ecology, and demographics." },
+        { "century_id": "18th_century", "fact_index": 5, "connective": "Enlightenment thinkers developed new theories of trade and wealth, laying the foundation for modern economic systems." },
+        { "century_id": "20th_century_late", "fact_index": 12, "connective": "Digital networks created instantaneous global commerce, accelerating the flow of goods and capital beyond anything previous eras could imagine." }
+      ]
+    },
+    {
+      "id": "religion_faith",
+      "name": "Religion & Faith",
+      "icon": "✨",
+      "description": "How spiritual beliefs shaped societies, conflicts, and human meaning across time",
+      "waypoints": [
+        { "century_id": "pre_ce_middle_east", "fact_index": 7, "connective": "Conquest and exile forced religions to transform, moving from temple-based ritual to portable text-based faith." },
+        { "century_id": "1st_century_ce", "fact_index": 4, "connective": "A Jewish preacher's execution by Rome became the seed of a new religion that would transform civilization." },
+        { "century_id": "4th_century_ce", "fact_index": 1, "connective": "Imperial patronage transformed Christianity from persecuted sect into institutional religion with political power." },
+        { "century_id": "7th_century", "fact_index": 7, "connective": "A new religion emerged from the Arabian peninsula and within a century reshaped the religious map of three continents." },
+        { "century_id": "11th_century", "fact_index": 0, "connective": "Theological disputes and political rivalries fractured Christendom into permanently separate branches." },
+        { "century_id": "16th_century", "fact_index": 0, "connective": "A monk's theological challenge to church authority sparked a religious revolution that shattered Christian unity and reshaped politics." },
+        { "century_id": "20th_century_late", "fact_index": 6, "connective": "Political and moral movements increasingly claimed authority independent of religious institutions, secularizing public life." }
+      ]
+    },
+    {
+      "id": "warfare_conquest",
+      "name": "Warfare & Conquest",
+      "icon": "⚔️",
+      "description": "How military power shaped empires, boundaries, and the course of history",
+      "waypoints": [
+        { "century_id": "pre_ce_middle_east", "fact_index": 4, "connective": "Iron weapons gave the Hittites overwhelming military advantage, establishing a pattern: technological innovation equals conquest." },
+        { "century_id": "2nd_century_ce", "fact_index": 1, "connective": "Rome's military machine reached its peak, controlling more territory than any previous power, but could not sustain indefinite expansion." },
+        { "century_id": "7th_century", "fact_index": 10, "connective": "Arab cavalry armies ended a thousand years of Greco-Roman rule, introducing new religions and languages to conquered lands." },
+        { "century_id": "11th_century", "fact_index": 3, "connective": "Religious warfare motivated crusading armies to travel thousands of miles, but conquest bred brutality and long-term resentment." },
+        { "century_id": "13th_century", "fact_index": 0, "connective": "Nomadic warriors from the steppes built history's largest land empire, connecting continents through conquest and terror." },
+        { "century_id": "18th_century", "fact_index": 9, "connective": "Global conflict transformed warfare from regional campaigns into interconnected struggles spanning continents and oceans." },
+        { "century_id": "20th_century_early", "fact_index": 0, "connective": "Industrial technology applied to warfare produced unprecedented mass death, shattering the old empires and reshaping the world order." }
+      ]
+    },
+    {
+      "id": "art_culture",
+      "name": "Art & Culture",
+      "icon": "🎭",
+      "description": "How humans expressed creativity, meaning, and beauty across time",
+      "waypoints": [
+        { "century_id": "pre_ce_middle_east", "fact_index": 1, "connective": "The world's oldest literature captured timeless human themes — friendship, mortality, the search for meaning — that still resonate today." },
+        { "century_id": "6th_century", "fact_index": 1, "connective": "Imperial patronage created architectural marvels that demonstrated engineering genius and religious devotion combined." },
+        { "century_id": "12th_century", "fact_index": 8, "connective": "A revolutionary architectural style soared upward, expressing spiritual aspiration through stone and glass." },
+        { "century_id": "14th_century", "fact_index": 6, "connective": "Medieval Italian poets pioneered the modern literary tradition, using vernacular language to explore theology and human psychology." },
+        { "century_id": "15th_century", "fact_index": 6, "connective": "A rebirth of classical learning combined with new techniques produced the most versatile geniuses in history." },
+        { "century_id": "16th_century", "fact_index": 12, "connective": "A playwright's genius for capturing human nature created works that became humanity's most frequently performed literature." },
+        { "century_id": "20th_century_late", "fact_index": 12, "connective": "Digital networks enabled art to be shared globally in real time, creating shared cultural moments across humanity." }
+      ]
+    },
+    {
+      "id": "law_governance",
+      "name": "Law & Governance",
+      "icon": "⚖️",
+      "description": "How societies organized power, justice, and rules to govern themselves",
+      "waypoints": [
+        { "century_id": "pre_ce_middle_east", "fact_index": 2, "connective": "Written law codes established the principle that power must operate within rules, not arbitrary will." },
+        { "century_id": "1st_century_ce", "fact_index": 13, "connective": "A republic transformed into an empire under a single ruler who concealed autocratic power within republican forms." },
+        { "century_id": "3rd_century_ce", "fact_index": 3, "connective": "Universal citizenship expanded rights far beyond ethnic boundaries, treating all subjects as legal equals." },
+        { "century_id": "5th_century_ce", "fact_index": 14, "connective": "Legal codes preserved and systematized centuries of law, ensuring continuity even as political empires collapsed." },
+        { "century_id": "13th_century", "fact_index": 3, "connective": "Barons forced a king to accept legal limitations, establishing the revolutionary principle that rulers too are subject to law." },
+        { "century_id": "18th_century", "fact_index": 1, "connective": "Enlightenment philosophy transformed into political action, declaring universal rights and establishing a new form of government." },
+        { "century_id": "20th_century_late", "fact_index": 1, "connective": "Global institutions attempted to create international law and protect human rights across borders, transcending the nation-state." }
+      ]
+    }
   ]
 }

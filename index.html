@@ -178,8 +178,9 @@
 <div class="nav">
   <button class="nav-btn active" id="btn-today"  onclick="showToday()">Today</button>
   <button class="nav-btn"        id="btn-browse" onclick="showBrowse()">Browse Eras</button>
-  <a class="nav-btn" href="game.html">🎮 Play</a>
+  <a class="nav-btn" href="game.html">🎮 Journey</a>
   <a class="nav-btn" href="retro-game.html">💾 Retro</a>
+  <a class="nav-btn" href="game-classic.html" style="font-size:0.78em;opacity:0.65">Classic</a>
 </div>
 
 <div class="era-bar" id="era-bar"></div>
@@ -379,7 +380,13 @@ function showBrowse() {
 }
 
 // ── Init ───────────────────────────────────────────────────
-loadContent();
+loadContent().then(() => {
+  // If arriving from Journey completion, open Browse Eras
+  if (window.location.hash === '#browse') {
+    showBrowse();
+    window.history.replaceState(null, '', window.location.pathname);
+  }
+});
 </script>
 </body>
 </html>

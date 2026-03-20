@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <title>Century Histories · Game</title>
+  <title>Century Histories · Journey</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Lora:ital@0;1&display=swap" rel="stylesheet">
   <style>
@@ -62,913 +62,926 @@
       text-transform: uppercase;
     }
     .hdr-back {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: 1px solid var(--border2);
-      color: var(--text2);
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.85rem;
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      background: none; border: 1px solid var(--border2); color: var(--text2);
+      padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;
     }
     .hdr-back:hover { border-color: var(--gold); color: var(--gold); }
     .hdr-home {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: 1px solid var(--border2);
-      color: var(--text2);
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      background: none; border: 1px solid var(--border2); color: var(--text2);
+      padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;
+      text-decoration: none; display: inline-flex; align-items: center;
     }
     .hdr-home:hover { border-color: var(--gold); color: var(--gold); }
 
-    /* ── Deck Select ── */
-    .deck-body {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 32px 20px;
-      gap: 24px;
-    }
-    .deck-intro {
-      text-align: center;
-      color: var(--text2);
-      font-size: 1rem;
-      line-height: 1.6;
-      max-width: 400px;
-    }
-    .deck-meta {
-      display: flex;
-      gap: 28px;
-      color: var(--text3);
-      font-size: 0.8rem;
-      text-align: center;
-    }
-    .deck-meta span strong { display: block; color: var(--gold); font-size: 1.4rem; }
-    .deck-opts {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      width: 100%;
-      max-width: 400px;
-    }
-    .deck-btn {
+    /* ── Progress bar ── */
+    .journey-progress {
       background: var(--bg2);
-      border: 2px solid var(--border2);
-      border-radius: 12px;
-      padding: 20px 24px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      transition: border-color 0.2s, background 0.2s;
-      text-align: left;
-    }
-    .deck-btn:hover { border-color: var(--gold); background: var(--bg3); }
-    .deck-num {
-      font-family: 'Playfair Display', serif;
-      font-size: 2.2rem;
-      color: var(--gold);
-      min-width: 52px;
-      text-align: center;
-    }
-    .deck-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.05rem;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
-    .deck-desc { font-size: 0.8rem; color: var(--text3); line-height: 1.4; }
-
-    /* ── Study Screen ── */
-    .study-hdr {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
       border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-    .study-progress {
-      font-size: 0.85rem;
-      color: var(--text3);
-      text-align: center;
-      flex: 1;
-    }
-    .study-progress strong { color: var(--gold); }
-    .study-hdr-btn {
-      background: none;
-      border: 1px solid var(--border2);
-      color: var(--text2);
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.8rem;
-      white-space: nowrap;
-    }
-    .study-hdr-btn:hover { border-color: var(--gold); color: var(--gold); }
-    .study-card-wrap {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px 16px;
-    }
-    .study-card {
-      background: var(--bg2);
-      border: 2px solid var(--border2);
-      border-radius: 16px;
-      width: 100%;
-      max-width: 480px;
-      overflow: hidden;
-    }
-    .study-card-body { padding: 20px; }
-    .study-card-era {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--text3);
-      margin-bottom: 4px;
-    }
-    .study-card-century {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.1rem;
-      color: var(--gold);
-      margin-bottom: 14px;
-    }
-    .study-card-fact {
-      font-size: 1rem;
-      line-height: 1.7;
-      color: var(--text);
-    }
-    .study-card-map {
-      width: 100%;
-      height: 200px;
-      border: none;
-      border-top: 1px solid var(--border);
-      display: block;
-    }
-    .study-card-loc {
       padding: 10px 20px;
-      font-size: 0.8rem;
-      color: var(--text2);
-      border-top: 1px solid var(--border);
       display: flex;
       align-items: center;
-      gap: 6px;
-    }
-    .study-card-loc::before { content: "📍"; }
-    .study-nav {
-      display: flex;
-      gap: 12px;
-      padding: 16px;
+      gap: 10px;
       flex-shrink: 0;
     }
-    .study-nav-btn {
-      flex: 1;
-      background: var(--bg2);
-      border: 2px solid var(--border2);
-      color: var(--text);
-      padding: 14px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 1rem;
-      font-family: 'Lora', serif;
-      transition: border-color 0.2s, background 0.2s;
+    .jp-label { font-size: 0.72rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+    .jp-dots { display: flex; gap: 6px; align-items: center; }
+    .jp-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--border2); border: 1px solid var(--border2);
+      transition: all 0.3s;
     }
-    .study-nav-btn:hover { border-color: var(--gold); }
-    .study-nav-btn.primary {
-      background: var(--gold);
-      border-color: var(--gold);
-      color: #1c1510;
-      font-weight: bold;
-    }
-    .study-nav-btn.primary:hover { background: #d9a240; }
-    .study-nav-btn:disabled { opacity: 0.3; cursor: default; }
+    .jp-dot.done { background: var(--gold); border-color: var(--gold); }
+    .jp-dot.active { background: transparent; border-color: var(--gold); box-shadow: 0 0 6px var(--gold); }
+    .jp-score { margin-left: auto; font-size: 0.8rem; color: var(--text2); }
+    .jp-score strong { color: var(--gold); }
 
-    /* ── Study Done ── */
-    .study-done-body {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 24px;
-      gap: 20px;
+    /* ── Thread Intro Screen ── */
+    .thread-body {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 32px 20px; gap: 20px;
+    }
+    .thread-icon { font-size: 4rem; line-height: 1; }
+    .thread-name {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.6rem, 6vw, 2.2rem);
+      color: var(--gold);
       text-align: center;
     }
-    .study-done-icon { font-size: 3.5rem; }
-    .study-done-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.6rem;
-      color: var(--gold);
+    .thread-desc {
+      font-size: 1rem; color: var(--text2); text-align: center;
+      max-width: 380px; line-height: 1.6; font-style: italic;
     }
-    .study-done-sub { font-size: 1rem; color: var(--text2); line-height: 1.6; max-width: 360px; }
-    .study-done-btn {
-      background: var(--gold);
-      border: none;
-      color: #1c1510;
-      padding: 16px 40px;
-      border-radius: 12px;
-      font-family: 'Playfair Display', serif;
-      font-size: 1.1rem;
-      cursor: pointer;
-      margin-top: 8px;
+    .thread-meta {
+      display: flex; gap: 24px; align-items: center;
+      font-size: 0.8rem; color: var(--text3);
     }
-    .study-done-btn:hover { background: #d9a240; }
-
-    /* ── Game Hub ── */
-    .hub-body {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 24px 16px;
-      gap: 16px;
-    }
-    .hub-session-label {
-      font-size: 0.8rem;
+    .thread-meta span { text-align: center; }
+    .thread-meta strong { display: block; color: var(--text); font-size: 1.1rem; }
+    .diff-badge {
+      padding: 4px 12px; border-radius: 20px;
+      font-size: 0.75rem; font-weight: bold; letter-spacing: 0.05em;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text3);
     }
-    .hub-session-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.1rem;
-      color: var(--gold);
-      margin-bottom: 4px;
+    .diff-1 { background: #1a2e1a; color: #6dbf6d; border: 1px solid #3a7a3a; }
+    .diff-2 { background: #1e2a10; color: #8fc45a; border: 1px solid #5a8a2a; }
+    .diff-3 { background: #2a2a10; color: #c4b84a; border: 1px solid #8a7a1a; }
+    .diff-4 { background: #2e2010; color: #c4862a; border: 1px solid #8a5a1a; }
+    .diff-5 { background: #2e1510; color: #c45c2a; border: 1px solid #8a3a1a; }
+    .diff-6 { background: #2e1010; color: #c42a2a; border: 1px solid #8a1a1a; }
+    .thread-begin-btn {
+      background: var(--gold); color: #1c1510;
+      border: none; border-radius: 10px; padding: 16px 40px;
+      font-family: 'Playfair Display', serif; font-size: 1.1rem;
+      cursor: pointer; letter-spacing: 0.05em;
+      transition: opacity 0.2s;
     }
-    .hub-score {
-      display: flex;
-      gap: 20px;
-      font-size: 0.85rem;
-      color: var(--text2);
+    .thread-begin-btn:hover { opacity: 0.85; }
+    .thread-classic-link {
+      font-size: 0.8rem; color: var(--text3); text-decoration: none;
     }
-    .hub-score span strong { color: var(--gold); }
-    .hub-modes {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      width: 100%;
-      max-width: 460px;
+    .thread-classic-link:hover { color: var(--text2); }
+    .thread-sunday {
+      background: var(--bg2); border: 1px solid var(--border2);
+      border-radius: 12px; padding: 20px; max-width: 380px;
+      width: 100%; text-align: center;
     }
-    .mode-card {
-      background: var(--bg2);
-      border: 2px solid var(--border2);
-      border-radius: 14px;
-      padding: 20px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      transition: border-color 0.2s, background 0.2s;
+    .thread-sunday h3 {
+      font-family: 'Playfair Display', serif; color: var(--gold);
+      margin-bottom: 8px; font-size: 1.2rem;
     }
-    .mode-card:hover { border-color: var(--gold); background: var(--bg3); }
-    .mode-card.done { border-color: var(--correct); opacity: 0.7; cursor: default; }
-    .mode-card.done:hover { background: var(--bg2); border-color: var(--correct); }
-    .mode-icon { font-size: 2rem; }
-    .mode-info { flex: 1; }
-    .mode-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.05rem;
-      color: var(--text);
-      margin-bottom: 4px;
+    .thread-sunday p {
+      font-size: 0.85rem; color: var(--text2); line-height: 1.5; margin-bottom: 16px;
     }
-    .mode-desc { font-size: 0.78rem; color: var(--text3); }
-    .mode-pts {
-      font-size: 0.85rem;
-      color: var(--text2);
-      text-align: right;
+    .sunday-opts { display: flex; flex-direction: column; gap: 10px; }
+    .sunday-btn {
+      background: var(--bg3); border: 1px solid var(--border2);
+      border-radius: 8px; padding: 14px 20px; cursor: pointer;
+      display: flex; align-items: center; gap: 14px;
+      color: var(--text); font-family: 'Lora', serif; font-size: 0.9rem;
+      text-align: left; transition: border-color 0.2s;
     }
-    .mode-pts.earned { color: var(--correct); font-weight: bold; }
-    .hub-new-session {
-      background: none;
-      border: 1px solid var(--border2);
-      color: var(--text3);
-      padding: 10px 24px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      margin-top: 8px;
-    }
-    .hub-new-session:hover { border-color: var(--text2); color: var(--text2); }
+    .sunday-btn:hover { border-color: var(--gold); }
+    .sunday-btn-num { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--gold); min-width: 36px; }
 
-    /* ── Score bar (top of game screens) ── */
+    /* ── Learn Screen ── */
+    .learn-body {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; padding: 24px 16px 20px; gap: 20px;
+    }
+    .learn-century {
+      font-size: 0.75rem; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--text3);
+    }
+    .learn-card {
+      background: var(--bg2); border: 2px solid var(--border2);
+      border-radius: 16px; width: 100%; max-width: 480px; overflow: hidden;
+    }
+    .learn-card-body { padding: 20px; }
+    .learn-era-badge {
+      display: inline-block; padding: 3px 10px; border-radius: 12px;
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em;
+      margin-bottom: 12px;
+    }
+    .learn-fact {
+      font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+      line-height: 1.7; color: var(--text);
+    }
+    .learn-map-wrap {
+      border-top: 1px solid var(--border); padding: 12px;
+    }
+    .learn-map-label {
+      font-size: 0.7rem; color: var(--text3); text-transform: uppercase;
+      letter-spacing: 0.06em; margin-bottom: 6px;
+    }
+    .learn-map iframe {
+      width: 100%; height: 140px; border: none; border-radius: 6px;
+      filter: sepia(0.4) brightness(0.8);
+    }
+    .learn-got-it {
+      background: var(--gold); color: #1c1510;
+      border: none; border-radius: 10px; padding: 14px 36px;
+      font-family: 'Playfair Display', serif; font-size: 1rem;
+      cursor: pointer; letter-spacing: 0.05em; transition: opacity 0.2s;
+    }
+    .learn-got-it:hover { opacity: 0.85; }
+    .learn-round-label {
+      font-size: 0.8rem; color: var(--text3);
+      font-style: italic; text-align: center; max-width: 380px;
+    }
+
+    /* ── Jeopardy ── */
+    .jeo-body { flex: 1; overflow-y: auto; padding: 20px 16px; }
+    .jeo-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 8px; }
+    .jeo-clue {
+      background: var(--bg2); border: 1px solid var(--border2);
+      border-radius: 10px; padding: 16px; font-size: clamp(0.9rem, 2.5vw, 1rem);
+      line-height: 1.7; color: var(--text); margin-bottom: 20px;
+    }
+    .jeo-clue .blank {
+      background: var(--border2); border-radius: 4px;
+      padding: 1px 6px; letter-spacing: 0.15em; font-style: italic;
+    }
+    .jeo-choices { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+    .jeo-choice {
+      background: var(--bg2); border: 2px solid var(--border2);
+      border-radius: 10px; padding: 14px 16px; cursor: pointer;
+      display: flex; align-items: center; gap: 12px;
+      font-size: 0.95rem; color: var(--text); transition: border-color 0.15s, background 0.15s;
+      text-align: left; font-family: 'Lora', serif;
+    }
+    .jeo-choice:hover:not(:disabled) { border-color: var(--gold); background: var(--bg3); }
+    .jeo-choice.correct { border-color: var(--correct); background: #1a2e18; color: #8dcc88; }
+    .jeo-choice.wrong { border-color: var(--accent); background: #2e1018; color: #cc8888; }
+    .jeo-choice.eliminated { opacity: 0.4; pointer-events: none; }
+    .jeo-choice-letter {
+      font-family: 'Playfair Display', serif; font-size: 1.1rem;
+      color: var(--gold); min-width: 24px; text-align: center;
+    }
+    .jeo-hint-btn {
+      background: none; border: 1px solid var(--border2); color: var(--text3);
+      padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;
+      margin-bottom: 12px;
+    }
+    .jeo-hint-btn:hover { border-color: var(--text2); color: var(--text2); }
+    .jeo-hint-btn:disabled { opacity: 0.4; cursor: default; }
+    .jeo-msg { font-size: 0.85rem; color: var(--text2); min-height: 1.2rem; margin-top: 8px; }
     .score-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 16px;
-      background: var(--bg2);
-      border-bottom: 1px solid var(--border);
-      font-size: 0.8rem;
-      color: var(--text2);
-      flex-shrink: 0;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 16px; background: var(--bg2);
+      border-bottom: 1px solid var(--border); font-size: 0.8rem;
+      color: var(--text3); flex-shrink: 0;
     }
     .score-bar strong { color: var(--gold); }
 
-    /* ── CHRONO ORDER ── */
-    .chrono-body {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      padding: 20px 16px;
-      overflow-y: auto;
+    /* ── Wordle ── */
+    .wordle-body { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; align-items: center; }
+    .wordle-clue {
+      background: var(--bg2); border: 1px solid var(--border2);
+      border-radius: 10px; padding: 16px; font-size: clamp(0.9rem, 2.5vw, 1rem);
+      line-height: 1.7; color: var(--text); width: 100%; max-width: 500px;
     }
-    .chrono-instruction {
-      font-size: 0.85rem;
-      color: var(--text2);
-      text-align: center;
+    .wordle-clue .blank {
+      background: var(--border2); border-radius: 4px;
+      padding: 1px 6px; letter-spacing: 0.15em; font-style: italic;
     }
+    .wordle-grid {
+      display: flex; flex-direction: column; gap: 5px; align-items: center;
+    }
+    .wordle-row { display: flex; gap: 5px; }
+    .wordle-tile {
+      width: var(--tile); height: var(--tile);
+      border: 2px solid var(--border2); border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Playfair Display', serif; font-size: clamp(0.9rem, 3vw, 1.4rem);
+      font-weight: 700; text-transform: uppercase; transition: background 0.3s, border-color 0.3s;
+    }
+    .wordle-tile.correct { background: var(--correct); border-color: var(--correct); color: #fff; }
+    .wordle-tile.present { background: var(--present); border-color: var(--present); color: #fff; }
+    .wordle-tile.absent  { background: var(--absent);  border-color: var(--absent);  color: #fff; }
+    .wordle-tile.active  { border-color: var(--text2); }
+    .wordle-input-row { display: flex; gap: 8px; width: 100%; max-width: 500px; }
+    .wordle-input {
+      flex: 1; background: var(--bg2); border: 2px solid var(--border2);
+      border-radius: 8px; padding: 12px 16px; color: var(--text);
+      font-family: 'Playfair Display', serif; font-size: 1.1rem;
+      letter-spacing: 0.12em; text-transform: uppercase; outline: none;
+    }
+    .wordle-input:focus { border-color: var(--gold); }
+    .wordle-submit {
+      background: var(--gold); color: #1c1510;
+      border: none; border-radius: 8px; padding: 12px 20px;
+      font-family: 'Playfair Display', serif; font-size: 0.95rem;
+      cursor: pointer; white-space: nowrap;
+    }
+    .wordle-submit:hover { opacity: 0.85; }
+    .wordle-msg { font-size: 0.85rem; color: var(--text2); min-height: 1.2rem; text-align: center; }
+    .wordle-keyboard { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 6px; }
+    .wordle-kb-row { display: flex; gap: 4px; justify-content: center; }
+    .wordle-key {
+      background: var(--bg3); border: 1px solid var(--border2); border-radius: 4px;
+      padding: 0; height: 42px; min-width: 30px; flex: 1; max-width: 44px;
+      font-family: 'Playfair Display', serif; font-size: 0.85rem; font-weight: 700;
+      color: var(--text); cursor: pointer; text-transform: uppercase;
+      transition: background 0.2s;
+    }
+    .wordle-key.wide { max-width: 60px; font-size: 0.72rem; }
+    .wordle-key.correct { background: var(--correct); border-color: var(--correct); color: #fff; }
+    .wordle-key.present { background: var(--present); border-color: var(--present); color: #fff; }
+    .wordle-key.absent  { background: var(--absent);  border-color: var(--absent);  color: #666; }
+
+    /* ── Chrono ── */
+    .chrono-body { flex: 1; overflow-y: auto; padding: 20px 16px; display: flex; flex-direction: column; gap: 16px; }
+    .chrono-instr { font-size: 0.85rem; color: var(--text3); text-align: center; font-style: italic; }
     .chrono-list { display: flex; flex-direction: column; gap: 10px; }
     .chrono-card {
-      background: var(--bg2);
-      border: 2px solid var(--border2);
-      border-radius: 10px;
-      padding: 14px 16px;
-      cursor: grab;
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      transition: border-color 0.2s, transform 0.15s;
-      user-select: none;
+      background: var(--bg2); border: 2px solid var(--border2);
+      border-radius: 10px; padding: 14px 14px 14px 12px;
+      display: flex; align-items: flex-start; gap: 10px;
+      cursor: grab; user-select: none; transition: border-color 0.2s, background 0.2s;
+      position: relative;
     }
-    .chrono-card:active { cursor: grabbing; }
-    .chrono-card.dragging { opacity: 0.5; transform: scale(0.97); }
-    .chrono-card.drag-over { border-color: var(--gold); }
-    .chrono-card.correct-pos { border-color: var(--correct); }
-    .chrono-card.wrong-pos { border-color: var(--accent); }
-    .chrono-handle { color: var(--text3); font-size: 1.2rem; padding-top: 2px; }
-    .chrono-text { font-size: 0.9rem; line-height: 1.6; flex: 1; }
-    .chrono-arrows {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      flex-shrink: 0;
+    .chrono-card.dragging { opacity: 0.5; cursor: grabbing; }
+    .chrono-card.drag-over { border-color: var(--gold); background: var(--bg3); }
+    .chrono-card.correct { border-color: var(--correct); background: #1a2e18; }
+    .chrono-card.wrong   { border-color: var(--accent); }
+    .chrono-rank {
+      font-family: 'Playfair Display', serif; font-size: 1.3rem;
+      color: var(--gold); min-width: 28px; text-align: center; flex-shrink: 0;
     }
+    .chrono-text { font-size: 0.9rem; line-height: 1.5; color: var(--text); flex: 1; }
+    .chrono-arrows { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
     .chrono-arrow {
-      background: none;
-      border: 1px solid var(--border2);
-      color: var(--text2);
-      width: 34px;
-      height: 30px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      touch-action: manipulation;
+      background: none; border: 1px solid var(--border2); color: var(--text3);
+      border-radius: 4px; padding: 2px 6px; cursor: pointer; font-size: 0.7rem;
+      line-height: 1;
     }
-    .chrono-arrow:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
-    .chrono-arrow:disabled { opacity: 0.2; cursor: default; }
-    .chrono-reveal { font-size: 0.75rem; color: var(--text3); margin-top: 6px; font-style: italic; }
-    .chrono-submit-wrap { padding: 0 16px 20px; }
+    .chrono-arrow:hover { border-color: var(--gold); color: var(--gold); }
     .chrono-submit {
-      width: 100%;
-      background: var(--gold);
-      border: none;
-      color: #1c1510;
-      padding: 16px;
-      border-radius: 10px;
-      font-family: 'Playfair Display', serif;
-      font-size: 1.05rem;
-      cursor: pointer;
+      background: var(--gold); color: #1c1510;
+      border: none; border-radius: 10px; padding: 14px;
+      font-family: 'Playfair Display', serif; font-size: 1rem;
+      cursor: pointer; width: 100%;
     }
-    .chrono-submit:hover { background: #d9a240; }
-    .chrono-submit:disabled { opacity: 0.4; cursor: default; }
+    .chrono-submit:hover { opacity: 0.85; }
 
-    /* ── WORDLE ── */
-    .wordle-body {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 16px;
-      gap: 14px;
-      overflow-y: auto;
+    /* ── Round result (shown at bottom of game screens) ── */
+    .round-result {
+      background: var(--bg2); border-top: 2px solid var(--gold);
+      padding: 20px; display: none; flex-direction: column;
+      align-items: center; gap: 12px; flex-shrink: 0;
     }
-    .wordle-clue {
-      background: var(--bg2);
-      border: 1px solid var(--border2);
-      border-radius: 10px;
-      padding: 14px 18px;
-      font-size: 0.9rem;
-      line-height: 1.7;
-      text-align: center;
-      width: 100%;
-      max-width: 480px;
+    .round-result.visible { display: flex; }
+    .rr-icon { font-size: 2rem; }
+    .rr-pts { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--gold); }
+    .rr-msg { font-size: 0.85rem; color: var(--text2); text-align: center; }
+    .rr-next {
+      background: var(--gold); color: #1c1510;
+      border: none; border-radius: 10px; padding: 14px 36px;
+      font-family: 'Playfair Display', serif; font-size: 1rem;
+      cursor: pointer; letter-spacing: 0.04em;
     }
-    .wordle-clue em { color: var(--gold); font-style: normal; }
-    .wordle-grid {
-      display: grid;
-      grid-template-columns: repeat(var(--word-len), var(--tile));
-      gap: 5px;
-    }
-    .tile {
-      width: var(--tile);
-      height: var(--tile);
-      border: 2px solid var(--border2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(1rem, 3.5vw, 1.4rem);
-      font-weight: bold;
-      text-transform: uppercase;
-      border-radius: 4px;
-      transition: background 0.3s, border-color 0.3s, color 0.3s;
-    }
-    .tile.filled { border-color: var(--text3); }
-    .tile.correct { background: var(--correct); border-color: var(--correct); color: white; }
-    .tile.present { background: var(--present); border-color: var(--present); color: white; }
-    .tile.absent  { background: var(--absent);  border-color: var(--absent);  color: var(--text2); }
-    .wordle-keyboard {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      width: 100%;
-      max-width: 480px;
-    }
-    .kb-row { display: flex; justify-content: center; gap: 5px; }
-    .kb-key {
-      background: var(--bg3);
-      border: 1px solid var(--border2);
-      color: var(--text);
-      border-radius: 5px;
-      padding: 12px 8px;
-      min-width: 32px;
-      text-align: center;
-      cursor: pointer;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      font-family: 'Lora', serif;
-      transition: background 0.2s;
-      touch-action: manipulation;
-    }
-    .kb-key.wide { min-width: 52px; font-size: 0.65rem; }
-    .kb-key.correct { background: var(--correct); border-color: var(--correct); color: white; }
-    .kb-key.present { background: var(--present); border-color: var(--present); color: white; }
-    .kb-key.absent  { background: var(--absent);  border-color: var(--absent);  color: var(--text3); }
-    .kb-key:hover { border-color: var(--gold); }
-    .wordle-msg {
-      font-size: 0.9rem;
-      color: var(--text2);
-      text-align: center;
-      min-height: 1.4em;
-    }
+    .rr-next:hover { opacity: 0.85; }
 
-    /* ── JEOPARDY ── */
-    .jeo-body {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px 16px;
-      gap: 16px;
-      max-width: 520px;
-      margin: 0 auto;
-      width: 100%;
+    /* ── Connective Screen ── */
+    .connective-body {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 32px 20px; gap: 24px;
     }
-    .jeo-label {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
+    .conn-round-badge {
+      font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em;
       color: var(--text3);
     }
-    .jeo-clue {
-      background: var(--bg2);
-      border: 1px solid var(--border2);
-      border-radius: 12px;
-      padding: 18px 20px;
-      font-size: 0.95rem;
-      line-height: 1.7;
+    .conn-score-big {
+      font-family: 'Playfair Display', serif; font-size: 2.8rem; color: var(--gold);
       text-align: center;
-      width: 100%;
     }
-    .jeo-clue em { color: var(--gold); font-style: normal; }
-    .jeo-choices { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-    .choice-btn {
-      background: var(--bg2);
-      border: 2px solid var(--border2);
-      color: var(--text);
-      padding: 14px 18px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      font-family: 'Lora', serif;
-      text-align: left;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      transition: border-color 0.2s;
+    .conn-score-label { font-size: 0.8rem; color: var(--text3); margin-top: -16px; text-align: center; }
+    .conn-divider { width: 60px; height: 1px; background: var(--border2); }
+    .conn-text {
+      font-size: 1rem; line-height: 1.7; color: var(--text2);
+      text-align: center; max-width: 400px; font-style: italic;
     }
-    .choice-btn:hover:not(:disabled) { border-color: var(--gold); }
-    .choice-btn:disabled { cursor: default; }
-    .choice-btn .choice-letter {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: var(--border2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 0.8rem;
-      flex-shrink: 0;
+    .conn-next-century {
+      font-size: 0.75rem; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--text3);
+      text-align: center;
     }
-    .choice-btn.correct-ans { border-color: var(--correct); background: rgba(83,141,78,0.15); }
-    .choice-btn.wrong-ans   { border-color: var(--accent);  background: rgba(201,24,74,0.1); }
-    .jeo-hint-btn {
-      background: none;
-      border: 1px solid var(--border2);
-      color: var(--text2);
-      padding: 8px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.8rem;
+    .conn-next-century strong { color: var(--text); }
+    .conn-next-btn {
+      background: var(--gold); color: #1c1510;
+      border: none; border-radius: 10px; padding: 14px 36px;
+      font-family: 'Playfair Display', serif; font-size: 1rem;
+      cursor: pointer; letter-spacing: 0.04em; transition: opacity 0.2s;
     }
-    .jeo-hint-btn:hover { border-color: var(--gold); }
-    .jeo-msg { font-size: 0.9rem; color: var(--text2); text-align: center; min-height: 1.4em; }
+    .conn-next-btn:hover { opacity: 0.85; }
 
-    /* ── Mode Result ── */
-    .mode-result {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 14px;
-      padding: 24px 20px;
-      border-top: 1px solid var(--border);
-    }
-    .mode-result.show { display: flex; }
-    .mode-result-icon { font-size: 2.5rem; }
-    .mode-result-score {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.8rem;
-      color: var(--gold);
-    }
-    .mode-result-msg { font-size: 0.9rem; color: var(--text2); text-align: center; }
-    .mode-result-btn {
-      background: var(--gold);
-      border: none;
-      color: #1c1510;
-      padding: 14px 36px;
-      border-radius: 10px;
-      font-family: 'Playfair Display', serif;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    .mode-result-btn:hover { background: #d9a240; }
-
-    /* ── Final Done Screen ── */
+    /* ── Completion Screen ── */
     .done-body {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 24px;
-      gap: 18px;
-      text-align: center;
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; padding: 32px 20px; gap: 16px;
     }
-    .done-icon { font-size: 3.5rem; }
+    .done-icon { font-size: 3rem; }
     .done-title {
       font-family: 'Playfair Display', serif;
-      font-size: 1.8rem;
-      color: var(--gold);
+      font-size: clamp(1.4rem, 5vw, 1.9rem); color: var(--gold);
+      text-align: center;
     }
-    .done-scores {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      width: 100%;
-      max-width: 320px;
-    }
-    .done-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 16px;
-      background: var(--bg2);
-      border-radius: 8px;
-      font-size: 0.9rem;
-    }
-    .done-row .pts { color: var(--gold); font-weight: bold; }
+    .done-thread-name { font-size: 0.9rem; color: var(--text2); font-style: italic; text-align: center; }
     .done-total {
-      display: flex;
-      justify-content: space-between;
-      padding: 12px 16px;
-      background: var(--bg3);
-      border: 1px solid var(--gold);
-      border-radius: 8px;
       font-family: 'Playfair Display', serif;
-      font-size: 1.1rem;
+      font-size: 2.6rem; color: var(--gold); text-align: center;
     }
-    .done-total .pts { color: var(--gold); }
-    .done-streak { font-size: 0.9rem; color: var(--text2); }
-    .done-streak strong { color: var(--gold); }
-    .done-btn {
-      background: var(--gold);
-      border: none;
-      color: #1c1510;
-      padding: 14px 36px;
-      border-radius: 10px;
-      font-family: 'Playfair Display', serif;
-      font-size: 1rem;
-      cursor: pointer;
-      margin-top: 8px;
+    .done-total-label { font-size: 0.75rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-top: -12px; }
+    .done-rounds {
+      width: 100%; max-width: 400px;
+      background: var(--bg2); border: 1px solid var(--border2);
+      border-radius: 12px; overflow: hidden;
     }
-    .done-btn:hover { background: #d9a240; }
-    .done-btn.secondary {
-      background: none;
-      border: 1px solid var(--border2);
-      color: var(--text2);
+    .done-round-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 16px; border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
     }
-    .done-btn.secondary:hover { border-color: var(--gold); color: var(--gold); }
+    .done-round-row:last-child { border-bottom: none; }
+    .done-round-century { color: var(--text2); }
+    .done-round-game { color: var(--text3); font-size: 0.75rem; }
+    .done-round-pts { font-family: 'Playfair Display', serif; color: var(--gold); font-size: 1rem; }
+    .done-browse-btn {
+      background: var(--gold); color: #1c1510;
+      border: none; border-radius: 10px; padding: 14px 36px;
+      font-family: 'Playfair Display', serif; font-size: 1rem;
+      cursor: pointer; letter-spacing: 0.04em;
+      text-decoration: none; display: inline-block;
+    }
+    .done-browse-btn:hover { opacity: 0.85; }
+    .done-play-again {
+      background: none; border: 1px solid var(--border2); color: var(--text2);
+      border-radius: 10px; padding: 12px 28px;
+      font-family: 'Lora', serif; font-size: 0.9rem; cursor: pointer;
+    }
+    .done-play-again:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ── Sunday Classic mode (reused from game-classic) ── */
+    .deck-body {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; padding: 32px 20px; gap: 24px;
+    }
+    .deck-intro { text-align: center; color: var(--text2); font-size: 1rem; line-height: 1.6; max-width: 400px; }
+    .deck-meta { display: flex; gap: 28px; color: var(--text3); font-size: 0.8rem; text-align: center; }
+    .deck-meta span strong { display: block; color: var(--gold); font-size: 1.4rem; }
+    .deck-opts { display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 400px; }
+    .deck-btn {
+      background: var(--bg2); border: 2px solid var(--border2); border-radius: 12px;
+      padding: 20px 24px; cursor: pointer; display: flex; align-items: center; gap: 16px;
+      transition: border-color 0.2s, background 0.2s; text-align: left;
+    }
+    .deck-btn:hover { border-color: var(--gold); background: var(--bg3); }
+    .deck-num { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: var(--gold); min-width: 52px; text-align: center; }
+    .deck-name { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: var(--text); margin-bottom: 4px; }
+    .deck-desc { font-size: 0.8rem; color: var(--text3); line-height: 1.4; }
+
+    /* ── Mode result (shared) ── */
+    .mode-result {
+      background: var(--bg2); border-top: 2px solid var(--gold);
+      padding: 20px; display: none; flex-direction: column;
+      align-items: center; gap: 12px; flex-shrink: 0;
+    }
+    .mode-result.visible { display: flex; }
+    .mode-result-icon { font-size: 2rem; }
+    .mode-result-score { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--gold); }
+    .mode-result-msg { font-size: 0.85rem; color: var(--text2); text-align: center; }
+    .mode-result-btn {
+      background: var(--gold); color: #1c1510;
+      border: none; border-radius: 10px; padding: 13px 30px;
+      font-family: 'Playfair Display', serif; font-size: 0.95rem; cursor: pointer;
+    }
+    .mode-result-btn:hover { opacity: 0.85; }
+
+    /* ── Sunday study screen ── */
+    .study-hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .study-progress { font-size: 0.85rem; color: var(--text3); text-align: center; flex: 1; }
+    .study-progress strong { color: var(--gold); }
+    .study-hdr-btn {
+      background: none; border: 1px solid var(--border2); color: var(--text2);
+      padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; white-space: nowrap;
+    }
+    .study-hdr-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .study-card-wrap {
+      flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px 16px;
+    }
+    .study-card {
+      background: var(--bg2); border: 2px solid var(--border2);
+      border-radius: 16px; width: 100%; max-width: 480px; overflow: hidden;
+    }
+    .study-card-body { padding: 20px; }
+    .study-card-era { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+    .study-card-century { font-family: 'Playfair Display', serif; font-size: 0.95rem; color: var(--text2); font-style: italic; margin-bottom: 12px; }
+    .study-card-fact { font-size: clamp(0.9rem, 2.5vw, 1.05rem); line-height: 1.7; }
+    .study-card-map { border-top: 1px solid var(--border); }
+    .study-card-map-label { padding: 8px 12px 0; font-size: 0.7rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; }
+    .study-card-map iframe { width: 100%; height: 140px; border: none; display: block; filter: sepia(0.4) brightness(0.8); }
+    .study-nav { display: flex; gap: 10px; justify-content: center; padding: 0 16px 20px; flex-shrink: 0; }
+    .study-nav button {
+      background: var(--bg2); border: 1px solid var(--border2); color: var(--text2);
+      padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 0.9rem;
+      transition: border-color 0.2s;
+    }
+    .study-nav button:hover { border-color: var(--gold); color: var(--gold); }
+    .study-nav button.primary { background: var(--gold); color: #1c1510; border-color: var(--gold); }
+
+    /* ── Hub (Sunday classic) ── */
+    .hub-body {
+      flex: 1; overflow-y: auto; padding: 20px 16px; display: flex; flex-direction: column; gap: 16px;
+    }
+    .hub-century {
+      font-family: 'Playfair Display', serif; font-size: 1rem;
+      color: var(--text2); text-align: center; font-style: italic;
+    }
+    .hub-score-row {
+      display: flex; gap: 12px; justify-content: center;
+    }
+    .hub-score-box {
+      background: var(--bg2); border: 1px solid var(--border2);
+      border-radius: 8px; padding: 12px 16px; text-align: center; flex: 1; max-width: 140px;
+    }
+    .hub-score-box .val { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--gold); }
+    .hub-score-box .lbl { font-size: 0.7rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; }
+    .hub-modes { display: flex; flex-direction: column; gap: 12px; }
+    .hub-mode {
+      background: var(--bg2); border: 2px solid var(--border2); border-radius: 12px;
+      padding: 16px; cursor: pointer; display: flex; align-items: center; gap: 14px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .hub-mode:hover { border-color: var(--gold); background: var(--bg3); }
+    .hub-mode.done { border-color: var(--correct); opacity: 0.7; cursor: default; }
+    .hub-mode-icon { font-size: 1.8rem; flex-shrink: 0; }
+    .hub-mode-info { flex: 1; }
+    .hub-mode-name { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--text); margin-bottom: 2px; }
+    .hub-mode-desc { font-size: 0.75rem; color: var(--text3); }
+    .hub-mode-pts { font-size: 0.8rem; color: var(--text2); white-space: nowrap; }
+    .hub-mode-done-badge { font-size: 0.75rem; color: var(--correct); font-weight: bold; }
+    .hub-new-session {
+      background: none; border: 1px solid var(--border2); color: var(--text2);
+      border-radius: 8px; padding: 12px; cursor: pointer; font-size: 0.85rem; text-align: center;
+    }
+    .hub-new-session:hover { border-color: var(--gold); color: var(--gold); }
+    .hub-done-all {
+      background: var(--bg2); border: 1px solid var(--correct);
+      border-radius: 10px; padding: 14px; text-align: center;
+      font-size: 0.9rem; color: var(--correct);
+    }
+    .hub-done-link { display: block; margin-top: 8px; font-size: 0.8rem; color: var(--text2); text-decoration: none; }
+    .hub-done-link:hover { color: var(--gold); }
+
+    /* ── Sunday Done ── */
+    .sdone-body {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; padding: 32px 20px; gap: 16px;
+    }
+    .sdone-icon { font-size: 3rem; }
+    .sdone-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--gold); text-align: center; }
+    .sdone-scores { width: 100%; max-width: 380px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 12px; overflow: hidden; }
+    .sdone-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .sdone-row:last-child { border-bottom: none; }
+    .sdone-lbl { color: var(--text2); }
+    .sdone-val { font-family: 'Playfair Display', serif; color: var(--gold); font-size: 1.1rem; }
+    .sdone-streak { font-size: 0.9rem; color: var(--text2); text-align: center; }
+    .sdone-streak strong { color: var(--gold); }
+    .sdone-btn {
+      background: var(--gold); color: #1c1510;
+      border: none; border-radius: 10px; padding: 14px 36px;
+      font-family: 'Playfair Display', serif; font-size: 1rem; cursor: pointer;
+    }
+    .sdone-btn:hover { opacity: 0.85; }
   </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════
-     SCREEN: Deck Select
+<!-- ════════════════════════════════════════════════
+     SCREEN: Thread Intro (or Sunday)
 ════════════════════════════════════════════════ -->
-<div id="screen-deck" class="screen active">
+<div id="screen-thread" class="screen">
   <div class="hdr">
+    <a class="hdr-home" href="index.html">🏛 Home</a>
     <div class="hdr-title">Century Histories</div>
-    <div class="hdr-sub">Choose Your Session</div>
-    <a class="hdr-home" href="index.html">🏛 Home</a>
+    <div class="hdr-sub" id="thread-day-label">Today's Journey</div>
   </div>
-  <div class="deck-body">
-    <div class="deck-intro">
-      Study a set of historical facts, then test yourself with three game modes.
+  <!-- Normal Mon–Sat thread -->
+  <div id="thread-intro" class="thread-body">
+    <div class="thread-icon" id="thread-icon"></div>
+    <div class="thread-name" id="thread-name"></div>
+    <div class="thread-desc" id="thread-desc"></div>
+    <div class="thread-meta">
+      <span><strong>7</strong>Centuries</span>
+      <span id="thread-diff-badge"></span>
+      <span><strong>700</strong>Pts max</span>
     </div>
-    <div class="deck-meta">
-      <span><strong id="deck-seen-count">0</strong>facts studied</span>
-      <span><strong id="deck-streak">0</strong>day streak</span>
-    </div>
-    <div class="deck-opts">
-      <button class="deck-btn" onclick="startSession(5)">
-        <div class="deck-num">5</div>
-        <div>
-          <div class="deck-name">Quick Session</div>
-          <div class="deck-desc">5 facts from one century · ~5 minutes</div>
-        </div>
-      </button>
-      <button class="deck-btn" onclick="startSession(10)">
-        <div class="deck-num">10</div>
-        <div>
-          <div class="deck-name">Standard Session</div>
-          <div class="deck-desc">10 facts from one century · ~10 minutes</div>
-        </div>
-      </button>
-      <button class="deck-btn" onclick="startSession(23)">
-        <div class="deck-num">23</div>
-        <div>
-          <div class="deck-name">Grand Tour</div>
-          <div class="deck-desc">One fact from each of the 23 centuries · ~20 minutes</div>
-        </div>
-      </button>
+    <button class="thread-begin-btn" onclick="beginJourney()">Begin Journey →</button>
+    <a class="thread-classic-link" href="game-classic.html">Classic mode</a>
+  </div>
+  <!-- Sunday Pick Your Deck -->
+  <div id="sunday-intro" class="thread-body" style="display:none">
+    <div class="thread-icon">🎁</div>
+    <div class="thread-name">Sunday Bonus</div>
+    <div class="thread-desc">Pick your deck and explore any century — no thread, no limits.</div>
+    <div class="thread-sunday">
+      <h3>Choose Your Session</h3>
+      <p>Today is your free day. Pick a size and dive in.</p>
+      <div class="sunday-opts">
+        <button class="sunday-btn" onclick="startClassicSession(5)">
+          <span class="sunday-btn-num">I</span>
+          <div><div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--text);">Quick</div>
+          <div style="font-size:0.78rem;color:var(--text3)">5 facts · 1 century · up to 700 pts</div></div>
+        </button>
+        <button class="sunday-btn" onclick="startClassicSession(10)">
+          <span class="sunday-btn-num">II</span>
+          <div><div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--text);">Standard</div>
+          <div style="font-size:0.78rem;color:var(--text3)">10 facts · 1 century · up to 700 pts</div></div>
+        </button>
+        <button class="sunday-btn" onclick="startClassicSession(23)">
+          <span class="sunday-btn-num">III</span>
+          <div><div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--text);">Grand Tour</div>
+          <div style="font-size:0.78rem;color:var(--text3)">23 facts · all centuries · up to 700 pts</div></div>
+        </button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     SCREEN: Study
+<!-- ════════════════════════════════════════════════
+     SCREEN: Learn (fact card before each game)
 ════════════════════════════════════════════════ -->
-<div id="screen-study" class="screen">
+<div id="screen-learn" class="screen">
   <div class="hdr">
-    <div class="hdr-title">Study</div>
-    <div class="study-hdr">
-      <button class="study-hdr-btn" onclick="studyNav(-1)" id="study-prev-btn">← Prev</button>
-      <div class="study-progress">
-        Fact <strong id="study-idx">1</strong> of <strong id="study-total">5</strong>
-      </div>
-      <button class="study-hdr-btn" onclick="skipToGame()">Skip to Game →</button>
-    </div>
+    <div class="hdr-title" id="learn-thread-name"></div>
+    <div class="hdr-sub" id="learn-round-sub"></div>
   </div>
-  <div class="study-card-wrap">
-    <div class="study-card" id="study-card">
-      <div class="study-card-body">
-        <div class="study-card-era" id="sc-era"></div>
-        <div class="study-card-century" id="sc-century"></div>
-        <div class="study-card-fact" id="sc-fact"></div>
+  <div class="journey-progress" id="learn-progress-bar"></div>
+  <div class="learn-body">
+    <div class="learn-century" id="learn-century-label"></div>
+    <div class="learn-card">
+      <div class="learn-card-body">
+        <div class="learn-era-badge" id="learn-era-badge"></div>
+        <div class="learn-fact" id="learn-fact-text"></div>
       </div>
-      <iframe class="study-card-map" id="sc-map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-      <div class="study-card-loc" id="sc-loc"></div>
+      <div class="learn-map-wrap" id="learn-map-wrap">
+        <div class="learn-map-label" id="learn-map-label"></div>
+        <div class="learn-map">
+          <iframe id="learn-map-iframe" src="" loading="lazy" referrerpolicy="no-referrer"></iframe>
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="study-nav">
-    <button class="study-nav-btn" onclick="studyNav(-1)" id="study-prev-nav">← Back</button>
-    <button class="study-nav-btn primary" onclick="studyNav(1)" id="study-next-nav">Next →</button>
+    <div class="learn-round-label" id="learn-game-hint"></div>
+    <button class="learn-got-it" onclick="startRoundGame()">Ready — Test me →</button>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     SCREEN: Study Done
+<!-- ════════════════════════════════════════════════
+     SCREEN: Jeopardy (single-fact multiple choice)
 ════════════════════════════════════════════════ -->
-<div id="screen-study-done" class="screen">
+<div id="screen-jeo" class="screen">
   <div class="hdr">
-    <div class="hdr-title">Ready to Play?</div>
+    <div class="hdr-title">What Is It?</div>
+    <div class="hdr-sub" id="jeo-round-sub"></div>
   </div>
-  <div class="study-done-body">
-    <div class="study-done-icon">🎓</div>
-    <div class="study-done-title">Session Complete!</div>
-    <div class="study-done-sub" id="study-done-sub">
-      You've studied 5 facts.<br>Now test your memory with three game modes.
-    </div>
-    <button class="study-done-btn" onclick="startGames()">Start Games →</button>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════
-     SCREEN: Hub
-════════════════════════════════════════════════ -->
-<div id="screen-hub" class="screen">
-  <div class="hdr">
-    <div class="hdr-title">Game Hub</div>
-    <div class="hdr-sub" id="hub-sub">Choose a mode</div>
-    <a class="hdr-home" href="index.html">🏛 Home</a>
-  </div>
-  <div class="hub-body">
-    <div>
-      <div class="hub-session-label">Current Session</div>
-      <div class="hub-session-name" id="hub-session-name">—</div>
-    </div>
-    <div class="hub-score">
-      <span>Score: <strong id="hub-score">0</strong></span>
-      <span>Streak: <strong id="hub-streak">0</strong> 🔥</span>
-    </div>
-    <div class="hub-modes">
-      <div class="mode-card" id="mode-chrono-card" onclick="startChrono()">
-        <div class="mode-icon">📅</div>
-        <div class="mode-info">
-          <div class="mode-name">Chrono Order</div>
-          <div class="mode-desc">Arrange 4 events from oldest to newest</div>
-        </div>
-        <div class="mode-pts" id="mode-chrono-pts">up to 100</div>
-      </div>
-      <div class="mode-card" id="mode-wordle-card" onclick="startWordle()">
-        <div class="mode-icon">🔤</div>
-        <div class="mode-info">
-          <div class="mode-name">Missing Word</div>
-          <div class="mode-desc">Guess the hidden keyword from the fact</div>
-        </div>
-        <div class="mode-pts" id="mode-wordle-pts">up to 300</div>
-      </div>
-      <div class="mode-card" id="mode-jeo-card" onclick="startJeo()">
-        <div class="mode-icon">❓</div>
-        <div class="mode-info">
-          <div class="mode-name">What Is It?</div>
-          <div class="mode-desc">Identify the missing person, place, or event</div>
-        </div>
-        <div class="mode-pts" id="mode-jeo-pts">up to 300</div>
-      </div>
-    </div>
-    <button class="hub-new-session" onclick="newSession()">↩ New Session</button>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════
-     SCREEN: Chrono Order
-════════════════════════════════════════════════ -->
-<div id="screen-chrono" class="screen">
-  <div class="hdr">
-    <button class="hdr-back" onclick="goHub()">← Hub</button>
-    <div class="hdr-title">Chrono Order</div>
-  </div>
+  <div class="journey-progress" id="jeo-progress-bar"></div>
   <div class="score-bar">
-    <span>Session Score: <strong id="chrono-session-score">0</strong></span>
-    <span>Drag oldest → newest</span>
+    <span id="jeo-value-left">Worth 100 pts</span>
+    <span>Journey score: <strong id="jeo-journey-score">0</strong></span>
   </div>
-  <div class="chrono-body">
-    <div class="chrono-instruction">Arrange these events from <strong>oldest</strong> (top) to <strong>most recent</strong> (bottom)</div>
-    <div class="chrono-list" id="chrono-list"></div>
+  <div class="jeo-body">
+    <div class="jeo-label">The clue is…</div>
+    <div class="jeo-clue" id="jeo-clue"></div>
+    <div class="jeo-choices" id="jeo-choices"></div>
+    <button class="jeo-hint-btn" id="jeo-hint-btn" onclick="useJeoHint()">Use Hint (−50 pts)</button>
+    <div class="jeo-msg" id="jeo-msg"></div>
   </div>
-  <div class="chrono-submit-wrap">
-    <button class="chrono-submit" id="chrono-submit-btn" onclick="checkChrono()">Check Order</button>
-  </div>
-  <div class="mode-result" id="chrono-result">
-    <div class="mode-result-icon" id="chrono-res-icon">🏆</div>
-    <div class="mode-result-score" id="chrono-res-score"></div>
-    <div class="mode-result-msg" id="chrono-res-msg"></div>
-    <button class="mode-result-btn" onclick="goHub()">Back to Hub</button>
+  <div class="round-result" id="jeo-result">
+    <div class="rr-icon" id="jeo-res-icon">🏆</div>
+    <div class="rr-pts" id="jeo-res-pts"></div>
+    <div class="rr-msg" id="jeo-res-msg"></div>
+    <button class="rr-next" id="jeo-next-btn" onclick="afterRound()">Continue →</button>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     SCREEN: Wordle
+<!-- ════════════════════════════════════════════════
+     SCREEN: Wordle (missing word)
 ════════════════════════════════════════════════ -->
 <div id="screen-wordle" class="screen">
   <div class="hdr">
-    <button class="hdr-back" onclick="goHub()">← Hub</button>
     <div class="hdr-title">Missing Word</div>
+    <div class="hdr-sub" id="wordle-round-sub"></div>
   </div>
+  <div class="journey-progress" id="wordle-progress-bar"></div>
   <div class="score-bar">
-    <span>Session Score: <strong id="wordle-session-score">0</strong></span>
-    <span id="wordle-attempts-left">6 attempts</span>
+    <span id="wordle-value-left">Worth 100 pts</span>
+    <span>Journey score: <strong id="wordle-journey-score">0</strong></span>
   </div>
   <div class="wordle-body">
     <div class="wordle-clue" id="wordle-clue"></div>
     <div class="wordle-grid" id="wordle-grid"></div>
+    <div class="wordle-input-row" id="wordle-input-row">
+      <input class="wordle-input" id="wordle-input" type="text" maxlength="12"
+             placeholder="Guess…" autocomplete="off" autocorrect="off" spellcheck="false"
+             oninput="this.value=this.value.toUpperCase()"
+             onkeydown="if(event.key==='Enter')submitWordle()">
+      <button class="wordle-submit" onclick="submitWordle()">Enter</button>
+    </div>
     <div class="wordle-msg" id="wordle-msg"></div>
     <div class="wordle-keyboard" id="wordle-keyboard"></div>
   </div>
-  <div class="mode-result" id="wordle-result">
-    <div class="mode-result-icon" id="wordle-res-icon">🏆</div>
-    <div class="mode-result-score" id="wordle-res-score"></div>
-    <div class="mode-result-msg" id="wordle-res-msg"></div>
-    <button class="mode-result-btn" onclick="goHub()">Back to Hub</button>
+  <div class="round-result" id="wordle-result">
+    <div class="rr-icon" id="wordle-res-icon">🏆</div>
+    <div class="rr-pts" id="wordle-res-pts"></div>
+    <div class="rr-msg" id="wordle-res-msg"></div>
+    <button class="rr-next" onclick="afterRound()">Continue →</button>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     SCREEN: Jeopardy
+<!-- ════════════════════════════════════════════════
+     SCREEN: Chrono (put facts in order)
 ════════════════════════════════════════════════ -->
-<div id="screen-jeo" class="screen">
+<div id="screen-chrono" class="screen">
   <div class="hdr">
-    <button class="hdr-back" onclick="goHub()">← Hub</button>
+    <div class="hdr-title">Chrono Order</div>
+    <div class="hdr-sub" id="chrono-round-sub"></div>
+  </div>
+  <div class="journey-progress" id="chrono-progress-bar"></div>
+  <div class="score-bar">
+    <span>Worth up to 100 pts</span>
+    <span>Journey score: <strong id="chrono-journey-score">0</strong></span>
+  </div>
+  <div class="chrono-body">
+    <div class="chrono-instr">Arrange oldest → newest. Drag or use arrows.</div>
+    <div class="chrono-list" id="chrono-list"></div>
+    <button class="chrono-submit" id="chrono-submit" onclick="submitChrono()">Submit Order</button>
+  </div>
+  <div class="round-result" id="chrono-result">
+    <div class="rr-icon" id="chrono-res-icon">🏆</div>
+    <div class="rr-pts" id="chrono-res-pts"></div>
+    <div class="rr-msg" id="chrono-res-msg"></div>
+    <button class="rr-next" onclick="afterRound()">Continue →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     SCREEN: Connective (between rounds)
+════════════════════════════════════════════════ -->
+<div id="screen-connective" class="screen">
+  <div class="hdr">
+    <div class="hdr-title" id="conn-thread-name"></div>
+    <div class="hdr-sub" id="conn-sub"></div>
+  </div>
+  <div class="journey-progress" id="conn-progress-bar"></div>
+  <div class="connective-body">
+    <div class="conn-round-badge" id="conn-round-badge"></div>
+    <div class="conn-score-big" id="conn-score"></div>
+    <div class="conn-score-label">pts this round</div>
+    <div class="conn-divider"></div>
+    <div class="conn-text" id="conn-text"></div>
+    <div class="conn-next-century" id="conn-next-century"></div>
+    <button class="conn-next-btn" onclick="goToNextRound()">Next Century →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     SCREEN: Journey Complete
+════════════════════════════════════════════════ -->
+<div id="screen-done" class="screen">
+  <div class="hdr">
+    <a class="hdr-home" href="index.html">🏛 Home</a>
+    <div class="hdr-title">Journey Complete!</div>
+  </div>
+  <div class="done-body">
+    <div class="done-icon" id="done-icon">🏆</div>
+    <div class="done-title" id="done-title"></div>
+    <div class="done-thread-name" id="done-thread-name"></div>
+    <div class="done-total" id="done-total"></div>
+    <div class="done-total-label">out of 700 pts</div>
+    <div class="done-rounds" id="done-rounds"></div>
+    <a class="done-browse-btn" href="index.html#browse">Explore These Eras →</a>
+    <button class="done-play-again" onclick="location.reload()">Play Again</button>
+  </div>
+</div>
+
+<!-- ═══ SUNDAY CLASSIC SCREENS ═══ -->
+<div id="screen-study" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="goClassicDeck()">← Deck</button>
+    <div class="hdr-title">Study</div>
+  </div>
+  <div class="study-hdr">
+    <div class="study-progress"><strong id="study-idx"></strong> <span id="study-of"></span></div>
+    <button class="study-hdr-btn" onclick="goClassicHub()">Skip to Games →</button>
+  </div>
+  <div class="study-card-wrap">
+    <div class="study-card">
+      <div class="study-card-body">
+        <div class="study-card-era" id="study-era"></div>
+        <div class="study-card-century" id="study-century"></div>
+        <div class="study-card-fact" id="study-fact"></div>
+      </div>
+      <div class="study-card-map" id="study-map">
+        <div class="study-card-map-label" id="study-map-label"></div>
+        <iframe id="study-map-iframe" src="" loading="lazy" referrerpolicy="no-referrer"
+                style="width:100%;height:140px;border:none;display:block;filter:sepia(0.4)brightness(0.8)"></iframe>
+      </div>
+    </div>
+  </div>
+  <div class="study-nav">
+    <button onclick="studyPrev()">← Prev</button>
+    <button onclick="studyNext()" id="study-next-btn" class="primary">Next →</button>
+  </div>
+</div>
+
+<div id="screen-hub" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="goClassicDeck()">← Deck</button>
+    <div class="hdr-title">Game Hub</div>
+    <a class="hdr-home" href="index.html">🏛 Home</a>
+  </div>
+  <div class="hub-body">
+    <div class="hub-century" id="hub-century"></div>
+    <div class="hub-score-row">
+      <div class="hub-score-box"><div class="val" id="hub-score">0</div><div class="lbl">Session pts</div></div>
+      <div class="hub-score-box"><div class="val" id="hub-streak">0</div><div class="lbl">Day streak</div></div>
+    </div>
+    <div class="hub-modes" id="hub-modes"></div>
+    <button class="hub-new-session" onclick="goClassicDeck()">New Session</button>
+  </div>
+</div>
+
+<!-- Sunday classic game screens (jeo/wordle/chrono with hub back button) -->
+<div id="screen-sjeo" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="showScreen('screen-hub')">← Hub</button>
     <div class="hdr-title">What Is It?</div>
   </div>
   <div class="score-bar">
-    <span>Session Score: <strong id="jeo-session-score">0</strong></span>
-    <span id="jeo-value-left">Worth 300 pts</span>
+    <span>Session: <strong id="sjeo-session-score">0</strong></span>
+    <span id="sjeo-value-left">Worth 300 pts</span>
   </div>
-  <div style="flex:1;overflow-y:auto">
-    <div class="jeo-body">
-      <div class="jeo-label">The clue is…</div>
-      <div class="jeo-clue" id="jeo-clue"></div>
-      <div class="jeo-choices" id="jeo-choices"></div>
-      <button class="jeo-hint-btn" id="jeo-hint-btn" onclick="useHint()">Use Hint (−100 pts)</button>
-      <div class="jeo-msg" id="jeo-msg"></div>
-    </div>
+  <div class="jeo-body">
+    <div class="jeo-label">The clue is…</div>
+    <div class="jeo-clue" id="sjeo-clue"></div>
+    <div class="jeo-choices" id="sjeo-choices"></div>
+    <button class="jeo-hint-btn" id="sjeo-hint-btn" onclick="useSJeoHint()">Use Hint (−100 pts)</button>
+    <div class="jeo-msg" id="sjeo-msg"></div>
   </div>
-  <div class="mode-result" id="jeo-result">
-    <div class="mode-result-icon" id="jeo-res-icon">🏆</div>
-    <div class="mode-result-score" id="jeo-res-score"></div>
-    <div class="mode-result-msg" id="jeo-res-msg"></div>
-    <button class="mode-result-btn" onclick="goHub()">Back to Hub</button>
+  <div class="mode-result" id="sjeo-result">
+    <div class="mode-result-icon" id="sjeo-res-icon">🏆</div>
+    <div class="mode-result-score" id="sjeo-res-score"></div>
+    <div class="mode-result-msg" id="sjeo-res-msg"></div>
+    <button class="mode-result-btn" onclick="showScreen('screen-hub');renderHub()">Back to Hub</button>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     SCREEN: All Done
-════════════════════════════════════════════════ -->
-<div id="screen-done" class="screen">
+<div id="screen-swordle" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="showScreen('screen-hub')">← Hub</button>
+    <div class="hdr-title">Missing Word</div>
+  </div>
+  <div class="score-bar">
+    <span>Session: <strong id="swordle-session-score">0</strong></span>
+    <span id="swordle-value-left">Worth 300 pts</span>
+  </div>
+  <div class="wordle-body">
+    <div class="wordle-clue" id="swordle-clue"></div>
+    <div class="wordle-grid" id="swordle-grid"></div>
+    <div class="wordle-input-row" id="swordle-input-row">
+      <input class="wordle-input" id="swordle-input" type="text" maxlength="12"
+             placeholder="Guess…" autocomplete="off" autocorrect="off" spellcheck="false"
+             oninput="this.value=this.value.toUpperCase()"
+             onkeydown="if(event.key==='Enter')submitSWordle()">
+      <button class="wordle-submit" onclick="submitSWordle()">Enter</button>
+    </div>
+    <div class="wordle-msg" id="swordle-msg"></div>
+    <div class="wordle-keyboard" id="swordle-keyboard"></div>
+  </div>
+  <div class="mode-result" id="swordle-result">
+    <div class="mode-result-icon" id="swordle-res-icon">🏆</div>
+    <div class="mode-result-score" id="swordle-res-score"></div>
+    <div class="mode-result-msg" id="swordle-res-msg"></div>
+    <button class="mode-result-btn" onclick="showScreen('screen-hub');renderHub()">Back to Hub</button>
+  </div>
+</div>
+
+<div id="screen-schrono" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="showScreen('screen-hub')">← Hub</button>
+    <div class="hdr-title">Chrono Order</div>
+  </div>
+  <div class="score-bar">
+    <span>Session: <strong id="schrono-session-score">0</strong></span>
+    <span>Worth up to 100 pts</span>
+  </div>
+  <div class="chrono-body">
+    <div class="chrono-instr">Arrange oldest → newest. Drag or use arrows.</div>
+    <div class="chrono-list" id="schrono-list"></div>
+    <button class="chrono-submit" id="schrono-submit" onclick="submitSChrono()">Submit Order</button>
+  </div>
+  <div class="mode-result" id="schrono-result">
+    <div class="mode-result-icon" id="schrono-res-icon">🏆</div>
+    <div class="mode-result-score" id="schrono-res-score"></div>
+    <div class="mode-result-msg" id="schrono-res-msg"></div>
+    <button class="mode-result-btn" onclick="showScreen('screen-hub');renderHub()">Back to Hub</button>
+  </div>
+</div>
+
+<div id="screen-sdone" class="screen">
   <div class="hdr">
     <div class="hdr-title">Session Complete!</div>
     <a class="hdr-home" href="index.html">🏛 Home</a>
   </div>
-  <div class="done-body">
-    <div class="done-icon">🏆</div>
-    <div class="done-title">All Modes Done!</div>
-    <div class="done-scores" id="done-scores"></div>
-    <div class="done-streak" id="done-streak"></div>
-    <button class="done-btn" onclick="newSession()">Play Again</button>
-    <a class="done-btn secondary" href="index.html">Browse History</a>
+  <div class="sdone-body">
+    <div class="sdone-icon">🏆</div>
+    <div class="sdone-title">All Done!</div>
+    <div class="sdone-scores" id="sdone-scores"></div>
+    <div class="sdone-streak" id="sdone-streak"></div>
+    <button class="sdone-btn" onclick="goClassicDeck()">Play Again</button>
+    <a class="done-browse-btn" href="index.html#browse" style="margin-top:4px">Browse History</a>
   </div>
 </div>
 
 <script>
 // ═══════════════════════════════════════════════════════════
-//  Constants
+//  Constants & Config
 // ═══════════════════════════════════════════════════════════
 const CONTENT_URL = 'https://raw.githubusercontent.com/Spikes666/centuryhistories/main/flashcards/content.json';
-const STORAGE_KEY = 'ch_game_v2';
+const STORAGE_KEY  = 'ch_journey_v1';
+const CLASSIC_KEY  = 'ch_game_v2';
 const MAX_WORDLE_ATTEMPTS = 6;
 
-// ═══════════════════════════════════════════════════════════
-//  App state
-// ═══════════════════════════════════════════════════════════
-let centuries = [];         // raw century objects from JSON
-let G = {};                 // persistent game state (from localStorage)
+// Day-of-week game mix: 0=Sun(classic), 1=Mon…6=Sat
+// Each row = 7 game types for that day's 7 rounds: 'jeo'|'wordle'|'chrono'
+const DAY_MIXES = [
+  null, // Sunday — handled separately
+  ['jeo','jeo','jeo','jeo','jeo','wordle','wordle'],           // Mon easy
+  ['jeo','jeo','jeo','jeo','wordle','wordle','chrono'],        // Tue
+  ['jeo','jeo','jeo','wordle','wordle','chrono','chrono'],     // Wed
+  ['jeo','jeo','wordle','wordle','chrono','chrono','chrono'],  // Thu
+  ['jeo','wordle','wordle','chrono','chrono','chrono','chrono'],// Fri
+  ['wordle','wordle','chrono','chrono','chrono','chrono','chrono'], // Sat hard
+];
 
-// Active session game data (rebuilt from G.session.facts when needed)
-let sessionGames = null;
-
-// Wordle state
-let W = { word: '', guess: '', attempts: [], keyStates: {}, done: false };
-
-// Jeopardy state
-let J = { hintsUsed: 0, done: false, currentValue: 300 };
-
-// Chrono state
-let C = { order: [], done: false };
+// Saturday: no hints allowed, jeo worth 50 not 100
+const DIFFICULTY_LABELS = ['','Easy','Moderate','Balanced','Challenging','Hard','Expert'];
 
 // ═══════════════════════════════════════════════════════════
-//  localStorage helpers
+//  App State
+// ═══════════════════════════════════════════════════════════
+let centuries = [];
+let threads   = [];
+let G = {};  // persistent journey state
+
+// Journey state
+let J_thread   = null;  // current thread object
+let J_waypoints = [];   // resolved fact objects for this journey
+let J_round    = 0;     // 0-indexed current round
+let J_scores   = [];    // pts per round
+let J_gameType = '';    // current round's game type
+let J_currentFact = null; // resolved fact for current round
+
+// Game-specific state
+let W = { word:'', attempts:[], keyStates:{}, done:false };
+let JEO = { hintsUsed:0, done:false, value:100 };
+let CHRON = { order:[], correct:[], done:false };
+// Sunday classic state
+let SC = {};  // classic session
+let SW = { word:'', attempts:[], keyStates:{}, done:false };
+let SJEO = { hintsUsed:0, done:false, value:300 };
+let SCHRON = { order:[], correct:[], done:false };
+let studyIdx = 0;
+
+// ═══════════════════════════════════════════════════════════
+//  Storage
 // ═══════════════════════════════════════════════════════════
 function loadStorage() {
   try {
@@ -977,28 +990,19 @@ function loadStorage() {
     return { ...defaultStorage(), ...JSON.parse(raw) };
   } catch(e) { return defaultStorage(); }
 }
-
 function defaultStorage() {
-  return {
-    seenFacts: {},
-    session: null,
-    streak: 0,
-    lastCompleted: null
-  };
+  return { seenFacts:{}, streak:0, lastCompleted:null };
 }
+function saveStorage() { localStorage.setItem(STORAGE_KEY, JSON.stringify(G)); }
 
-function saveStorage() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(G));
+function loadClassicStorage() {
+  try {
+    const raw = localStorage.getItem(CLASSIC_KEY);
+    if (!raw) return { seenFacts:{}, session:null, streak:0, lastCompleted:null };
+    return { seenFacts:{}, session:null, streak:0, lastCompleted:null, ...JSON.parse(raw) };
+  } catch(e) { return { seenFacts:{}, session:null, streak:0, lastCompleted:null }; }
 }
-
-function countSeenFacts() {
-  let total = 0;
-  for (const [id, n] of Object.entries(G.seenFacts || {})) {
-    const c = centuries.find(c => c.id === id);
-    if (c) total += Math.min(n, c.facts.length);
-  }
-  return total;
-}
+function saveClassicStorage() { localStorage.setItem(CLASSIC_KEY, JSON.stringify(SC)); }
 
 // ═══════════════════════════════════════════════════════════
 //  Utility
@@ -1013,27 +1017,9 @@ function extractYear(factText, centuryIdx) {
   const m = factText.match(/(\d[\d,]*)\s*(BCE|BC|CE|AD)/i);
   if (m) {
     const n = parseInt(m[1].replace(/,/g,''));
-    return m[2].toUpperCase() === 'BCE' || m[2].toUpperCase() === 'BC' ? -n : n;
+    return m[2].toUpperCase()==='BCE'||m[2].toUpperCase()==='BC' ? -n : n;
   }
   return (centuryIdx * 100) - 3000;
-}
-
-function stripAllDates(text) {
-  return text
-    // Parenthetical date ranges: (~1122–1204 CE), (1147–), (c. 312 BCE)
-    .replace(/\(\s*[~c.]?\s*\d[\d,]*\s*[-–]?\s*\d*\s*(?:BCE|CE|BC|AD)?\s*\)/gi, '')
-    // "Around/Circa YYYY BCE/CE,"
-    .replace(/\b(Around|Circa|~)\s*\d[\d,]*\s*(BCE|CE|BC|AD)?,?\s*/gi, '')
-    // Standalone "YYYY BCE" or "YYYY CE"
-    .replace(/\b\d[\d,]*\s*(?:BCE|CE|BC|AD)\b[,.]?\s*/gi, '')
-    // Ordinal century references
-    .replace(/\b(1st|2nd|3rd|4th|5th|6th|7th|8th|9th|10th|11th|12th|13th|14th|15th|16th|17th|18th|19th|20th|21st)\s+century\b\s*/gi, 'this era ')
-    // Bare 4-digit years in parens: (1453), (1066)
-    .replace(/\(\s*\d{3,4}\s*\)/g, '')
-    .replace(/\s{2,}/g, ' ')
-    .replace(/^\s*[,;.]\s*/, '')
-    .replace(/\s+([,;.])/g, '$1')
-    .trim();
 }
 
 function extractKeyword(factText) {
@@ -1043,768 +1029,982 @@ function extractKeyword(factText) {
   const words = factText.match(/\b[A-Z][a-z]{3,11}\b/g) || [];
   const filtered = words.filter(w => !stopwords.has(w));
   if (!filtered.length) return null;
-  // prefer longer, unique words
   const counts = {};
-  filtered.forEach(w => { counts[w] = (counts[w]||0)+1; });
-  const unique = filtered.filter(w => counts[w] === 1);
+  filtered.forEach(w => { counts[w]=(counts[w]||0)+1; });
+  const unique = filtered.filter(w => counts[w]===1);
   const pool = unique.length ? unique : filtered;
-  return pool.sort((a,b) => b.length - a.length)[0];
+  return pool.sort((a,b)=>b.length-a.length)[0];
 }
 
 function blankedFact(factText, keyword) {
   const blanks = '_'.repeat(keyword.length);
-  return factText.replace(new RegExp('\\b' + keyword + '\\b', 'i'), blanks);
+  return factText.replace(new RegExp('\\b'+keyword+'\\b','i'), blanks);
 }
 
-function buildWrongAnswers(correctFact, sessionFacts, count = 3) {
+function buildWrongAnswers(correctFact, pool, count=3) {
   const correctKw = extractKeyword(correctFact.fact);
-  const pool = [];
-  // first try session facts from other facts
-  for (const f of sessionFacts) {
-    if (f.fact === correctFact.fact) continue;
+  const candidates = [];
+  for (const f of pool) {
+    if (f.fact===correctFact.fact) continue;
     const kw = extractKeyword(f.fact);
-    if (kw && kw.toUpperCase() !== correctKw?.toUpperCase()) pool.push(kw);
+    if (kw && kw.toUpperCase()!==correctKw?.toUpperCase()) candidates.push(kw);
   }
-  // fallback: use keywords from all centuries
-  if (pool.length < count) {
+  if (candidates.length < count) {
     for (const c of centuries) {
       for (const f of c.facts) {
         const kw = extractKeyword(f.fact);
-        if (kw && kw.toUpperCase() !== correctKw?.toUpperCase() && !pool.includes(kw)) {
-          pool.push(kw);
-          if (pool.length >= count * 4) break;
+        if (kw && kw.toUpperCase()!==correctKw?.toUpperCase() && !candidates.includes(kw)) {
+          candidates.push(kw);
+          if (candidates.length >= count*4) break;
         }
       }
-      if (pool.length >= count * 4) break;
+      if (candidates.length >= count*4) break;
     }
   }
-  // shuffle & take count
-  for (let i = pool.length-1; i > 0; i--) {
-    const j = Math.floor(Math.random()*(i+1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
+  for (let i=candidates.length-1; i>0; i--) {
+    const j=Math.floor(Math.random()*(i+1));
+    [candidates[i],candidates[j]]=[candidates[j],candidates[i]];
   }
-  return pool.slice(0, count);
+  return candidates.slice(0,count);
 }
 
-// ═══════════════════════════════════════════════════════════
-//  Fact selection
-// ═══════════════════════════════════════════════════════════
-function pickDeckFacts(count) {
-  const seen = G.seenFacts || {};
-
-  if (count === 23) {
-    return centuries.map((c, ci) => {
-      const idx = (seen[c.id] || 0) % c.facts.length;
-      const f   = c.facts[idx];
-      return { ...f, century_label: c.label, era: c.era, century_id: c.id,
-               century_idx: ci, year: extractYear(f.fact, ci) };
-    });
-  } else {
-    const unseenCenturies = centuries.filter(c => (seen[c.id]||0) < c.facts.length);
-    const pool = unseenCenturies.length > 0 ? unseenCenturies : centuries;
-    const c  = pool[Math.floor(Math.random() * pool.length)];
-    const ci = centuries.indexOf(c);
-    const start = (seen[c.id] || 0) % c.facts.length;
-    const facts = Array.from({ length: count }, (_, i) => {
-      const fi = (start + i) % c.facts.length;
-      const f  = c.facts[fi];
-      return { ...f, century_label: c.label, era: c.era, century_id: c.id,
-               century_idx: ci, year: extractYear(f.fact, ci) };
-    });
-    return facts;
-  }
-}
-
-function markFactsSeen(facts) {
-  const byCentury = {};
-  for (const f of facts) {
-    if (!byCentury[f.century_id]) byCentury[f.century_id] = 0;
-    byCentury[f.century_id]++;
-  }
-  for (const [id, n] of Object.entries(byCentury)) {
-    G.seenFacts[id] = (G.seenFacts[id] || 0) + n;
-  }
-  saveStorage();
-}
-
-// ═══════════════════════════════════════════════════════════
-//  Session game builder
-// ═══════════════════════════════════════════════════════════
-function buildSessionGames(facts) {
-  // CHRONO: pick 4, spread across the session, sort by year
-  let chronoPool;
-  if (facts.length <= 4) {
-    chronoPool = [...facts];
-  } else {
-    const step = Math.floor(facts.length / 4);
-    const idxs = new Set([0,1,2,3].map(i => Math.min(i*step, facts.length-1)));
-    chronoPool = [...idxs].map(i => facts[i]);
-  }
-  // dedupe by fact text
-  const seen = new Set();
-  chronoPool = chronoPool.filter(f => { if (seen.has(f.fact)) return false; seen.add(f.fact); return true; });
-  while (chronoPool.length < 4 && facts.length > chronoPool.length) {
-    const extra = facts.find(f => !seen.has(f.fact));
-    if (!extra) break;
-    chronoPool.push(extra);
-    seen.add(extra.fact);
-  }
-  const chronoCorrect = [...chronoPool].sort((a,b) => a.year - b.year);
-  // shuffle display order
-  const chronoDisplay = [...chronoPool];
-  for (let i = chronoDisplay.length-1; i > 0; i--) {
-    const j = Math.floor(Math.random()*(i+1));
-    [chronoDisplay[i], chronoDisplay[j]] = [chronoDisplay[j], chronoDisplay[i]];
-  }
-
-  // WORDLE: first fact with a valid keyword (4-12 chars)
-  let wordleFact = null;
-  for (const f of facts) {
-    const kw = extractKeyword(f.fact);
-    if (kw && kw.length >= 4 && kw.length <= 12) {
-      wordleFact = { ...f, keyword: kw.toUpperCase() };
-      break;
-    }
-  }
-
-  // JEOPARDY: another fact with a valid keyword, different from wordle
-  let jeoFact = null;
-  for (const f of facts) {
-    if (wordleFact && f.fact === wordleFact.fact) continue;
-    const kw = extractKeyword(f.fact);
-    if (kw && kw.length >= 3) {
-      const wrong = buildWrongAnswers(f, facts);
-      jeoFact = { ...f, keyword: kw, wrong };
-      break;
-    }
-  }
-
-  return { chronoDisplay, chronoCorrect, wordleFact, jeoFact };
-}
-
-// ═══════════════════════════════════════════════════════════
-//  Study flow
-// ═══════════════════════════════════════════════════════════
-let studyIdx = 0;
-
-function startSession(count) {
-  const facts = pickDeckFacts(count);
-  const centuryLabel = count === 23 ? 'All 23 Centuries' : (facts[0]?.century_label || '');
-  G.session = {
-    facts,
-    score: {},
-    deckSize: count,
-    centuryLabel,
-    studyDone: false
+function seededRandom(seed) {
+  let s = seed;
+  return function() {
+    s = (s * 1664525 + 1013904223) & 0xffffffff;
+    return (s >>> 0) / 0xffffffff;
   };
-  saveStorage();
-  studyIdx = 0;
-  showScreen('screen-study');
-  renderStudyCard(0);
 }
 
-function renderStudyCard(idx) {
-  const facts = G.session.facts;
-  const f = facts[idx];
-  if (!f) return;
-
-  document.getElementById('study-idx').textContent   = idx + 1;
-  document.getElementById('study-total').textContent = facts.length;
-  document.getElementById('sc-era').textContent      = f.era || '';
-  document.getElementById('sc-century').textContent  = f.century_label || '';
-  document.getElementById('sc-fact').textContent     = f.fact || '';
-
-  // Map iframe
-  const mapEl  = document.getElementById('sc-map');
-  const locEl  = document.getElementById('sc-loc');
-  const mapIframe = f.map_iframe || '';
-  const mapLabel  = f.map_label  || '';
-  if (mapIframe) {
-    mapEl.src = mapIframe;
-    mapEl.style.display = 'block';
-    locEl.textContent   = mapLabel;
-    locEl.style.display = 'flex';
-  } else {
-    mapEl.src           = '';
-    mapEl.style.display = 'none';
-    locEl.style.display = 'none';
+function seededShuffle(arr, seed) {
+  const a = [...arr];
+  const rng = seededRandom(seed);
+  for (let i=a.length-1; i>0; i--) {
+    const j=Math.floor(rng()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
   }
+  return a;
+}
 
-  // Button states
-  const prevBtn = document.getElementById('study-prev-nav');
-  const nextBtn = document.getElementById('study-next-nav');
-  if (prevBtn) prevBtn.disabled = idx === 0;
-  if (nextBtn) {
-    if (idx === facts.length - 1) {
-      nextBtn.textContent = 'Start Game →';
-      nextBtn.onclick = showStudyDone;
-    } else {
-      nextBtn.textContent = 'Next →';
-      nextBtn.onclick = () => studyNav(1);
-    }
+function getWeekNumber(d) {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1));
+  return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+}
+
+function todayDow() { return new Date().getDay(); } // 0=Sun,1=Mon,...,6=Sat
+function todayStr() { return new Date().toISOString().slice(0,10); }
+
+function eraStyle(era) {
+  const map = {
+    'Ancient World': { color:'#c17f3a', bg:'#2a1f10' },
+    'Medieval':      { color:'#7a9e5f', bg:'#111a0f' },
+    'Renaissance':   { color:'#a06fc0', bg:'#1a1025' },
+    'Age of Exploration': { color:'#4a9ec0', bg:'#0d1e2a' },
+    'Industrial Age':     { color:'#c04a4a', bg:'#2a0f0f' },
+    'Modern World':       { color:'#5aa8a0', bg:'#0d2220' },
+  };
+  for (const [k,v] of Object.entries(map)) {
+    if (era && era.includes(k)) return v;
   }
+  return { color:'#c8922a', bg:'#221810' };
 }
 
-function studyNav(dir) {
-  const facts = G.session.facts;
-  studyIdx = Math.max(0, Math.min(facts.length - 1, studyIdx + dir));
-  renderStudyCard(studyIdx);
-}
-
-function skipToGame() {
-  showStudyDone();
-}
-
-function showStudyDone() {
-  const { facts, centuryLabel } = G.session;
-  const sub = document.getElementById('study-done-sub');
-  sub.innerHTML = `You've studied <strong>${facts.length}</strong> facts from <strong>${centuryLabel}</strong>.<br>Now test your memory with three game modes.`;
-  showScreen('screen-study-done');
-}
-
-function startGames() {
-  markFactsSeen(G.session.facts);
-  G.session.studyDone = true;
-  saveStorage();
-  sessionGames = buildSessionGames(G.session.facts);
-  goHub();
+function renderProgressBar(containerId, roundIdx, roundScores) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const dots = Array.from({length:7},(_,i)=>{
+    let cls = 'jp-dot';
+    if (i < roundIdx) cls += ' done';
+    else if (i === roundIdx) cls += ' active';
+    return `<span class="${cls}"></span>`;
+  }).join('');
+  const total = roundScores.reduce((s,v)=>s+v,0);
+  el.innerHTML = `<span class="jp-label">Round ${roundIdx+1}/7</span>
+    <div class="jp-dots">${dots}</div>
+    <span class="jp-score"><strong>${total}</strong> pts</span>`;
 }
 
 // ═══════════════════════════════════════════════════════════
-//  Hub
+//  Thread selection
 // ═══════════════════════════════════════════════════════════
-function goHub() {
-  const sess = G.session;
-  if (!sess || !sess.studyDone) {
-    renderDeckScreen();
-    showScreen('screen-deck');
+function getDailyThread() {
+  const dow = todayDow();
+  if (dow === 0) return null; // Sunday
+  const date = new Date();
+  const weekNum = getWeekNumber(date);
+  const ids = threads.map(t=>t.id);
+  const shuffled = seededShuffle(ids, weekNum * 10 + dow);
+  // Use dow-1 (Mon=0..Sat=5) as index into 6-thread rotation
+  return threads.find(t=>t.id===shuffled[(dow-1) % ids.length]) || threads[0];
+}
+
+function resolveWaypoints(thread) {
+  return thread.waypoints.map(wp => {
+    const century = centuries.find(c=>c.id===wp.century_id);
+    if (!century) return null;
+    const ci = centuries.indexOf(century);
+    const f = century.facts[wp.fact_index];
+    if (!f) return null;
+    return {
+      ...f,
+      century_id: century.id,
+      century_label: century.label,
+      era: century.era || '',
+      century_idx: ci,
+      year: extractYear(f.fact, ci),
+      connective: wp.connective
+    };
+  }).filter(Boolean);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Init
+// ═══════════════════════════════════════════════════════════
+async function init() {
+  G = loadStorage();
+  SC = loadClassicStorage();
+
+  showScreen('screen-thread');
+
+  // Show loading state
+  document.getElementById('thread-name').textContent = 'Loading…';
+
+  try {
+    const resp = await fetch(CONTENT_URL);
+    const data = await resp.json();
+    centuries = data.centuries || [];
+    threads   = data.threads   || [];
+  } catch(e) {
+    document.getElementById('thread-name').textContent = 'Failed to load content.';
     return;
   }
-  if (!sessionGames) sessionGames = buildSessionGames(sess.facts);
 
-  const score = sess.score || {};
-  const total = Object.values(score).reduce((a,b) => a+b, 0);
-  document.getElementById('hub-session-name').textContent = sess.centuryLabel || '—';
-  document.getElementById('hub-score').textContent = total;
-  document.getElementById('hub-streak').textContent = G.streak || 0;
-  document.getElementById('hub-sub').textContent = 'Choose a mode';
+  const dow = todayDow();
 
-  // Update mode cards
-  function setMode(id, pts, key) {
-    const card = document.getElementById(`mode-${id}-card`);
-    const ptsEl = document.getElementById(`mode-${id}-pts`);
-    if (score[key] !== undefined) {
-      card.classList.add('done');
-      card.onclick = null;
-      ptsEl.textContent = `✓ +${score[key]} pts`;
-      ptsEl.className = 'mode-pts earned';
-    } else {
-      card.classList.remove('done');
-      ptsEl.textContent = `up to ${pts}`;
-      ptsEl.className = 'mode-pts';
-      if (id === 'chrono')  card.onclick = startChrono;
-      if (id === 'wordle')  card.onclick = startWordle;
-      if (id === 'jeo')     card.onclick = startJeo;
-    }
+  if (dow === 0) {
+    // Sunday
+    document.getElementById('thread-day-label').textContent = 'Sunday Bonus';
+    document.getElementById('thread-intro').style.display = 'none';
+    document.getElementById('sunday-intro').style.display = 'flex';
+    return;
   }
-  setMode('chrono', 100,  'chrono');
-  setMode('wordle', 300,  'wordle');
-  setMode('jeo',    300,  'jeopardy');
 
-  showScreen('screen-hub');
-}
+  const thread = getDailyThread();
+  if (!thread) { document.getElementById('thread-name').textContent = 'No thread today.'; return; }
 
-function renderDeckScreen() {
-  document.getElementById('deck-seen-count').textContent = countSeenFacts();
-  document.getElementById('deck-streak').textContent = G.streak || 0;
+  J_thread = thread;
+  J_waypoints = resolveWaypoints(thread);
+  J_round = 0;
+  J_scores = [];
+
+  // Render intro
+  const style = eraStyle(thread.era || '');
+  document.getElementById('thread-icon').textContent = thread.icon;
+  document.getElementById('thread-name').textContent = thread.name;
+  document.getElementById('thread-desc').textContent = thread.description;
+  const dayNames = ['','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  document.getElementById('thread-day-label').textContent = `${dayNames[dow]} · ${thread.name}`;
+  const diffBadge = document.getElementById('thread-diff-badge');
+  diffBadge.innerHTML = `<span class="diff-badge diff-${dow}">${DIFFICULTY_LABELS[dow]}</span>`;
 }
 
 // ═══════════════════════════════════════════════════════════
-//  Score helpers
+//  Journey flow
 // ═══════════════════════════════════════════════════════════
-function sessionTotal() {
-  return Object.values(G.session.score || {}).reduce((a,b) => a+b, 0);
+function beginJourney() {
+  showLearnScreen();
 }
 
-function completeMode(key, pts) {
-  G.session.score[key] = pts;
-  saveStorage();
-  // check if all 3 done
-  const s = G.session.score;
-  if (s.chrono !== undefined && s.wordle !== undefined && s.jeopardy !== undefined) {
-    const today = new Date().toISOString().slice(0,10);
-    if (G.lastCompleted !== today) {
-      G.streak = (G.streak || 0) + 1;
-      G.lastCompleted = today;
-    }
-    saveStorage();
-    setTimeout(showDoneScreen, 1200);
+function showLearnScreen() {
+  if (J_round >= J_waypoints.length) { showDoneScreen(); return; }
+
+  const wp = J_waypoints[J_round];
+  const dow = todayDow();
+  const gameMix = DAY_MIXES[dow];
+  J_gameType = gameMix ? gameMix[Math.min(J_round, gameMix.length-1)] : 'jeo';
+  J_currentFact = wp;
+
+  const style = eraStyle(wp.era);
+
+  document.getElementById('learn-thread-name').textContent = J_thread ? J_thread.name : '';
+  document.getElementById('learn-round-sub').textContent = `Round ${J_round+1} of 7`;
+  document.getElementById('learn-century-label').textContent = wp.century_label;
+
+  const badge = document.getElementById('learn-era-badge');
+  badge.textContent = wp.era ? wp.era.split('(')[0].trim() : '';
+  badge.style.background = style.bg;
+  badge.style.color = style.color;
+  badge.style.border = `1px solid ${style.color}40`;
+
+  document.getElementById('learn-fact-text').textContent = wp.fact;
+
+  // Map
+  if (wp.map_iframe) {
+    document.getElementById('learn-map-label').textContent = wp.map_label || '';
+    document.getElementById('learn-map-iframe').src = wp.map_iframe;
+    document.getElementById('learn-map-wrap').style.display = '';
+  } else {
+    document.getElementById('learn-map-wrap').style.display = 'none';
   }
+
+  // Game hint
+  const gameNames = { jeo:'Multiple Choice', wordle:'Missing Word', chrono:'Chrono Order' };
+  document.getElementById('learn-game-hint').textContent =
+    `Next up: ${gameNames[J_gameType] || 'Quiz'} — study this fact carefully.`;
+
+  renderProgressBar('learn-progress-bar', J_round, J_scores);
+  showScreen('screen-learn');
 }
 
-function showDoneScreen() {
-  const score = G.session.score;
-  const chrono   = score.chrono   || 0;
-  const wordle   = score.wordle   || 0;
-  const jeopardy = score.jeopardy || 0;
-  const total    = chrono + wordle + jeopardy;
-
-  const scoresEl = document.getElementById('done-scores');
-  scoresEl.innerHTML = `
-    <div class="done-row"><span>📅 Chrono Order</span><span class="pts">+${chrono}</span></div>
-    <div class="done-row"><span>🔤 Missing Word</span><span class="pts">+${wordle}</span></div>
-    <div class="done-row"><span>❓ What Is It?</span><span class="pts">+${jeopardy}</span></div>
-    <div class="done-total"><span>Total</span><span class="pts">${total} pts</span></div>
-  `;
-  document.getElementById('done-streak').innerHTML = `Streak: <strong>${G.streak} day${G.streak===1?'':'s'}</strong> 🔥`;
-  showScreen('screen-done');
+function startRoundGame() {
+  if (J_gameType === 'jeo')    startJeoRound();
+  else if (J_gameType === 'wordle') startWordleRound();
+  else if (J_gameType === 'chrono') startChronoRound();
 }
 
-function newSession() {
-  G.session = null;
-  sessionGames = null;
-  saveStorage();
-  renderDeckScreen();
-  showScreen('screen-deck');
+// ──────────────── Jeopardy Round ────────────────
+function startJeoRound() {
+  const f = J_currentFact;
+  const kw = extractKeyword(f.fact);
+  if (!kw) { J_scores.push(0); afterRound(); return; }
+
+  const dow = todayDow();
+  const isSat = dow === 6;
+  const baseValue = 100;
+
+  JEO = { hintsUsed:0, done:false, value:baseValue, keyword:kw, fact:f };
+
+  document.getElementById('jeo-round-sub').textContent = `Round ${J_round+1} of 7`;
+  document.getElementById('jeo-journey-score').textContent = J_scores.reduce((s,v)=>s+v,0);
+  document.getElementById('jeo-value-left').textContent = `Worth ${baseValue} pts`;
+
+  const blanked = blankedFact(f.fact, kw);
+  document.getElementById('jeo-clue').innerHTML =
+    blanked.replace(/_+/g, `<span class="blank">${'_'.repeat(kw.length)}</span>`);
+
+  const hintBtn = document.getElementById('jeo-hint-btn');
+  hintBtn.disabled = isSat;
+  hintBtn.textContent = isSat ? 'No hints (Saturday!)' : 'Use Hint (−50 pts)';
+
+  const wrong = buildWrongAnswers(f, J_waypoints);
+  const choices = [kw, ...wrong].sort(()=>Math.random()-0.5);
+  const letters = ['A','B','C','D'];
+  const choicesEl = document.getElementById('jeo-choices');
+  choicesEl.innerHTML = '';
+  choices.forEach((c,i) => {
+    const btn = document.createElement('button');
+    btn.className = 'jeo-choice';
+    btn.innerHTML = `<span class="jeo-choice-letter">${letters[i]}</span>${c}`;
+    btn.onclick = () => answerJeo(c, kw, btn, choicesEl, isSat);
+    choicesEl.appendChild(btn);
+  });
+
+  document.getElementById('jeo-msg').textContent = '';
+  document.getElementById('jeo-result').classList.remove('visible');
+  renderProgressBar('jeo-progress-bar', J_round, J_scores);
+  showScreen('screen-jeo');
 }
 
-// ═══════════════════════════════════════════════════════════
-//  CHRONO ORDER
-// ═══════════════════════════════════════════════════════════
-function startChrono() {
-  if (!sessionGames) return;
-  C = { order: [...sessionGames.chronoDisplay], done: false };
-  document.getElementById('chrono-session-score').textContent = sessionTotal();
-  document.getElementById('chrono-result').classList.remove('show');
-  document.getElementById('chrono-submit-btn').disabled = false;
-  renderChronoList();
-  showScreen('screen-chrono');
-}
+function useJeoHint() {
+  if (JEO.done || todayDow()===6) return;
+  JEO.hintsUsed++;
+  JEO.value = Math.max(0, JEO.value - 50);
+  document.getElementById('jeo-value-left').textContent = `Worth ${JEO.value} pts`;
+  document.getElementById('jeo-hint-btn').disabled = true;
 
-function moveCard(i, dir) {
-  const j = i + dir;
-  if (j < 0 || j >= C.order.length) return;
-  [C.order[i], C.order[j]] = [C.order[j], C.order[i]];
-  renderChronoList();
-}
-
-function renderChronoList() {
-  const list = document.getElementById('chrono-list');
-  list.innerHTML = '';
-  C.order.forEach((fact, i) => {
-    const card = document.createElement('div');
-    card.className = 'chrono-card';
-    card.draggable = true;
-    card.dataset.idx = i;
-    card.innerHTML = `
-      <div class="chrono-arrows">
-        <button class="chrono-arrow" onclick="moveCard(${i}, -1)" ${i === 0 ? 'disabled' : ''} aria-label="Move up">▲</button>
-        <button class="chrono-arrow" onclick="moveCard(${i}, 1)" ${i === C.order.length - 1 ? 'disabled' : ''} aria-label="Move down">▼</button>
-      </div>
-      <div class="chrono-text">${stripAllDates(fact.fact)}</div>
-    `;
-    // Drag events
-    card.addEventListener('dragstart', e => {
-      e.dataTransfer.setData('text/plain', i);
-      card.classList.add('dragging');
-    });
-    card.addEventListener('dragend', () => card.classList.remove('dragging'));
-    card.addEventListener('dragover', e => { e.preventDefault(); card.classList.add('drag-over'); });
-    card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
-    card.addEventListener('drop', e => {
-      e.preventDefault();
-      card.classList.remove('drag-over');
-      const fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
-      const toIdx   = i;
-      if (fromIdx !== toIdx) {
-        const tmp = C.order[fromIdx];
-        C.order[fromIdx] = C.order[toIdx];
-        C.order[toIdx]   = tmp;
-        renderChronoList();
-      }
-    });
-    // Touch events for mobile
-    let touchStartY = 0;
-    let dragCard = null;
-    card.addEventListener('touchstart', e => {
-      touchStartY = e.touches[0].clientY;
-      dragCard = i;
-    }, {passive:true});
-    card.addEventListener('touchmove', e => {
-      e.preventDefault();
-      const touch = e.touches[0];
-      const el = document.elementFromPoint(touch.clientX, touch.clientY);
-      const target = el?.closest('.chrono-card');
-      document.querySelectorAll('.chrono-card').forEach(c => c.classList.remove('drag-over'));
-      if (target) target.classList.add('drag-over');
-    }, {passive:false});
-    card.addEventListener('touchend', e => {
-      const touch = e.changedTouches[0];
-      const el = document.elementFromPoint(touch.clientX, touch.clientY);
-      const target = el?.closest('.chrono-card');
-      document.querySelectorAll('.chrono-card').forEach(c => c.classList.remove('drag-over'));
-      if (target && dragCard !== null) {
-        const toIdx = parseInt(target.dataset.idx);
-        if (dragCard !== toIdx) {
-          const tmp = C.order[dragCard];
-          C.order[dragCard] = C.order[toIdx];
-          C.order[toIdx]    = tmp;
-          renderChronoList();
-        }
-      }
-      dragCard = null;
-    });
-    list.appendChild(card);
+  // Eliminate one wrong choice
+  const choices = document.querySelectorAll('#jeo-choices .jeo-choice');
+  let eliminated = 0;
+  choices.forEach(btn => {
+    if (eliminated) return;
+    const text = btn.childNodes[1]?.textContent || btn.textContent.trim().slice(1);
+    if (text.trim() !== JEO.keyword && !btn.classList.contains('eliminated')) {
+      btn.classList.add('eliminated');
+      eliminated++;
+    }
   });
 }
 
-function checkChrono() {
-  const correct = sessionGames.chronoCorrect;
-  let pts = 0;
-  C.order.forEach((f, i) => {
-    if (f.fact === correct[i].fact) pts += 25;
+function answerJeo(chosen, correct, btn, choicesEl, isSat) {
+  if (JEO.done) return;
+  JEO.done = true;
+  const isRight = chosen.toUpperCase() === correct.toUpperCase();
+  const pts = isRight ? JEO.value : 0;
+
+  choicesEl.querySelectorAll('.jeo-choice').forEach(b => {
+    b.disabled = true;
+    const text = (b.childNodes[1]?.textContent || b.textContent.trim().slice(1)).trim();
+    if (text.toUpperCase() === correct.toUpperCase()) b.classList.add('correct');
+    else if (b === btn && !isRight) b.classList.add('wrong');
   });
 
-  // Reveal correct positions
-  const cards = document.querySelectorAll('.chrono-card');
-  C.order.forEach((f, i) => {
-    const isRight = f.fact === correct[i].fact;
-    cards[i].classList.add(isRight ? 'correct-pos' : 'wrong-pos');
-    const revealEl = document.createElement('div');
-    revealEl.className = 'chrono-reveal';
-    revealEl.textContent = `${correct[i].year < 0 ? Math.abs(correct[i].year)+' BCE' : correct[i].year+' CE'} · ${correct[i].century_label}`;
-    cards[i].appendChild(revealEl);
-  });
-  document.getElementById('chrono-submit-btn').disabled = true;
-
-  const resIcon  = document.getElementById('chrono-res-icon');
-  const resScore = document.getElementById('chrono-res-score');
-  const resMsg   = document.getElementById('chrono-res-msg');
-  resIcon.textContent  = pts === 100 ? '🏆' : pts >= 50 ? '⭐' : '📜';
-  resScore.textContent = `+${pts} points`;
-  resMsg.textContent   = pts === 100 ? 'Perfect order! Outstanding!' :
-                         pts >= 50   ? 'Mostly correct — great job!' :
-                         'Keep studying — you\'ll get it!';
-  document.getElementById('chrono-result').classList.add('show');
-  completeMode('chrono', pts);
+  document.getElementById('jeo-msg').textContent = isRight ? `Correct! +${pts}` : `The answer was: ${correct}`;
+  showRoundResult('jeo', pts, isRight);
 }
 
-// ═══════════════════════════════════════════════════════════
-//  MISSING WORD (Wordle)
-// ═══════════════════════════════════════════════════════════
-function startWordle() {
-  if (!sessionGames?.wordleFact) { alert('No suitable fact for this mode in your session.'); return; }
-  const { keyword, fact } = sessionGames.wordleFact;
-  W = {
-    word: keyword.toUpperCase(),
-    guess: '',
-    attempts: [],
-    keyStates: {},
-    done: false
-  };
-  document.getElementById('wordle-session-score').textContent = sessionTotal();
+// ──────────────── Wordle Round ────────────────
+function startWordleRound() {
+  const f = J_currentFact;
+  const kw = extractKeyword(f.fact);
+  if (!kw || kw.length < 4 || kw.length > 12) { J_scores.push(0); afterRound(); return; }
+
+  W = { word:kw.toUpperCase(), attempts:[], keyStates:{}, done:false };
+
+  document.getElementById('wordle-round-sub').textContent = `Round ${J_round+1} of 7`;
+  document.getElementById('wordle-journey-score').textContent = J_scores.reduce((s,v)=>s+v,0);
+  document.getElementById('wordle-value-left').textContent = 'Worth up to 100 pts';
+  document.style?.setProperty('--word-len', kw.length);
+  document.documentElement.style.setProperty('--word-len', kw.length);
+
+  const blanked = blankedFact(f.fact, kw);
+  document.getElementById('wordle-clue').innerHTML =
+    blanked.replace(/_+/g, `<span class="blank">${'_'.repeat(kw.length)}</span>`);
+
+  buildWordleGrid('wordle-grid', kw.length);
+  buildWordleKeyboard('wordle-keyboard', 'wordle');
   document.getElementById('wordle-msg').textContent = '';
-  document.getElementById('wordle-result').classList.remove('show');
-  document.style?.setProperty('--word-len', W.word.length);
-  document.documentElement.style.setProperty('--word-len', W.word.length);
-
-  // Clue
-  const clueEl = document.getElementById('wordle-clue');
-  const blanks  = '_'.repeat(W.word.length);
-  clueEl.innerHTML = `<em>${blanks}</em><br><br>${blankedFact(fact, sessionGames.wordleFact.keyword)}`;
-
-  renderWordleGrid();
-  renderWordleKeyboard();
-  updateWordleAttemptsLeft();
+  document.getElementById('wordle-input').value = '';
+  document.getElementById('wordle-result').classList.remove('visible');
+  renderProgressBar('wordle-progress-bar', J_round, J_scores);
   showScreen('screen-wordle');
+  document.getElementById('wordle-input').focus();
 }
 
-function renderWordleGrid() {
-  const grid = document.getElementById('wordle-grid');
+function buildWordleGrid(gridId, len) {
+  const grid = document.getElementById(gridId);
   grid.innerHTML = '';
-  const maxRows = MAX_WORDLE_ATTEMPTS;
-  const wordLen = W.word.length;
-
-  for (let r = 0; r < maxRows; r++) {
-    const attempt = W.attempts[r];
-    for (let c = 0; c < wordLen; c++) {
+  for (let r=0; r<MAX_WORDLE_ATTEMPTS; r++) {
+    const row = document.createElement('div');
+    row.className = 'wordle-row';
+    row.id = `${gridId}-row-${r}`;
+    for (let c=0; c<len; c++) {
       const tile = document.createElement('div');
-      tile.className = 'tile';
-      if (attempt) {
-        tile.textContent = attempt.letters[c].letter;
-        tile.classList.add(attempt.letters[c].state);
-        tile.classList.add('filled');
-      } else if (r === W.attempts.length) {
-        // current row
-        tile.textContent = W.guess[c] || '';
-        if (W.guess[c]) tile.classList.add('filled');
-      }
-      grid.appendChild(tile);
+      tile.className = 'wordle-tile';
+      tile.id = `${gridId}-tile-${r}-${c}`;
+      row.appendChild(tile);
     }
+    grid.appendChild(row);
   }
 }
 
-function scoreWordleGuess(guess, target) {
-  const result = [];
-  const used   = Array(target.length).fill(false);
-  // Pass 1: correct positions
-  for (let i = 0; i < guess.length; i++) {
-    if (guess[i] === target[i]) {
-      result[i] = { letter: guess[i], state: 'correct' };
-      used[i] = true;
-    } else {
-      result[i] = { letter: guess[i], state: 'absent' };
-    }
+function buildWordleKeyboard(kbId, prefix) {
+  const rows = [['Q','W','E','R','T','Y','U','I','O','P'],
+                ['A','S','D','F','G','H','J','K','L'],
+                ['ENTER','Z','X','C','V','B','N','M','⌫']];
+  const kb = document.getElementById(kbId);
+  kb.innerHTML = '';
+  rows.forEach(row => {
+    const r = document.createElement('div');
+    r.className = 'wordle-kb-row';
+    row.forEach(k => {
+      const btn = document.createElement('button');
+      btn.className = 'wordle-key' + (k.length>1?' wide':'');
+      btn.textContent = k;
+      btn.id = `${kbId}-key-${k}`;
+      btn.onclick = () => {
+        const inp = document.getElementById(prefix===`wordle`?'wordle-input':'swordle-input');
+        if (k==='ENTER') { prefix==='wordle'?submitWordle():submitSWordle(); }
+        else if (k==='⌫') { inp.value=inp.value.slice(0,-1); }
+        else { if(inp.value.length<12) inp.value+=k; }
+        inp.focus();
+      };
+      r.appendChild(btn);
+    });
+    kb.appendChild(r);
+  });
+}
+
+function scoreWordle(attemptNum) {
+  // 100,80,60,50,40,30 for attempts 1-6
+  return [100,80,60,50,40,30][Math.min(attemptNum-1,5)];
+}
+
+function submitWordle() {
+  if (W.done) return;
+  const inp = document.getElementById('wordle-input');
+  const guess = inp.value.trim().toUpperCase();
+  if (guess.length !== W.word.length) {
+    document.getElementById('wordle-msg').textContent = `Need ${W.word.length} letters.`;
+    return;
   }
-  // Pass 2: present
-  for (let i = 0; i < guess.length; i++) {
-    if (result[i].state === 'correct') continue;
-    for (let j = 0; j < target.length; j++) {
-      if (!used[j] && guess[i] === target[j]) {
-        result[i].state = 'present';
-        used[j] = true;
-        break;
+  inp.value = '';
+  document.getElementById('wordle-msg').textContent = '';
+
+  const attempt = evaluateGuess(guess, W.word);
+  W.attempts.push(attempt);
+  renderWordleAttempt('wordle-grid', W.attempts.length-1, attempt);
+  updateKeyStates(W.keyStates, attempt);
+  applyKeyColors('wordle-keyboard', W.keyStates);
+
+  const won = guess === W.word;
+  const lost = !won && W.attempts.length >= MAX_WORDLE_ATTEMPTS;
+
+  if (won || lost) {
+    W.done = true;
+    const pts = won ? scoreWordle(W.attempts.length) : 0;
+    showRoundResult('wordle', pts, won,
+      won ? `You got it in ${W.attempts.length}!` : `The word was: ${W.word}`);
+  }
+}
+
+function evaluateGuess(guess, word) {
+  const result = [];
+  const wArr = word.split('');
+  const used = new Array(word.length).fill(false);
+
+  // First pass: correct
+  for (let i=0; i<guess.length; i++) {
+    if (guess[i]===wArr[i]) { result[i]={letter:guess[i],state:'correct'}; used[i]=true; }
+    else result[i]={letter:guess[i],state:'absent'};
+  }
+  // Second pass: present
+  for (let i=0; i<guess.length; i++) {
+    if (result[i].state==='correct') continue;
+    for (let j=0; j<wArr.length; j++) {
+      if (!used[j] && guess[i]===wArr[j]) {
+        result[i].state='present'; used[j]=true; break;
       }
     }
   }
   return result;
 }
 
-function wordleKey(letter) {
-  if (W.done) return;
-  if (letter === 'ENTER') {
-    submitWordleGuess();
-  } else if (letter === 'BACK') {
-    W.guess = W.guess.slice(0, -1);
-    renderWordleGrid();
-  } else if (W.guess.length < W.word.length && /^[A-Z]$/.test(letter)) {
-    W.guess += letter;
-    renderWordleGrid();
+function renderWordleAttempt(gridId, row, attempt) {
+  attempt.forEach((a,c) => {
+    const tile = document.getElementById(`${gridId}-tile-${row}-${c}`);
+    if (tile) { tile.textContent=a.letter; tile.className='wordle-tile '+a.state; }
+  });
+}
+
+function updateKeyStates(states, attempt) {
+  const priority = {correct:3,present:2,absent:1};
+  attempt.forEach(a => {
+    const cur = states[a.letter];
+    if (!cur || priority[a.state]>(priority[cur]||0)) states[a.letter]=a.state;
+  });
+}
+
+function applyKeyColors(kbId, states) {
+  for (const [k,s] of Object.entries(states)) {
+    const btn = document.getElementById(`${kbId}-key-${k}`);
+    if (btn) { btn.className='wordle-key'+(k.length>1?' wide':'')+' '+s; }
   }
 }
 
-function submitWordleGuess() {
-  if (W.guess.length !== W.word.length) {
-    document.getElementById('wordle-msg').textContent = `Need ${W.word.length} letters`;
+// ──────────────── Chrono Round ────────────────
+function startChronoRound() {
+  // Use facts seen so far in the journey (including current) — min 4
+  const available = J_waypoints.slice(0, J_round+1);
+  let pool = [...available];
+
+  // Pad with extra waypoints if needed
+  if (pool.length < 4) {
+    const extras = J_waypoints.slice(J_round+1);
+    pool = [...pool, ...extras.slice(0, 4-pool.length)];
+  }
+  pool = pool.slice(0,4);
+
+  const correct = [...pool].sort((a,b)=>a.year-b.year);
+  const display = [...pool];
+  for (let i=display.length-1;i>0;i--) {
+    const j=Math.floor(Math.random()*(i+1));
+    [display[i],display[j]]=[display[j],display[i]];
+  }
+
+  CHRON = { order:display.map((_,i)=>i), correct, display, done:false };
+
+  document.getElementById('chrono-round-sub').textContent = `Round ${J_round+1} of 7`;
+  document.getElementById('chrono-journey-score').textContent = J_scores.reduce((s,v)=>s+v,0);
+
+  renderChronoList('chrono-list', CHRON, false);
+  document.getElementById('chrono-submit').disabled = false;
+  document.getElementById('chrono-result').classList.remove('visible');
+  renderProgressBar('chrono-progress-bar', J_round, J_scores);
+  showScreen('screen-chrono');
+}
+
+function renderChronoList(listId, state, locked) {
+  const list = document.getElementById(listId);
+  list.innerHTML = '';
+  state.order.forEach((itemIdx,pos) => {
+    const f = state.display[itemIdx];
+    const card = document.createElement('div');
+    card.className = 'chrono-card';
+    card.draggable = !locked;
+    card.dataset.pos = pos;
+    card.dataset.idx = itemIdx;
+    card.innerHTML = `
+      <div class="chrono-rank">${pos+1}</div>
+      <div class="chrono-text">${f.fact}</div>
+      ${!locked ? `<div class="chrono-arrows">
+        <button class="chrono-arrow" onclick="chronoMove(${pos},-1)">↑</button>
+        <button class="chrono-arrow" onclick="chronoMove(${pos},1)">↓</button>
+      </div>` : ''}`;
+    if (!locked) setupChronoDrag(card, listId, state);
+    list.appendChild(card);
+  });
+}
+
+function setupChronoDrag(card, listId, state) {
+  card.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('text/plain', card.dataset.pos);
+    card.classList.add('dragging');
+  });
+  card.addEventListener('dragend', () => card.classList.remove('dragging'));
+  card.addEventListener('dragover', e => { e.preventDefault(); card.classList.add('drag-over'); });
+  card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+  card.addEventListener('drop', e => {
+    e.preventDefault();
+    card.classList.remove('drag-over');
+    const fromPos = parseInt(e.dataTransfer.getData('text/plain'));
+    const toPos = parseInt(card.dataset.pos);
+    if (fromPos !== toPos) {
+      const tmp = state.order[fromPos];
+      state.order[fromPos] = state.order[toPos];
+      state.order[toPos] = tmp;
+      renderChronoList(listId, state, false);
+    }
+  });
+}
+
+function chronoMove(pos, dir) {
+  const newPos = pos + dir;
+  if (newPos < 0 || newPos >= CHRON.order.length) return;
+  const tmp = CHRON.order[pos]; CHRON.order[pos]=CHRON.order[newPos]; CHRON.order[newPos]=tmp;
+  renderChronoList('chrono-list', CHRON, false);
+}
+
+function submitChrono() {
+  if (CHRON.done) return;
+  CHRON.done = true;
+  document.getElementById('chrono-submit').disabled = true;
+
+  let pts = 0;
+  const list = document.getElementById('chrono-list');
+  const cards = list.querySelectorAll('.chrono-card');
+
+  cards.forEach((card, pos) => {
+    const itemIdx = parseInt(card.dataset.idx);
+    const displayedFact = CHRON.display[itemIdx];
+    const correctPos = CHRON.correct.findIndex(f=>f.fact===displayedFact.fact);
+    if (correctPos === pos) { pts += 25; card.classList.add('correct'); }
+    else { card.classList.add('wrong'); }
+  });
+
+  showRoundResult('chrono', pts, pts>=75,
+    pts===100 ? 'Perfect order!' : pts>=50 ? `${pts/25} of 4 correct.` : 'Keep practicing!');
+}
+
+// ──────────────── Round Result + Connective ────────────────
+function showRoundResult(screen, pts, success, extraMsg='') {
+  const result = document.getElementById(`${screen}-result`);
+  document.getElementById(`${screen}-res-icon`).textContent = success ? '🏆' : '📖';
+  document.getElementById(`${screen}-res-pts`).textContent = `+${pts} pts`;
+  document.getElementById(`${screen}-res-msg`).textContent = extraMsg;
+  result.classList.add('visible');
+  J_scores.push(pts);
+}
+
+function afterRound() {
+  const wp = J_waypoints[J_round];
+  const isLast = J_round >= J_waypoints.length - 1;
+
+  if (isLast) {
+    showDoneScreen();
     return;
   }
-  const letters = scoreWordleGuess(W.guess, W.word);
-  W.attempts.push({ guess: W.guess, letters });
 
-  // Update key states
-  letters.forEach(({ letter, state }) => {
-    const cur = W.keyStates[letter];
-    if (cur === 'correct') return;
-    if (cur === 'present' && state !== 'correct') return;
-    W.keyStates[letter] = state;
-  });
+  // Show connective screen
+  const nextWp = J_waypoints[J_round + 1];
+  const total = J_scores.reduce((s,v)=>s+v,0);
 
-  const won = letters.every(l => l.state === 'correct');
-  W.guess = '';
-  renderWordleGrid();
-  renderWordleKeyboard();
+  document.getElementById('conn-thread-name').textContent = J_thread?.name || '';
+  document.getElementById('conn-sub').textContent = `Round ${J_round+1} complete`;
+  document.getElementById('conn-round-badge').textContent = `Round ${J_round+1} of 7`;
+  document.getElementById('conn-score').textContent = `+${J_scores[J_scores.length-1]}`;
+  document.getElementById('conn-text').textContent = wp.connective || '';
+  document.getElementById('conn-next-century').innerHTML =
+    `Next up: <strong>${nextWp.century_label}</strong>`;
 
-  if (won) {
-    W.done = true;
-    const pts = Math.max(100, 300 - (W.attempts.length - 1) * 40);
-    document.getElementById('wordle-msg').textContent = '🎉 Correct!';
-    showWordleResult(pts, true);
-  } else if (W.attempts.length >= MAX_WORDLE_ATTEMPTS) {
-    W.done = true;
-    document.getElementById('wordle-msg').textContent = `The word was: ${W.word}`;
-    showWordleResult(0, false);
-  } else {
-    document.getElementById('wordle-msg').textContent = '';
-    updateWordleAttemptsLeft();
-  }
+  renderProgressBar('conn-progress-bar', J_round, J_scores);
+  showScreen('screen-connective');
 }
 
-function updateWordleAttemptsLeft() {
-  const left = MAX_WORDLE_ATTEMPTS - W.attempts.length;
-  document.getElementById('wordle-attempts-left').textContent = `${left} attempt${left===1?'':'s'} left`;
+function goToNextRound() {
+  J_round++;
+  showLearnScreen();
 }
 
-function showWordleResult(pts, won) {
-  const resIcon  = document.getElementById('wordle-res-icon');
-  const resScore = document.getElementById('wordle-res-score');
-  const resMsg   = document.getElementById('wordle-res-msg');
-  resIcon.textContent  = won ? '🏆' : '📖';
-  resScore.textContent = `+${pts} points`;
-  resMsg.textContent   = won
-    ? `Solved in ${W.attempts.length} attempt${W.attempts.length===1?'':'s'}!`
-    : `The answer was: ${W.word}`;
-  document.getElementById('wordle-result').classList.add('show');
-  completeMode('wordle', pts);
-}
+// ──────────────── Done Screen ────────────────
+function showDoneScreen() {
+  const total = J_scores.reduce((s,v)=>s+v,0);
+  const pct = total / 700;
 
-function renderWordleKeyboard() {
-  const rows = [['Q','W','E','R','T','Y','U','I','O','P'],
-                ['A','S','D','F','G','H','J','K','L'],
-                ['ENTER','Z','X','C','V','B','N','M','BACK']];
-  const kb = document.getElementById('wordle-keyboard');
-  kb.innerHTML = '';
-  rows.forEach(row => {
-    const rowEl = document.createElement('div');
-    rowEl.className = 'kb-row';
-    row.forEach(k => {
-      const btn = document.createElement('button');
-      btn.className = 'kb-key' + (k.length > 1 ? ' wide' : '');
-      btn.textContent = k === 'BACK' ? '⌫' : k;
-      const st = W.keyStates[k];
-      if (st) btn.classList.add(st);
-      btn.addEventListener('click', () => wordleKey(k));
-      rowEl.appendChild(btn);
-    });
-    kb.appendChild(rowEl);
-  });
-}
+  let icon = '📖';
+  let title = 'Keep Exploring';
+  if (pct >= 0.9) { icon='🏆'; title='Masterful Journey!'; }
+  else if (pct >= 0.7) { icon='⭐'; title='Excellent Journey!'; }
+  else if (pct >= 0.5) { icon='✨'; title='Good Journey!'; }
+  else if (pct >= 0.3) { icon='🗺️'; title='Journey Complete!'; }
 
-// Physical keyboard
-document.addEventListener('keydown', e => {
-  const screen = document.querySelector('.screen.active');
-  if (!screen || screen.id !== 'screen-wordle') return;
-  if (e.key === 'Enter')     { wordleKey('ENTER'); }
-  else if (e.key === 'Backspace') { wordleKey('BACK'); }
-  else if (/^[a-zA-Z]$/.test(e.key)) { wordleKey(e.key.toUpperCase()); }
-});
+  document.getElementById('done-icon').textContent = icon;
+  document.getElementById('done-title').textContent = title;
+  document.getElementById('done-thread-name').textContent =
+    J_thread ? `${J_thread.icon} ${J_thread.name}` : '';
+  document.getElementById('done-total').textContent = total;
 
-// ═══════════════════════════════════════════════════════════
-//  JEOPARDY (What Is It?)
-// ═══════════════════════════════════════════════════════════
-function startJeo() {
-  if (!sessionGames?.jeoFact) { alert('No suitable fact for this mode in your session.'); return; }
-  J = { hintsUsed: 0, done: false, currentValue: 300 };
-  document.getElementById('jeo-session-score').textContent = sessionTotal();
-  document.getElementById('jeo-value-left').textContent = 'Worth 300 pts';
-  document.getElementById('jeo-msg').textContent = '';
-  document.getElementById('jeo-result').classList.remove('show');
-  document.getElementById('jeo-hint-btn').style.display = '';
-  document.getElementById('jeo-hint-btn').disabled = false;
-
-  const { fact, keyword, wrong } = sessionGames.jeoFact;
-  // Build answer set: correct + wrong, shuffled
-  const answers = [keyword, ...wrong].sort(() => Math.random() - 0.5);
-  const correctIdx = answers.indexOf(keyword);
-
-  const clueEl = document.getElementById('jeo-clue');
-  clueEl.innerHTML = blankedFact(fact, keyword).replace(keyword, '<em>________</em>');
-
-  const choicesEl = document.getElementById('jeo-choices');
-  choicesEl.innerHTML = '';
-  const letters = ['A','B','C','D'];
-  answers.forEach((ans, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'choice-btn';
-    btn.innerHTML = `<span class="choice-letter">${letters[i]}</span>${ans}`;
-    btn.addEventListener('click', () => answerJeo(ans, keyword, btn, choicesEl));
-    choicesEl.appendChild(btn);
-  });
-
-  showScreen('screen-jeo');
-}
-
-function answerJeo(chosen, correct, clickedBtn, choicesEl) {
-  if (J.done) return;
-  J.done = true;
-  const won = chosen.toLowerCase() === correct.toLowerCase();
-
-  // Reveal all choices
-  choicesEl.querySelectorAll('.choice-btn').forEach(btn => {
-    btn.disabled = true;
-    const btnText = btn.textContent.replace(/^[ABCD]/, '').trim();
-    if (btnText.toLowerCase() === correct.toLowerCase()) {
-      btn.classList.add('correct-ans');
-    } else if (btn === clickedBtn && !won) {
-      btn.classList.add('wrong-ans');
-    }
-  });
-
-  document.getElementById('jeo-hint-btn').style.display = 'none';
-  const pts = won ? J.currentValue : 0;
-  document.getElementById('jeo-msg').textContent = won
-    ? `Correct! +${pts} pts`
-    : `The answer was: ${correct}`;
-
-  const resIcon  = document.getElementById('jeo-res-icon');
-  const resScore = document.getElementById('jeo-res-score');
-  const resMsg   = document.getElementById('jeo-res-msg');
-  resIcon.textContent  = won ? '🏆' : '📖';
-  resScore.textContent = `+${pts} points`;
-  resMsg.textContent   = won
-    ? (J.hintsUsed === 0 ? 'No hints needed — impressive!' : `Used ${J.hintsUsed} hint${J.hintsUsed===1?'':'s'}`)
-    : `The answer was: ${correct}`;
-  setTimeout(() => {
-    document.getElementById('jeo-result').classList.add('show');
-    completeMode('jeopardy', pts);
-  }, 700);
-}
-
-function useHint() {
-  if (J.hintsUsed >= 2 || J.done) return;
-  J.hintsUsed++;
-  J.currentValue = J.hintsUsed === 1 ? 200 : 100;
-
-  const { fact, keyword, wrong } = sessionGames.jeoFact;
-  // Eliminate a wrong answer button
-  const buttons = Array.from(document.getElementById('jeo-choices').querySelectorAll('.choice-btn'));
-  const wrongBtns = buttons.filter(btn => {
-    const t = btn.textContent.replace(/^[ABCD]/, '').trim();
-    return t.toLowerCase() !== keyword.toLowerCase() && !btn.disabled;
-  });
-  if (wrongBtns.length) {
-    const toElim = wrongBtns[Math.floor(Math.random() * wrongBtns.length)];
-    toElim.disabled = true;
-    toElim.style.opacity = '0.3';
-  }
-
-  document.getElementById('jeo-value-left').textContent = `Worth ${J.currentValue} pts`;
-  if (J.hintsUsed >= 2) {
-    document.getElementById('jeo-hint-btn').disabled = true;
-  }
-}
-
-// ═══════════════════════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════════════════════
-async function init() {
-  G = loadStorage();
-
-  try {
-    const resp = await fetch(CONTENT_URL);
-    const data = await resp.json();
-
-    // Normalize content.json structure
-    if (Array.isArray(data)) {
-      centuries = data;
-    } else if (data.centuries) {
-      centuries = data.centuries;
-    } else {
-      // Try to extract centuries from object keys
-      centuries = Object.entries(data).map(([id, obj]) => ({ id, ...obj }));
-    }
-
-    // Ensure each century has id, label, facts
-    centuries = centuries.filter(c => c.facts && c.facts.length > 0);
-
-  } catch(e) {
-    document.body.innerHTML = `<div style="padding:40px;text-align:center;color:#c8922a">
-      <h2>Could not load content</h2><p style="color:#786050;margin-top:12px">${e.message}</p>
-      <p style="margin-top:20px"><a href="index.html" style="color:#c8922a">← Back to Flashcards</a></p>
+  const roundsEl = document.getElementById('done-rounds');
+  roundsEl.innerHTML = J_waypoints.map((wp,i) => {
+    const gameMix = DAY_MIXES[todayDow()] || DAY_MIXES[1];
+    const gameType = gameMix[Math.min(i, gameMix.length-1)];
+    const gameNames = { jeo:'Multiple Choice', wordle:'Missing Word', chrono:'Chrono Order' };
+    return `<div class="done-round-row">
+      <div>
+        <div class="done-round-century">${wp.century_label}</div>
+        <div class="done-round-game">${gameNames[gameType]||gameType}</div>
+      </div>
+      <div class="done-round-pts">+${J_scores[i]||0}</div>
     </div>`;
-    return;
+  }).join('');
+
+  // Update streak
+  const today = todayStr();
+  if (G.lastCompleted !== today) {
+    G.streak = (G.lastCompleted===getPrevDay(today)) ? G.streak+1 : 1;
+    G.lastCompleted = today;
+    saveStorage();
   }
 
-  // Check for an active session to resume
-  const sess = G.session;
-  if (sess && sess.studyDone && sess.facts?.length) {
-    sessionGames = buildSessionGames(sess.facts);
-    goHub();
+  showScreen('screen-done');
+}
+
+function getPrevDay(dateStr) {
+  const d = new Date(dateStr+'T12:00:00');
+  d.setDate(d.getDate()-1);
+  return d.toISOString().slice(0,10);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Sunday Classic Mode
+// ═══════════════════════════════════════════════════════════
+function startClassicSession(count) {
+  SC = loadClassicStorage();
+  const seen = SC.seenFacts || {};
+
+  let facts;
+  if (count === 23) {
+    facts = centuries.map((c,ci) => {
+      const idx = (seen[c.id]||0) % c.facts.length;
+      const f = c.facts[idx];
+      return { ...f, century_label:c.label, era:c.era||'', century_id:c.id,
+               century_idx:ci, year:extractYear(f.fact,ci) };
+    });
   } else {
-    renderDeckScreen();
-    showScreen('screen-deck');
+    const pool = centuries;
+    const c = pool[Math.floor(Math.random()*pool.length)];
+    const ci = centuries.indexOf(c);
+    const start = (seen[c.id]||0) % c.facts.length;
+    facts = Array.from({length:count},(_,i)=>{
+      const fi=(start+i)%c.facts.length;
+      const f=c.facts[fi];
+      return { ...f, century_label:c.label, era:c.era||'', century_id:c.id,
+               century_idx:ci, year:extractYear(f.fact,ci) };
+    });
+  }
+
+  SC.session = {
+    facts,
+    score: {},
+    deckSize: count,
+    centuryLabel: count===23 ? 'All 23 Centuries' : (facts[0]?.century_label||''),
+    studyDone: false
+  };
+  saveClassicStorage();
+
+  studyIdx = 0;
+  renderStudyCard();
+  showScreen('screen-study');
+}
+
+function renderStudyCard() {
+  const facts = SC.session.facts;
+  const f = facts[studyIdx];
+  const style = eraStyle(f.era||'');
+  document.getElementById('study-idx').textContent = studyIdx+1;
+  document.getElementById('study-of').textContent = `of ${facts.length}`;
+  const eraEl = document.getElementById('study-era');
+  eraEl.textContent = f.era||'';
+  eraEl.style.color = style.color;
+  document.getElementById('study-century').textContent = f.century_label||'';
+  document.getElementById('study-fact').textContent = f.fact;
+  if (f.map_iframe) {
+    document.getElementById('study-map-label').textContent = f.map_label||'';
+    document.getElementById('study-map-iframe').src = f.map_iframe;
+    document.getElementById('study-map').style.display='';
+  } else {
+    document.getElementById('study-map').style.display='none';
+  }
+  document.getElementById('study-next-btn').textContent =
+    studyIdx >= facts.length-1 ? 'Start Games →' : 'Next →';
+}
+
+function studyPrev() {
+  if (studyIdx>0) { studyIdx--; renderStudyCard(); }
+}
+function studyNext() {
+  const facts = SC.session.facts;
+  if (studyIdx < facts.length-1) { studyIdx++; renderStudyCard(); }
+  else goClassicHub();
+}
+function goClassicDeck() {
+  document.getElementById('thread-intro').style.display='none';
+  document.getElementById('sunday-intro').style.display='flex';
+  showScreen('screen-thread');
+}
+function goClassicHub() {
+  SC.session.studyDone = true;
+  saveClassicStorage();
+  renderHub();
+  showScreen('screen-hub');
+}
+
+function renderHub() {
+  const s = SC.session;
+  document.getElementById('hub-century').textContent = s.centuryLabel;
+  document.getElementById('hub-score').textContent = Object.values(s.score||{}).reduce((a,b)=>a+b,0);
+  document.getElementById('hub-streak').textContent = SC.streak||0;
+  const modes = [
+    { id:'chrono', icon:'📅', name:'Chrono Order',   desc:'Arrange events oldest to newest',  pts:'100' },
+    { id:'wordle', icon:'📝', name:'Missing Word',    desc:'Guess the hidden keyword',          pts:'300' },
+    { id:'jeo',    icon:'🎯', name:'What Is It?',     desc:'Multiple choice — pick the answer', pts:'300' },
+  ];
+  const hub = document.getElementById('hub-modes');
+  hub.innerHTML = '';
+  modes.forEach(m => {
+    const done = s.score && s.score[m.id] !== undefined;
+    const div = document.createElement('div');
+    div.className = 'hub-mode' + (done?' done':'');
+    div.innerHTML = `
+      <div class="hub-mode-icon">${m.icon}</div>
+      <div class="hub-mode-info">
+        <div class="hub-mode-name">${m.name}</div>
+        <div class="hub-mode-desc">${m.desc}</div>
+      </div>
+      ${done ? `<div class="hub-mode-done-badge">+${s.score[m.id]} ✓</div>`
+             : `<div class="hub-mode-pts">up to ${m.pts} pts</div>`}`;
+    if (!done) div.onclick = () => launchClassicMode(m.id);
+    hub.appendChild(div);
+  });
+
+  const allDone = modes.every(m => s.score && s.score[m.id] !== undefined);
+  if (allDone) {
+    const total = Object.values(s.score).reduce((a,b)=>a+b,0);
+    const doneDiv = document.createElement('div');
+    doneDiv.className='hub-done-all';
+    doneDiv.innerHTML = `Session complete! Total: ${total} pts<a class="hub-done-link" href="index.html#browse">Browse History →</a>`;
+    hub.appendChild(doneDiv);
   }
 }
 
+function launchClassicMode(modeId) {
+  const facts = SC.session.facts;
+  if (modeId==='jeo') {
+    let jf = null;
+    for (const f of facts) {
+      const kw = extractKeyword(f.fact);
+      if (kw && kw.length>=3) { jf={...f,keyword:kw,wrong:buildWrongAnswers(f,facts)}; break; }
+    }
+    if (!jf) return;
+    SJEO = { hintsUsed:0, done:false, value:300, fact:jf, keyword:jf.keyword };
+    renderSJeo();
+    showScreen('screen-sjeo');
+  } else if (modeId==='wordle') {
+    let wf = null;
+    for (const f of facts) {
+      const kw = extractKeyword(f.fact);
+      if (kw && kw.length>=4 && kw.length<=12) { wf={...f,keyword:kw.toUpperCase()}; break; }
+    }
+    if (!wf) return;
+    SW = { word:wf.keyword, attempts:[], keyStates:{}, done:false, fact:wf };
+    document.documentElement.style.setProperty('--word-len', wf.keyword.length);
+    const blanked = blankedFact(wf.fact, wf.keyword);
+    document.getElementById('swordle-clue').innerHTML =
+      blanked.replace(/_+/g,`<span class="blank">${'_'.repeat(wf.keyword.length)}</span>`);
+    document.getElementById('swordle-session-score').textContent =
+      Object.values(SC.session.score||{}).reduce((a,b)=>a+b,0);
+    document.getElementById('swordle-value-left').textContent='Worth 300 pts';
+    buildWordleGrid('swordle-grid', wf.keyword.length);
+    buildWordleKeyboard('swordle-keyboard','swordle');
+    document.getElementById('swordle-msg').textContent='';
+    document.getElementById('swordle-input').value='';
+    document.getElementById('swordle-result').classList.remove('visible');
+    showScreen('screen-swordle');
+    document.getElementById('swordle-input').focus();
+  } else if (modeId==='chrono') {
+    let pool;
+    if (facts.length<=4) pool=[...facts];
+    else {
+      const step=Math.floor(facts.length/4);
+      const idxs=new Set([0,1,2,3].map(i=>Math.min(i*step,facts.length-1)));
+      pool=[...idxs].map(i=>facts[i]);
+    }
+    const seen=new Set(); pool=pool.filter(f=>{if(seen.has(f.fact))return false;seen.add(f.fact);return true;});
+    while(pool.length<4&&facts.length>pool.length){const e=facts.find(f=>!seen.has(f.fact));if(!e)break;pool.push(e);seen.add(e.fact);}
+    const correct=[...pool].sort((a,b)=>a.year-b.year);
+    const display=[...pool];
+    for(let i=display.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[display[i],display[j]]=[display[j],display[i]];}
+    SCHRON={order:display.map((_,i)=>i),correct,display,done:false};
+    document.getElementById('schrono-session-score').textContent=Object.values(SC.session.score||{}).reduce((a,b)=>a+b,0);
+    renderChronoList('schrono-list',SCHRON,false);
+    document.getElementById('schrono-submit').disabled=false;
+    document.getElementById('schrono-result').classList.remove('visible');
+    showScreen('screen-schrono');
+  }
+}
+
+function renderSJeo() {
+  const f = SJEO.fact;
+  const kw = SJEO.keyword;
+  const blanked = blankedFact(f.fact, kw);
+  document.getElementById('sjeo-clue').innerHTML=
+    blanked.replace(/_+/g,`<span class="blank">${'_'.repeat(kw.length)}</span>`);
+  document.getElementById('sjeo-session-score').textContent=
+    Object.values(SC.session.score||{}).reduce((a,b)=>a+b,0);
+  document.getElementById('sjeo-value-left').textContent=`Worth ${SJEO.value} pts`;
+  document.getElementById('sjeo-hint-btn').disabled=false;
+  document.getElementById('sjeo-msg').textContent='';
+  document.getElementById('sjeo-result').classList.remove('visible');
+
+  const wrong=f.wrong||buildWrongAnswers(f,SC.session.facts);
+  const choices=[kw,...wrong].sort(()=>Math.random()-0.5);
+  const letters=['A','B','C','D'];
+  const el=document.getElementById('sjeo-choices');
+  el.innerHTML='';
+  choices.forEach((c,i)=>{
+    const btn=document.createElement('button');
+    btn.className='jeo-choice';
+    btn.innerHTML=`<span class="jeo-choice-letter">${letters[i]}</span>${c}`;
+    btn.onclick=()=>answerSJeo(c,kw,btn,el);
+    el.appendChild(btn);
+  });
+}
+
+function useSJeoHint(){
+  if(SJEO.done)return;
+  SJEO.hintsUsed++;SJEO.value=Math.max(0,SJEO.value-100);
+  document.getElementById('sjeo-value-left').textContent=`Worth ${SJEO.value} pts`;
+  document.getElementById('sjeo-hint-btn').disabled=true;
+  const choices=document.querySelectorAll('#sjeo-choices .jeo-choice');
+  let el=0;
+  choices.forEach(btn=>{
+    if(el)return;
+    const text=(btn.childNodes[1]?.textContent||btn.textContent.trim().slice(1)).trim();
+    if(text.toUpperCase()!==SJEO.keyword.toUpperCase()&&!btn.classList.contains('eliminated')){btn.classList.add('eliminated');el++;}
+  });
+}
+
+function answerSJeo(chosen,correct,btn,choicesEl){
+  if(SJEO.done)return;
+  SJEO.done=true;
+  const isRight=chosen.toUpperCase()===correct.toUpperCase();
+  const pts=isRight?SJEO.value:0;
+  choicesEl.querySelectorAll('.jeo-choice').forEach(b=>{
+    b.disabled=true;
+    const text=(b.childNodes[1]?.textContent||b.textContent.trim().slice(1)).trim();
+    if(text.toUpperCase()===correct.toUpperCase())b.classList.add('correct');
+    else if(b===btn&&!isRight)b.classList.add('wrong');
+  });
+  document.getElementById('sjeo-msg').textContent=isRight?`Correct! +${pts}`:`Answer: ${correct}`;
+  SC.session.score.jeo=pts;saveClassicStorage();
+  const res=document.getElementById('sjeo-result');
+  document.getElementById('sjeo-res-icon').textContent=isRight?'🏆':'📖';
+  document.getElementById('sjeo-res-score').textContent=`+${pts} pts`;
+  document.getElementById('sjeo-res-msg').textContent='';
+  res.classList.add('visible');
+}
+
+function submitSWordle(){
+  if(SW.done)return;
+  const inp=document.getElementById('swordle-input');
+  const guess=inp.value.trim().toUpperCase();
+  if(guess.length!==SW.word.length){document.getElementById('swordle-msg').textContent=`Need ${SW.word.length} letters.`;return;}
+  inp.value='';document.getElementById('swordle-msg').textContent='';
+  const attempt=evaluateGuess(guess,SW.word);
+  SW.attempts.push(attempt);
+  renderWordleAttempt('swordle-grid',SW.attempts.length-1,attempt);
+  updateKeyStates(SW.keyStates,attempt);
+  applyKeyColors('swordle-keyboard',SW.keyStates);
+  const won=guess===SW.word;
+  const lost=!won&&SW.attempts.length>=MAX_WORDLE_ATTEMPTS;
+  if(won||lost){
+    SW.done=true;
+    const pts=won?[300,260,220,180,140,100][Math.min(SW.attempts.length-1,5)]:0;
+    SC.session.score.wordle=pts;saveClassicStorage();
+    const res=document.getElementById('swordle-result');
+    document.getElementById('swordle-res-icon').textContent=won?'🏆':'📖';
+    document.getElementById('swordle-res-score').textContent=`+${pts} pts`;
+    document.getElementById('swordle-res-msg').textContent=won?`Solved in ${SW.attempts.length}!`:`Word was: ${SW.word}`;
+    res.classList.add('visible');
+  }
+}
+
+function submitSChrono(){
+  if(SCHRON.done)return;
+  SCHRON.done=true;
+  document.getElementById('schrono-submit').disabled=true;
+  let pts=0;
+  const cards=document.querySelectorAll('#schrono-list .chrono-card');
+  cards.forEach((card,pos)=>{
+    const itemIdx=parseInt(card.dataset.idx);
+    const df=SCHRON.display[itemIdx];
+    const cp=SCHRON.correct.findIndex(f=>f.fact===df.fact);
+    if(cp===pos){pts+=25;card.classList.add('correct');}
+    else card.classList.add('wrong');
+  });
+  SC.session.score.chrono=pts;saveClassicStorage();
+  const res=document.getElementById('schrono-result');
+  document.getElementById('schrono-res-icon').textContent=pts>=75?'🏆':'📖';
+  document.getElementById('schrono-res-score').textContent=`+${pts} pts`;
+  document.getElementById('schrono-res-msg').textContent=pts===100?'Perfect!':pts>=50?`${pts/25}/4 correct`:'Keep practicing!';
+  res.classList.add('visible');
+}
+
+// Chrono move for Sunday classic
+function schronoMove(pos,dir){
+  const newPos=pos+dir;
+  if(newPos<0||newPos>=SCHRON.order.length)return;
+  const tmp=SCHRON.order[pos];SCHRON.order[pos]=SCHRON.order[newPos];SCHRON.order[newPos]=tmp;
+  renderSchronoList();
+}
+function renderSchronoList(){
+  const list=document.getElementById('schrono-list');
+  list.innerHTML='';
+  SCHRON.order.forEach((itemIdx,pos)=>{
+    const f=SCHRON.display[itemIdx];
+    const card=document.createElement('div');
+    card.className='chrono-card';
+    card.draggable=true;
+    card.dataset.pos=pos;card.dataset.idx=itemIdx;
+    card.innerHTML=`<div class="chrono-rank">${pos+1}</div>
+      <div class="chrono-text">${f.fact}</div>
+      <div class="chrono-arrows">
+        <button class="chrono-arrow" onclick="schronoMove(${pos},-1)">↑</button>
+        <button class="chrono-arrow" onclick="schronoMove(${pos},1)">↓</button>
+      </div>`;
+    setupChronoDrag(card,'schrono-list',SCHRON);
+    list.appendChild(card);
+  });
+}
+
+// Override renderChronoList for sunday to use schrono arrows
+const _origRenderChronoList = renderChronoList;
+
+// ═══════════════════════════════════════════════════════════
+//  Boot
+// ═══════════════════════════════════════════════════════════
 init();
 </script>
 </body>
