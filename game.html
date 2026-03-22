@@ -615,12 +615,12 @@
       <h3>Choose Your Session</h3>
       <p>Today is your free day. Pick a size and dive in.</p>
       <div class="sunday-opts">
-        <button class="sunday-btn" onclick="startClassicSession(5)">
+        <button class="sunday-btn" onclick="showClassicSubjectScreen(5)">
           <span class="sunday-btn-num">I</span>
           <div><div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--text);">Quick</div>
           <div style="font-size:0.78rem;color:var(--text3)">5 facts · 1 century · up to 700 pts</div></div>
         </button>
-        <button class="sunday-btn" onclick="startClassicSession(10)">
+        <button class="sunday-btn" onclick="showClassicSubjectScreen(10)">
           <span class="sunday-btn-num">II</span>
           <div><div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--text);">Standard</div>
           <div style="font-size:0.78rem;color:var(--text3)">10 facts · 1 century · up to 700 pts</div></div>
@@ -792,6 +792,14 @@
 </div>
 
 <!-- ═══ SUNDAY CLASSIC SCREENS ═══ -->
+<div id="screen-classic-subject" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="goClassicDeck()">← Back</button>
+    <div class="hdr-title" id="classic-subject-title">Choose a Subject</div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:10px" id="classic-subject-list"></div>
+</div>
+
 <div id="screen-study" class="screen">
   <div class="hdr">
     <button class="hdr-back" onclick="goClassicDeck()">← Deck</button>
@@ -1066,6 +1074,24 @@ function buildWrongAnswers(correctFact, pool, count=3) {
     [candidates[i],candidates[j]]=[candidates[j],candidates[i]];
   }
   return candidates.slice(0,count);
+}
+
+// Pick 4 facts from 4 different eras of history for Chrono Order
+function buildChronoPool() {
+  const n    = centuries.length;
+  const step = Math.floor(n / 4);
+  const pool = [];
+  for (let i = 0; i < 4; i++) {
+    const lo = i * step;
+    const hi = i < 3 ? (i + 1) * step : n;
+    const ci = lo + Math.floor(Math.random() * (hi - lo));
+    const c  = centuries[ci];
+    const fi = Math.floor(Math.random() * c.facts.length);
+    const f  = c.facts[fi];
+    pool.push({ ...f, century_label:c.label, era:c.era||'',
+                century_id:c.id, century_idx:ci, year:extractYear(f.fact,ci) });
+  }
+  return pool;
 }
 
 function seededRandom(seed) {
@@ -1690,7 +1716,36 @@ function getPrevDay(dateStr) {
 // ═══════════════════════════════════════════════════════════
 //  Sunday Classic Mode
 // ═══════════════════════════════════════════════════════════
-function startClassicSession(count) {
+function showClassicSubjectScreen(count) {
+  const title = count === 5 ? 'Quick (5 facts)' : 'Standard (10 facts)';
+  document.getElementById('classic-subject-title').textContent = title + ' — Pick a Century';
+  const list = document.getElementById('classic-subject-list');
+  list.innerHTML = '';
+
+  const randomBtn = document.createElement('button');
+  randomBtn.className = 'sunday-btn';
+  randomBtn.style.cssText = 'display:flex;align-items:center;gap:14px;width:100%';
+  randomBtn.innerHTML = `<span class="sunday-btn-num" style="font-size:1.4rem">?</span>
+    <div><div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--text)">Random</div>
+    <div style="font-size:0.78rem;color:var(--text3)">Pick the next unseen century</div></div>`;
+  randomBtn.onclick = () => startClassicSession(count);
+  list.appendChild(randomBtn);
+
+  centuries.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'sunday-btn';
+    btn.style.cssText = 'display:flex;align-items:center;gap:14px;width:100%';
+    btn.innerHTML = `<span class="sunday-btn-num" style="font-size:1rem;min-width:36px">${i+1}</span>
+      <div><div style="font-family:'Playfair Display',serif;font-size:0.95rem;color:var(--text)">${c.label}</div>
+      <div style="font-size:0.75rem;color:var(--text3)">${c.era||''}</div></div>`;
+    btn.onclick = () => startClassicSession(count, c.id);
+    list.appendChild(btn);
+  });
+
+  showScreen('screen-classic-subject');
+}
+
+function startClassicSession(count, centuryId) {
   SC = loadClassicStorage();
   const seen = SC.seenFacts || {};
 
@@ -1703,9 +1758,15 @@ function startClassicSession(count) {
                century_idx:ci, year:extractYear(f.fact,ci) };
     });
   } else {
-    const pool = centuries;
-    const c = pool[Math.floor(Math.random()*pool.length)];
-    const ci = centuries.indexOf(c);
+    let c, ci;
+    if (centuryId) {
+      ci = centuries.findIndex(x => x.id === centuryId);
+      c  = centuries[ci];
+    }
+    if (!c) {
+      c  = centuries[Math.floor(Math.random()*centuries.length)];
+      ci = centuries.indexOf(c);
+    }
     const start = (seen[c.id]||0) % c.facts.length;
     facts = Array.from({length:count},(_,i)=>{
       const fi=(start+i)%c.facts.length;
@@ -1844,17 +1905,9 @@ function launchClassicMode(modeId) {
     showScreen('screen-swordle');
     document.getElementById('swordle-input').focus();
   } else if (modeId==='chrono') {
-    let pool;
-    if (facts.length<=4) pool=[...facts];
-    else {
-      const step=Math.floor(facts.length/4);
-      const idxs=new Set([0,1,2,3].map(i=>Math.min(i*step,facts.length-1)));
-      pool=[...idxs].map(i=>facts[i]);
-    }
-    const seen=new Set(); pool=pool.filter(f=>{if(seen.has(f.fact))return false;seen.add(f.fact);return true;});
-    while(pool.length<4&&facts.length>pool.length){const e=facts.find(f=>!seen.has(f.fact));if(!e)break;pool.push(e);seen.add(e.fact);}
-    const correct=[...pool].sort((a,b)=>a.year-b.year);
-    const display=[...pool];
+    const pool    = buildChronoPool();
+    const correct = [...pool].sort((a,b)=>a.year-b.year);
+    const display = [...pool];
     for(let i=display.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[display[i],display[j]]=[display[j],display[i]];}
     SCHRON={order:display.map((_,i)=>i),correct,display,done:false};
     document.getElementById('schrono-session-score').textContent=Object.values(SC.session.score||{}).reduce((a,b)=>a+b,0);

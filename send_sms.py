@@ -91,13 +91,14 @@ def get_todays_fact():
 
 def send_sms(fact, sent, total):
     icon = ERA_ICONS.get(fact['era'], '📜')
-    remaining = total - (sent % total)
+    # Truncate to first sentence for SMS brevity
+    first_sent = fact['fact'].split('. ')[0].rstrip('.')
+    if len(first_sent) > 120:
+        first_sent = first_sent[:117] + '...'
     body = (
-        f"{WEBAPP_URL}\n\n"
         f"{icon} {fact['century']}\n\n"
-        f"{fact['fact']}\n\n"
-        f"📍 {fact['map_label']}\n"
-        f"#{sent} · {remaining} until reshuffle"
+        f"{first_sent}.\n\n"
+        f"Play: {WEBAPP_URL}"
     )
 
     msg = MIMEText(body)
