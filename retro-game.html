@@ -43,7 +43,7 @@
       white-space: pre;
       font-family: inherit;
       font-size: inherit;
-      padding: 12px 16px 80px;
+      padding: 12px 16px 130px;
       max-width: 680px;
       margin: 0 auto;
       min-height: 100vh;
@@ -78,6 +78,17 @@
     .osk-key.correct { color: var(--hi); border-color: var(--hi); }
     .osk-key.present { color: #b59f3b; border-color: #b59f3b; }
     .osk-key.absent  { color: var(--dim); border-color: var(--dim); }
+
+    /* Context action keys (non-Wordle screens) */
+    .ctx-key {
+      flex: 1; min-height: 44px; border: 1px solid var(--dim);
+      background: transparent; color: var(--fg); font-family: inherit; font-size: 13px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      padding: 4px 6px; text-shadow: 0 0 4px var(--fg);
+      -webkit-tap-highlight-color: transparent; text-align: center; white-space: nowrap;
+    }
+    .ctx-key.primary { border-color: var(--fg); font-size: 14px; }
+    .ctx-key.done    { color: var(--dim); border-color: var(--dim); opacity: 0.5; }
 
     /* Theme toggle button */
     #theme-toggle {
@@ -149,6 +160,9 @@ const S = {
   chronoInput: '',
   chronoDone:  false,
   chronoError: '',
+
+  // SUBJECT selector
+  subjectCount: 0,
 
   // WORDLE
   wTarget: '', wGuesses: [], wColors: [], wCurrent: '', wDone: false, wError: '',
@@ -355,7 +369,7 @@ function extractKeyword(factText) {
 // ─────────────────────────────────────────────────────────────
 //  Fact selection (session-based)
 // ─────────────────────────────────────────────────────────────
-function pickDeckFacts(count) {
+function pickDeckFacts(count, centuryId) {
   const seen = G.seenFacts || {};
   if (count === 23) {
     return centuries.map((c, ci) => {
@@ -365,10 +379,17 @@ function pickDeckFacts(count) {
                century_idx:ci, year:extractYear(f.fact, ci) };
     });
   } else {
-    const unseenC = centuries.filter(c => (seen[c.id]||0) < c.facts.length);
-    const pool    = unseenC.length > 0 ? unseenC : centuries;
-    const c       = pool[Math.floor(Math.random()*pool.length)];
-    const ci      = centuries.indexOf(c);
+    let c, ci;
+    if (centuryId) {
+      ci = centuries.findIndex(x => x.id === centuryId);
+      c  = centuries[ci];
+    }
+    if (!c) {
+      const unseenC = centuries.filter(c => (seen[c.id]||0) < c.facts.length);
+      const pool    = unseenC.length > 0 ? unseenC : centuries;
+      c  = pool[Math.floor(Math.random()*pool.length)];
+      ci = centuries.indexOf(c);
+    }
     const start   = (seen[c.id]||0) % c.facts.length;
     return Array.from({length:count}, (_,i) => {
       const fi = (start+i) % c.facts.length;
@@ -380,26 +401,31 @@ function pickDeckFacts(count) {
 }
 
 // ─────────────────────────────────────────────────────────────
+//  Chrono pool — 4 facts from 4 different eras across history
+// ─────────────────────────────────────────────────────────────
+function buildChronoPool() {
+  const n    = centuries.length;
+  const step = Math.floor(n / 4);
+  const pool = [];
+  for (let i = 0; i < 4; i++) {
+    const lo = i * step;
+    const hi = i < 3 ? (i + 1) * step : n;
+    const ci = lo + Math.floor(Math.random() * (hi - lo));
+    const c  = centuries[ci];
+    const fi = Math.floor(Math.random() * c.facts.length);
+    const f  = c.facts[fi];
+    pool.push({ ...f, century_label: c.label, era: c.era,
+                century_id: c.id, century_idx: ci, year: extractYear(f.fact, ci) });
+  }
+  return pool;
+}
+
+// ─────────────────────────────────────────────────────────────
 //  Session game builder
 // ─────────────────────────────────────────────────────────────
 function buildSessionGames(facts) {
-  // CHRONO: pick 4 spread across session
-  let chronoPool;
-  if (facts.length <= 4) {
-    chronoPool = [...facts];
-  } else {
-    const step = Math.floor(facts.length/4);
-    const idxs = new Set([0,1,2,3].map(i => Math.min(i*step, facts.length-1)));
-    chronoPool = [...idxs].map(i => facts[i]);
-  }
-  const seenFacts = new Set();
-  chronoPool = chronoPool.filter(f => { if (seenFacts.has(f.fact)) return false; seenFacts.add(f.fact); return true; });
-  while (chronoPool.length < 4 && facts.length > chronoPool.length) {
-    const extra = facts.find(f => !seenFacts.has(f.fact));
-    if (!extra) break;
-    chronoPool.push(extra);
-    seenFacts.add(extra.fact);
-  }
+  // CHRONO: 4 facts from 4 different eras across all of history
+  const chronoPool    = buildChronoPool();
   const chronoCorrect = [...chronoPool].sort((a,b)=>a.year-b.year);
   const chronoDisplay = [...chronoPool];
   for (let i = chronoDisplay.length-1; i > 0; i--) {
@@ -469,12 +495,15 @@ function render() {
   else if (S.screen === 'CHRONO') out += renderChrono();
   else if (S.screen === 'WORDLE') out += renderWordle();
   else if (S.screen === 'JEO')    out += renderJeo();
+  else if (S.screen === 'SUBJECT') out += renderSubject();
   else if (S.screen === 'DONE')   out += renderDone();
 
   out += '\n';
   out += '+' + hr() + '+\n';
   if (S.screen === 'DECK' || S.screen === 'BOOT') {
     out += '| ' + pad('[T] THEME  [Q] QUIT TO INDEX', W) + ' |\n';
+  } else if (S.screen === 'SUBJECT') {
+    out += '| ' + pad('[T] THEME  [B] BACK  [R] RANDOM', W) + ' |\n';
   } else if (S.screen === 'STUDY') {
     out += '| ' + pad('[N] NEXT  [P] PREV  [S] SKIP', W) + ' |\n';
   } else {
@@ -511,6 +540,28 @@ function renderDeck() {
     '',
     center('PRESS 1 / 2 / 3 TO BEGIN')
   ]);
+  return o;
+}
+
+function renderSubject() {
+  const letters = 'ABCDEFGHIJKLMN';
+  const sizeLabel = S.subjectCount === 5 ? 'QUICK (5)' : 'STANDARD (10)';
+  const lines = [
+    center('-- SELECT SUBJECT --'),
+    center(`SESSION: ${sizeLabel}`),
+    '',
+  ];
+  centuries.forEach((c, i) => {
+    const key   = i < 9 ? String(i + 1) : letters[i - 9];
+    const label = c.label.slice(0, W - 6);
+    lines.push(`  [${key}] ${label}`);
+  });
+  lines.push('');
+  lines.push(`  [R] RANDOM — next unseen century`);
+  lines.push('');
+  lines.push(center('PRESS KEY TO SELECT'));
+  let o = '\n';
+  o += box(lines);
   return o;
 }
 
@@ -767,36 +818,95 @@ function renderDone() {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  On-screen keyboard for mobile Wordle
+//  On-screen keyboard — contextual for every screen
 // ─────────────────────────────────────────────────────────────
 function updateOSK() {
-  const osk = document.getElementById('osk');
+  const osk      = document.getElementById('osk');
   const enterBtn = document.getElementById('enter-btn');
-  if (S.screen !== 'WORDLE' || S.wDone) {
-    osk.classList.remove('show');
-    if (enterBtn) enterBtn.classList.remove('osk-open');
-    return;
-  }
-  osk.classList.add('show');
-  if (enterBtn) enterBtn.classList.add('osk-open');
 
-  const rows = ['QWERTYUIOP','ASDFGHJKL','⌫ZXCVBNM↵'];
-  const keyState = {};
-  for (let g = 0; g < S.wGuesses.length; g++) {
-    for (let i = 0; i < S.wGuesses[g].length; i++) {
-      const ch = S.wGuesses[g][i], c = S.wColors[g][i], prev = keyState[ch];
-      if (!prev||(prev==='absent'&&c!=='absent')||(prev==='present'&&c==='correct')) keyState[ch]=c;
-    }
+  function row(btns) { return `<div class="osk-row">${btns}</div>`; }
+  function ck(key, label, cls) {
+    const safe = key.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return `<button class="ctx-key ${cls||''}" onclick="oskKey('${safe}')">${label}</button>`;
   }
-  osk.innerHTML = rows.map(row => {
-    const keys = row.split('').map(ch => {
-      const special = ch==='⌫'||ch==='↵';
-      const state   = keyState[ch] || '';
-      const label   = ch==='⌫' ? 'DEL' : ch==='↵' ? 'ENT' : ch;
-      return `<button class="osk-key ${special?'wide':''} ${state}" onclick="oskKey('${ch}')">${label}</button>`;
+
+  let html = '';
+
+  if (S.screen === 'WORDLE' && !S.wDone) {
+    // Full QWERTY with letter-state colouring
+    const rows = ['QWERTYUIOP','ASDFGHJKL','⌫ZXCVBNM↵'];
+    const keyState = {};
+    for (let g = 0; g < S.wGuesses.length; g++) {
+      for (let i = 0; i < S.wGuesses[g].length; i++) {
+        const ch = S.wGuesses[g][i], c = S.wColors[g][i], prev = keyState[ch];
+        if (!prev||(prev==='absent'&&c!=='absent')||(prev==='present'&&c==='correct')) keyState[ch]=c;
+      }
+    }
+    html = rows.map(r => {
+      const keys = r.split('').map(ch => {
+        const special = ch==='⌫'||ch==='↵';
+        const state   = keyState[ch] || '';
+        const label   = ch==='⌫' ? 'DEL' : ch==='↵' ? 'ENT' : ch;
+        return `<button class="osk-key ${special?'wide':''} ${state}" onclick="oskKey('${ch}')">${label}</button>`;
+      }).join('');
+      return `<div class="osk-row">${keys}</div>`;
     }).join('');
-    return `<div class="osk-row">${keys}</div>`;
-  }).join('');
+
+  } else if (S.screen === 'DECK' || S.screen === 'BOOT') {
+    html = row(ck('1','1 QUICK','primary') + ck('2','2 STANDARD','primary') + ck('3','GRAND TOUR','primary'))
+         + row(ck('T','[T] THEME'));
+
+  } else if (S.screen === 'SUBJECT') {
+    const nums = '123456789'.split('').slice(0, Math.min(9, centuries.length));
+    const lets = 'ABCDEFGHIJKLMN'.split('').slice(0, Math.max(0, centuries.length - 9));
+    html = row(nums.map(k => ck(k, k)).join(''));
+    if (lets.length) html += row(lets.slice(0, 7).map(k => ck(k, k)).join(''));
+    if (lets.length > 7) html += row(lets.slice(7).map(k => ck(k, k)).join(''));
+    html += row(ck('R','RANDOM','primary') + ck('B','BACK'));
+
+  } else if (S.screen === 'STUDY') {
+    html = row(ck('P','◀ PREV') + ck('ENTER','NEXT ▶','primary') + ck('S','SKIP'));
+
+  } else if (S.screen === 'MENU') {
+    const sc = G.session?.score || {};
+    const d1 = sc.chrono   !== undefined ? 'done' : 'primary';
+    const d2 = sc.wordle   !== undefined ? 'done' : 'primary';
+    const d3 = sc.jeopardy !== undefined ? 'done' : 'primary';
+    html = row(ck('1','1 CHRONO',d1) + ck('2','2 WORDLE',d2) + ck('3','3 JEO',d3))
+         + row(ck('D','NEW SESSION') + ck('H','HUB'));
+
+  } else if (S.screen === 'CHRONO') {
+    if (!S.chronoDone) {
+      html = row(ck('1','1') + ck('2','2') + ck('3','3') + ck('4','4') + ck(' ','SPC') + ck('BACKSPACE','⌫'))
+           + row(ck('ENTER','CHECK ORDER','primary'));
+    } else {
+      html = row(ck('ENTER','CONTINUE','primary'));
+    }
+
+  } else if (S.screen === 'JEO') {
+    if (!S.jAnswered) {
+      const hintCls = S.jHints >= 1 ? 'done' : '';
+      html = row(ck('A','A','primary') + ck('B','B','primary') + ck('C','C','primary') + ck('D','D','primary'))
+           + row(ck('X','HINT (−100 pts)', hintCls));
+    } else {
+      html = row(ck('ENTER','CONTINUE','primary'));
+    }
+
+  } else if (S.screen === 'WORDLE' && S.wDone) {
+    html = row(ck('ENTER','CONTINUE','primary'));
+
+  } else if (S.screen === 'DONE') {
+    html = row(ck('D','NEW SESSION','primary') + ck('H','HUB'));
+  }
+
+  if (html) {
+    osk.innerHTML = html;
+    osk.classList.add('show');
+    if (enterBtn) enterBtn.style.display = 'none';
+  } else {
+    osk.classList.remove('show');
+    if (enterBtn) enterBtn.style.display = '';
+  }
 }
 
 function oskKey(ch) { handleKey(ch); }
@@ -811,9 +921,27 @@ function handleKey(key) {
   if (k === 'T') { cycleTheme(); return; }
 
   if (S.screen === 'DECK') {
-    if (k === '1') startSession(5);
-    if (k === '2') startSession(10);
+    if (k === '1') { S.subjectCount = 5;  S.screen = 'SUBJECT'; render(); }
+    if (k === '2') { S.subjectCount = 10; S.screen = 'SUBJECT'; render(); }
     if (k === '3') startSession(23);
+    return;
+  }
+
+  if (S.screen === 'SUBJECT') {
+    if (k === 'B' || k === 'Q') { S.screen = 'DECK'; render(); return; }
+    if (k === 'R') { startSession(S.subjectCount); return; }
+    // Keys 1-9 → centuries 0-8
+    if (/^[1-9]$/.test(k)) {
+      const idx = parseInt(k) - 1;
+      if (idx < centuries.length) startSession(S.subjectCount, centuries[idx].id);
+      return;
+    }
+    // Keys A-N → centuries 9-22
+    const li = 'ABCDEFGHIJKLMN'.indexOf(k);
+    if (li >= 0) {
+      const idx = 9 + li;
+      if (idx < centuries.length) startSession(S.subjectCount, centuries[idx].id);
+    }
     return;
   }
 
@@ -889,8 +1017,8 @@ document.addEventListener('keydown', e => {
 // ─────────────────────────────────────────────────────────────
 //  Session flow
 // ─────────────────────────────────────────────────────────────
-function startSession(count) {
-  const facts        = pickDeckFacts(count);
+function startSession(count, centuryId) {
+  const facts        = pickDeckFacts(count, centuryId);
   const centuryLabel = count === 23 ? 'All 23 Centuries' : (facts[0]?.century_label || '');
   G.session = { facts, score: {}, deckSize: count, centuryLabel, studyDone: false };
   saveStorage();
