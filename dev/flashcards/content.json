@@ -1839,6 +1839,31 @@
           "map_url": "https://staticmap.openstreetmap.de/staticmap.php?center=35.0,20.0&zoom=3&size=280x180&markers=35.0,20.0,red-pushpin",
           "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-15.0,0.0,55.0,70.0&layer=mapnik&marker=35.0,20.0",
           "map_label": "The Mediterranean & Ancient World"
+        },
+        {
+          "fact": "Marco Polo's journey to the court of Kublai Khan (1271–1295 CE) opened European eyes to the wealth and sophistication of China — his account of paper money, coal burning, and vast cities like Beijing challenged European assumptions about their own civilization's superiority.",
+          "map_label": "China",
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=82.2,13.899999999999999,126.2,57.9&layer=mapnik&marker=35.9,104.2"
+        },
+        {
+          "fact": "The fall of Acre in 1291 CE to the Mamluks marked the end of the Crusader states in the Holy Land — after nearly two centuries of Christian rule, the last major Crusader stronghold fell, ending the dream of a permanent Christian presence in the Levant.",
+          "map_label": "The Mediterranean & Ancient World",
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-15,25,55,55&layer=mapnik"
+        },
+        {
+          "fact": "The rise of universities in the 13th century, including Oxford, Cambridge, and the Sorbonne, created Europe's first institutions of higher learning — these centers combined Christian theology with rediscovered Aristotelian philosophy, laying the intellectual foundations of medieval scholasticism.",
+          "map_label": "The Mediterranean & Ancient World",
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-15,25,55,55&layer=mapnik"
+        },
+        {
+          "fact": "The Mongol destruction of Kiev in 1240 CE shattered the power of Kievan Rus and forced Russian princes into vassalage — this 'Mongol Yoke' lasted over two centuries and profoundly shaped Russian political development, contributing to the rise of autocratic rule.",
+          "map_label": "Russia",
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=15.600000000000001,33.8,59.6,77.8&layer=mapnik&marker=55.8,37.6"
+        },
+        {
+          "fact": "The papal bull 'Unam Sanctam' (1302 CE) by Pope Boniface VIII declared that salvation required submission to the Pope — this assertion of ultimate papal supremacy over secular rulers marked the height of medieval papal power, just before its dramatic decline in the 14th century.",
+          "map_label": "The Mediterranean & Ancient World",
+          "map_iframe": "https://www.openstreetmap.org/export/embed.html?bbox=-15,25,55,55&layer=mapnik"
         }
       ]
     },
