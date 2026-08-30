@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A daily-history-facts project with two halves:
 
 1. **A static web app** (plain HTML/CSS/JS, no build step, no `package.json`) deployed to GitHub Pages via `.github/workflows/deploy.yml`. Pushes to `main` deploy to the site root; pushes to `dev` deploy to `/dev/` (a preview copy, `keep_files: true` so the two don't clobber each other).
-2. **Python delivery/content scripts** that text a subset of the facts to one hardcoded phone number daily (Twilio SMS, Gmail-to-SMS gateway, or macOS iMessage) and a script that uses the Claude API to generate new facts weekly.
+2. **Python delivery/content scripts** that text one fact a day to a hardcoded phone number (macOS iMessage, or a Gmail-to-SMS gateway as an alternative that doesn't require a Mac) and a script that uses the Claude API to generate new facts weekly.
 
 There is no test suite, linter, or build tooling in this repo — verification is manual (open the HTML in a browser, or run a Python script and read its printed preview/log output).
 
@@ -53,17 +53,15 @@ The GitHub Pages deploy is dumb static hosting: whatever HTML/JS is committed is
 
 All scripts resolve `flashcards/content.json` relative to their own file location (`os.path.dirname(os.path.abspath(__file__))`), so they work regardless of the caller's cwd — unlike the frontends, they read the **local** file, not the GitHub raw copy.
 
-- **`daily_flashcards.py`** — Twilio SMS delivery of 10 facts/day, sequential (exhausts one century before moving to the next), position derived deterministically from days-since-2025-01-01 modulo total fact count (no external state file). Deployed as a Render cron job (`render.yaml`, runs 13:00 UTC daily). Requires `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`, `TO_NUMBER` env vars (see `.env.example`).
-- **`daily_flashcards_imessage.py`** — macOS-only, sends 1 fact/day via `osascript`/Messages.app, using the date as a random seed so the fact is stable within a day but differs day-to-day (no state file). Twilio-based alternative is left commented out inside the file for future re-use.
-- **`send_sms.py`** — Gmail-to-SMS-gateway delivery (`vtext.com`), 1 fact/day, using a persisted shuffled "deck" (`sms_state.json`) so all facts are seen once before any repeat, reshuffling when exhausted. Reads Gmail credentials from `~/.gmail_address` / `~/.gmail_app_password` (not env vars, unlike the other two senders). `sms_state.json` is gitignored — don't expect it to exist in a fresh checkout.
+- **`daily_flashcards_imessage.py`** — the primary delivery script. macOS-only (needs Messages.app + `osascript`), sends 1 fact/day, using the date as a random seed so the fact is stable within a day but differs day-to-day (no state file). Meant to run via `cron` on a Mac; a Raspberry Pi can't run this one since it has no Messages.app.
+- **`send_sms.py`** — alternative delivery via a Gmail-to-SMS-gateway (`vtext.com`) instead of iMessage, for running on something other than a Mac (e.g. a Raspberry Pi). 1 fact/day, using a persisted shuffled "deck" (`sms_state.json`) so all facts are seen once before any repeat, reshuffling when exhausted. Reads Gmail credentials from `~/.gmail_address` / `~/.gmail_app_password` — not env vars. `sms_state.json` is gitignored — don't expect it to exist in a fresh checkout.
 - **`update_content.py`** — weekly content generator: picks a random century, calls the Claude API (model id hardcoded, reads the key from `~/.anthropic_api_key` or `$ANTHROPIC_API_KEY`) to generate 5 new non-duplicate facts, geotags them via the inline `get_region()` keyword table, appends them to `flashcards/content.json`, and **commits + pushes directly to the current git remote** (`git_push()`) — this script has side effects on git history when run for real. Logs to `~/centuryhistories/update.log` (absolute path, not repo-relative like the other logs).
 - **`fetch_content.py`** — a one-off migration script that rewrote `index.html` to fetch content remotely instead of inlining it; not part of the regular workflow, kept as a record of that change.
 - **`remap_content.py`** / **`remap_content_v2.py`** — one-off batch scripts that re-derive `map_label`/`map_iframe` for every fact in `flashcards/content.json` from a keyword table. Not run automatically; run manually when the geotagging table is improved. v2 has tighter/less-false-positive-prone keyword matching than v1.
 
 ## Working in this repo
 
-- There's no install step beyond `pip install -r requirements.txt` (only `twilio` + `python-dotenv`, needed for `daily_flashcards.py`). The other scripts use only the stdlib.
+- There's no install step — every remaining script uses only the Python stdlib, no `requirements.txt` needed.
 - To "run" a frontend change, just open the HTML file in a browser (or serve the directory) — there's no dev server or build.
-- To sanity-check a Python script without sending a real message, read its printed `--- PREVIEW ---` output; every sender script prints the composed message before attempting delivery.
+- To sanity-check a Python script without sending a real message, read its printed `--- PREVIEW ---` output; `daily_flashcards_imessage.py` prints the composed message before attempting delivery.
 - When editing the fact/century/thread data model, update `flashcards/content.json` (not the root `content.json`), and remember every consumer re-derives its own flattened fact list from `centuries` — there's no shared parsing helper between the frontends and the Python scripts.
-- `README.md` currently contains an unresolved git merge-conflict (`<<<<<<<`/`=======`/`>>>>>>>` markers still committed) — be aware the file is not valid Markdown as-is if you need to read or edit it.

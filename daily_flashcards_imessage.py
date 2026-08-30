@@ -82,17 +82,6 @@ do shell script "rm " & quoted form of "{tmp_path}"
     else:
         print("Sent via iMessage successfully.")
 
-# ── Twilio SMS (kept for future use / A2P 10DLC) ─────────────────────────────
-# def send_sms(message):
-#     from twilio.rest import Client
-#     client = Client(os.environ["TWILIO_ACCOUNT_SID"], os.environ["TWILIO_AUTH_TOKEN"])
-#     msg = client.messages.create(
-#         body=message,
-#         from_=os.environ["TWILIO_FROM_NUMBER"],
-#         to=os.environ["TO_NUMBER"]
-#     )
-#     print(f"Sent via Twilio: SID={msg.sid}")
-
 # ── Main ──────────────────────────────────────────────────────────────────────
 def main():
     print(f"[{date.today()}] Daily History Flashcard starting...")
